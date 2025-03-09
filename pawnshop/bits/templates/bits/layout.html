@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,424 +8,7 @@
     <title>PawnShop - {% block title %}Home{% endblock %}</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <style>
-        :root {
-            --primary-color: #3a3f44;
-            --accent-color: #ff6b35;
-            --light-color: #f5f5f5;
-            --dark-color: #272b30;
-            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            --sidebar-width: 250px;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: var(--light-color);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        }
-        
-        header {
-            background-color: white;
-            box-shadow: var(--shadow);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            width: 100%;
-        }
-        
-        .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .logo-container {
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-        
-        .logo-icon {
-            font-size: 1.8rem;
-            color: var(--accent-color);
-            margin-right: 0.5rem;
-        }
-        
-        .logo-text {
-            color: var(--primary-color);
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-        
-        .search-container {
-            flex: 1;
-            max-width: 400px;
-            margin: 0 1.5rem;
-            position: relative;
-        }
-        
-        .search-form {
-            display: flex;
-            align-items: center;
-        }
-        
-        .search-input {
-            width: 100%;
-            padding: 0.7rem 1rem 0.7rem 2.5rem;
-            border: 1px solid #ddd;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            transition: all 0.3s;
-        }
-        
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-            pointer-events: none;
-        }
-        
-        .user-actions {
-            display: flex;
-            align-items: center;
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            margin-left: 1rem;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .user-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            margin-right: 0.5rem;
-            object-fit: cover;
-        }
-        
-        .user-name {
-            font-weight: 500;
-            color: var(--primary-color);
-        }
-        
-        .dropdown-icon {
-            margin-left: 0.5rem;
-            font-size: 0.8rem;
-        }
-        
-        .dropdown-menu {
-            position: absolute;
-            top: 100%;
-            right: 0;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: var(--shadow);
-            width: 200px;
-            padding: 1rem 0;
-            margin-top: 0.5rem;
-            z-index: 1001;
-            display: none;
-        }
-        
-        .dropdown-menu.active {
-            display: block;
-        }
-        
-        .dropdown-item {
-            display: flex;
-            align-items: center;
-            padding: 0.7rem 1.5rem;
-            text-decoration: none;
-            color: var(--primary-color);
-            transition: background-color 0.3s;
-        }
-        
-        .dropdown-item:hover {
-            background-color: var(--light-color);
-        }
-        
-        .dropdown-item i {
-            margin-right: 0.8rem;
-            width: 20px;
-            text-align: center;
-            color: var(--accent-color);
-        }
-        
-        .dropdown-divider {
-            height: 1px;
-            background-color: #eee;
-            margin: 0.5rem 0;
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.6rem 1.2rem;
-            border-radius: 50px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            font-size: 0.9rem;
-            box-shadow: var(--shadow);
-        }
-        
-        .btn-primary {
-            background-color: var(--accent-color);
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background-color: #e55a29;
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: white;
-        }
-        
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: var(--sidebar-width);
-            height: 100%;
-            background-color: white;
-            box-shadow: var(--shadow);
-            padding-top: 80px;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-            transform: translateX(-100%);
-        }
-        
-        .content-wrapper {
-            display: flex;
-            flex: 1;
-        }
-        
-        main {
-            flex: 1;
-            padding: 2rem 5%;
-            transition: margin-left 0.3s ease, width 0.3s ease;
-            width: 100%;
-        }
-        
-        main.with-sidebar {
-            margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-        }
-        
-        .page-title {
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-            font-size: 2rem;
-        }
-        
-        .content-card {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
-            padding: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .sidebar-links {
-            list-style: none;
-            padding: 1rem 0;
-        }
-        
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            text-decoration: none;
-            color: var(--primary-color);
-            transition: background-color 0.3s, color 0.3s;
-            border-left: 3px solid transparent;
-        }
-        
-        .sidebar-link:hover, .sidebar-link.active {
-            background-color: rgba(255, 107, 53, 0.1);
-            color: var(--accent-color);
-            border-left-color: var(--accent-color);
-        }
-        
-        .sidebar-link i {
-            margin-right: 1rem;
-            width: 20px;
-            text-align: center;
-        }
-        
-        .sidebar-footer {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            padding: 1rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: #999;
-            border-top: 1px solid #eee;
-        }
-        
-        .sidebar-toggle {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            cursor: pointer;
-            margin-right: 1rem;
-            display: block;
-            transition: transform 0.3s ease;
-        }
-        
-        footer {
-            background-color: var(--dark-color);
-            color: white;
-            padding: 1.5rem 5%;
-            text-align: center;
-            transition: margin-left 0.3s ease;
-            width: 100%;
-        }
-        
-        footer.with-sidebar {
-            margin-left: var(--sidebar-width);
-            width: calc(100% - var(--sidebar-width));
-        }
-        
-        .footer-content {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .footer-bottom {
-            color: #999;
-            font-size: 0.9rem;
-        }
-        
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--primary-color);
-            cursor: pointer;
-        }
-        
-        @media (max-width: 992px) {
-            .search-container {
-                max-width: 300px;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1rem 3%;
-            }
-            
-            .logo-text {
-                display: none;
-            }
-            
-            .search-container {
-                margin: 0 0.5rem;
-                flex: 1;
-            }
-            
-            .search-input {
-                padding: 0.6rem 1rem 0.6rem 2.5rem;
-            }
-            
-            .user-name {
-                display: none;
-            }
-            
-            .dropdown-icon {
-                display: none;
-            }
-            
-            .sell-btn-text {
-                display: none;
-            }
-            
-            .btn-primary {
-                padding: 0.6rem;
-            }
-            
-            .btn-outline {
-                padding: 0.6rem;
-            }
-            
-            .user-actions {
-                display: flex;
-                align-items: center;
-            }
-            
-            .dropdown-menu {
-                right: auto;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-            
-            .dropdown-menu.right-align {
-                right: 0;
-                left: auto;
-                transform: none;
-            }
-            
-            .sidebar {
-                width: 80%;
-                max-width: 300px;
-            }
-        }
-        
-        .sidebar-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
-            z-index: 999;
-            display: none;
-            transition: opacity 0.3s ease;
-            opacity: 0;
-        }
-        
-        .sidebar-backdrop.active {
-            display: block;
-            opacity: 1;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'bits/style.css' %}">
     {% block extra_styles %}{% endblock %}
 </head>
 <body>
@@ -497,6 +81,12 @@
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     
     <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">Menu</div>
+            <button class="sidebar-close" id="sidebarClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
         <nav>
             <ul class="sidebar-links">
                 <li>
@@ -531,9 +121,6 @@
                 </li>
             </ul>
         </nav>
-        <div class="sidebar-footer">
-            &copy; 2025 PawnShop
-        </div>
     </aside>
     
     <div class="content-wrapper">
@@ -549,9 +136,8 @@
     
     <script>
         const sidebar = document.getElementById('sidebar');
-        const mainContent = document.getElementById('mainContent');
-        const footer = document.getElementById('footer');
         const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
         const sidebarBackdrop = document.getElementById('sidebarBackdrop');
         
         let sidebarVisible = false;
@@ -571,46 +157,39 @@
             if (sidebarVisible) {
                 sidebar.style.transform = 'translateX(0)';
                 sidebarBackdrop.classList.add('active');
-                
-                if (window.innerWidth > 992) {
-                    mainContent.classList.add('with-sidebar');
-                    footer.classList.add('with-sidebar');
-                }
             } else {
                 sidebar.style.transform = 'translateX(-100%)';
                 sidebarBackdrop.classList.remove('active');
-                mainContent.classList.remove('with-sidebar');
-                footer.classList.remove('with-sidebar');
             }
             
             updateToggleIcon();
         }
         
-        sidebarToggle.addEventListener('click', function() {
+        function toggleSidebar() {
             sidebarVisible = !sidebarVisible;
             applySidebarState();
-        });
+        }
         
-        sidebarBackdrop.addEventListener('click', function() {
+        function closeSidebar() {
             sidebarVisible = false;
             applySidebarState();
-        });
+        }
+        
+        sidebarToggle.addEventListener('click', toggleSidebar);
+        sidebarClose.addEventListener('click', closeSidebar);
+        
+        sidebarBackdrop.addEventListener('click', closeSidebar);
         
         document.addEventListener('click', function(event) {
             if (sidebarVisible && 
                 !sidebar.contains(event.target) && 
                 !sidebarToggle.contains(event.target)) {
-                sidebarVisible = false;
-                applySidebarState();
+                closeSidebar();
             }
         });
         
         window.addEventListener('load', function() {
             sidebarVisible = false;
-            applySidebarState();
-        });
-        
-        window.addEventListener('resize', function() {
             applySidebarState();
         });
         
