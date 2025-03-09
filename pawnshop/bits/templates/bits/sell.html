@@ -1,0 +1,69 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <link rel="stylesheet" href="{% static 'bits/sell.css' %}">
+        <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Upload | Campus Pawn Shop</title>
+  </head>
+<body>
+<div class="container">
+  <h1>Upload Your Product</h1>
+  <form action="/submit-product" method="POST" enctype="multipart/form-data">
+    
+    <!-- Product Title -->
+    <label for="product-title">Product Title</label>
+    <input type="text" id="product-title" name="product_title" placeholder="Enter the name of your item" required maxlength="100">
+
+    <!-- Category -->
+    <label for="category">Category</label>
+    <select id="category" name="category" required>
+      <option value="" disabled selected>Select a category</option>
+      <option value="textbooks">Textbooks</option>
+      <option value="electronics">Electronics</option>
+      <option value="furniture">Furniture</option>
+      <option value="sports_equipment">Sports Equipment</option>
+      <option value="pyqs">PYQs</option>
+      <option value="novels_story_books">Novels/Story Books</option>
+      <option value="others">Others</option>
+    </select>
+
+    <!-- Condition -->
+    <label for="condition">Condition</label>
+    <select id="condition" name="condition" required>
+      <option value="" disabled selected>Select the condition</option>
+      <option value="new">New</option>
+      <option value="like_new">Like New</option>
+      <option value="used">Used</option>
+      <option value="damaged">Damaged</option>
+    </select>
+
+    <!-- Price -->
+    <label for="price">Price (₹)</label>
+    <input type="number" id="price" name="price" placeholder="Enter your selling price" required min="0">
+
+    <!-- Description -->
+    <label for="description">Description</label>
+    <textarea id="description" name="description" placeholder="Add details about your item (e.g., features, specifications)" rows="4" maxlength="500"></textarea>
+
+    <!-- Photos -->
+    <label for="photos">Upload Photos (Max 5)</label>
+    <input type="file" id="photos" name="photos[]" accept=".jpg,.jpeg,.png,.gif" multiple required>
+
+    <!-- Location on Campus -->
+    <label for="location">Location on Campus</label>
+    <select id="location" name="location" required>
+      <option value="" disabled selected>Select your location on campus</option>
+      <option value="side_a">Side A</option>
+      <option value="side_c">Side C</option>
+      <option value="side_d">Side D</option>
+    </select>
+
+    <!-- Submit Button -  
+    <button type="submit">Submit Product</button>
+
+  </form>
+</div>
+</body>
+</html>

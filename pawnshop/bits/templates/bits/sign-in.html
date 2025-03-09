@@ -12,8 +12,8 @@
 <body>
     <div class="login-container">
         <div class="logo">
-            <i class="fas fa-store"></i>
-            <h1>PawnShop</h1>
+            <i class="fas fa-store">  BITS</i>
+            <h1 id="bits">Store</h1>
             <p class="tagline">exclusive marketplace for BITS students</p>
         </div>
         
@@ -37,6 +37,9 @@
                     {% endif %}
                 </p>
                 
+                <a href="{% url 'home' %}" class="btn btn-logout">
+w                    Dashboard
+                </a>
                 <a href="{% url 'sign_out' %}" class="btn btn-logout">
                     <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
                     Logout
@@ -48,8 +51,8 @@
               <div id="g_id_onload"
                   data-client_id="***REMOVED***"
                   data-context="signin"
-                  data-ux_mode="popup"
-                  data-login_uri="/auth-receiver"
+                  data-ux_mode="redirect"
+                  data-login_uri="{% url 'auth_receiver' %}"
                   data-nonce=""
                   data-auto_select="true"
                   data-itp_support="true">

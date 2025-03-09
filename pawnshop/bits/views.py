@@ -1,7 +1,8 @@
 import os
 
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
 from google.auth.transport import requests
@@ -10,9 +11,10 @@ from google.auth.transport import requests
 def sign_in(request):
     if request.session.get('user_data'):
         print(request.session.get('user_data'))
+        return HttpResponseRedirect(reverse('home'))
     else:
         print("does not work")
-    return render(request, 'bits/sign-in.html')
+        return render(request, 'bits/sign-in.html')
 
 @csrf_exempt
 def auth_receiver(request):
@@ -23,12 +25,14 @@ def auth_receiver(request):
     except ValueError:
         return HttpResponse(status=403)
     request.session['user_data'] = user_data
-    return redirect('sign_in')
+    return redirect('home')
 
 def sign_out(request):
     del request.session['user_data']
-    return redirect('sign_in')
+    return HttpResponseRedirect(reverse('sign_in'))
 
-def test(request):
+def home(request):
     return render(request, 'bits/home.html')
 
+def sell(request):
+    return render(request, 'bits/sell.html')

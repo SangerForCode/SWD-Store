@@ -1,0 +1,111 @@
+/* General Reset */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #F9F9F9;
+}
+
+/* Container Styling */
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  padding: 20px;
+  background-color: #FFFFFF;
+  border-radius: 15px;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid #5CCAE8; /* Light Blue Border */
+}
+
+/* Header Styling */
+h1 {
+  text-align: center;
+  color: #2B2B88; /* Dark Blue */
+  font-size: 28px;
+  margin-bottom: 20px;
+}
+
+/* Form Styling */
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #2B2B88; /* Dark Blue */
+}
+
+input, select, textarea, button {
+  margin-top: 5px;
+  padding: 12px;
+  font-size: 16px;
+  border-radius: 10px; /* Rounded Borders */
+  border: 1px solid #5CCAE8; /* Light Blue Border */
+  outline: none;
+  transition: all 0.3s ease-in-out; /* Smooth Transitions */
+}
+
+input:hover, select:hover, textarea:hover {
+  border-color: #2B2B88; /* Dark Blue on Hover */
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #CF2027; /* Red on Focus */
+  box-shadow: 0px 0px 5px rgba(207, 32, 39, 0.5); /* Red Glow on Focus */
+}
+
+textarea {
+  resize: vertical; /* Allow vertical resizing only */
+}
+
+button {
+  margin-top: 20px;
+  background-color: #FFE275; /* Yellow Button Background */
+  color: #2B2B88; /* Dark Blue Text */
+  font-weight: bold;
+  border-radius: 15px; /* Extra Rounded Borders for Button */
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* Smooth Hover Transition */
+}
+
+button:hover {
+  background-color: #B78A2D; /* Gold Hover Effect */
+  color: white; /* White Text on Hover */
+}
+
+button:active {
+  background-color: #CF2027; /* Red when Clicked */
+}
+
+/* Responsive Design for Smaller Screens */
+@media (max-width: 768px) {
+  .container {
+    margin: 20px auto;
+    padding: 15px;
+    width: calc(100% - 40px);
+    box-shadow: none; /* Remove shadow for smaller screens */
+    border-width: 1.5px; /* Slightly thinner borders for smaller devices */
+  }
+  
+  h1 {
+    font-size: 24px;
+    margin-bottom: 15px;
+  }
+  
+  input, select, textarea, button {
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 8px; 
+    margin-top: 10px; 
+  }
+  
+  button {
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+}
+

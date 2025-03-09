@@ -34,7 +34,7 @@
             
             <div class="user-actions">
                 {% if request.session.user_data %}
-                    <a href="/sell" class="btn btn-primary">
+                    <a href="{% url 'add_product' %}" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
                         <span class="sell-btn-text" style="margin-left: 8px;">Sell Item</span>
                     </a>
@@ -77,12 +77,22 @@
             </div>
         </nav>
     </header>
+       <!-- Dummy Box -->
+       <div class="content-card" style="padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;">
+        <div style="text-align: center;">
+            <img src="{% static 'bits/dummy_image.png' %}" alt="Test Product 1" style="max-width: 100%; height: auto;"/>
+        </div>
+        <h2 style="margin-top: 10px;">Test Product 1</h2>
+        <p><strong>Price:</strong> <span style="font-weight: bold;">$99.99</span></p>
+        <p>Add product description here.</p>
+        <!-- Add any other necessary product details here -->
+    </div>
     
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-title">Menu</div>
+            <div class="sidebar-title">Quick Links</div>
             <button class="sidebar-close" id="sidebarClose">
                 <i class="fas fa-times"></i>
             </button>
@@ -105,18 +115,8 @@
                     </a>
                 </li>
                 <li>
-                    <a href="/about" class="sidebar-link">
-                        <i class="fas fa-info-circle"></i> About
-                    </a>
-                </li>
-                <li>
                     <a href="/contact" class="sidebar-link">
                         <i class="fas fa-envelope"></i> Contact
-                    </a>
-                </li>
-                <li>
-                    <a href="/developer" class="sidebar-link">
-                        <i class="fas fa-code"></i> Developer
                     </a>
                 </li>
             </ul>
