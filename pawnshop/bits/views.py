@@ -30,4 +30,4 @@ def sign_out(request):
     return redirect('sign_in')
 
 def test(request):
-    return render(request, 'bits/layout.html')
+    return render(request, 'bits/home.html')

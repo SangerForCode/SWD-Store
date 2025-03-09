@@ -32,7 +32,6 @@
             background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
         }
         
-        /* Header Styles */
         header {
             background-color: white;
             box-shadow: var(--shadow);
@@ -69,7 +68,6 @@
             font-weight: bold;
         }
         
-        /* Search Bar */
         .search-container {
             flex: 1;
             max-width: 400px;
@@ -137,7 +135,6 @@
             font-size: 0.8rem;
         }
         
-        /* User Dropdown Menu */
         .dropdown-menu {
             position: absolute;
             top: 100%;
@@ -148,7 +145,7 @@
             width: 200px;
             padding: 1rem 0;
             margin-top: 0.5rem;
-            z-index: 1001; /* Higher than sidebar */
+            z-index: 1001;
             display: none;
         }
         
@@ -216,7 +213,6 @@
             color: white;
         }
         
-        /* Sidebar */
         .sidebar {
             position: fixed;
             top: 0;
@@ -228,10 +224,9 @@
             padding-top: 80px;
             z-index: 1000;
             transition: transform 0.3s ease;
-            transform: translateX(-100%); /* Hidden by default */
+            transform: translateX(-100%);
         }
         
-        /* Main Content */
         .content-wrapper {
             display: flex;
             flex: 1;
@@ -263,7 +258,6 @@
             margin-bottom: 2rem;
         }
         
-        /* Sidebar Links */
         .sidebar-links {
             list-style: none;
             padding: 1rem 0;
@@ -302,7 +296,6 @@
             border-top: 1px solid #eee;
         }
         
-        /* Toggle Button for Sidebar */
         .sidebar-toggle {
             background: none;
             border: none;
@@ -314,7 +307,6 @@
             transition: transform 0.3s ease;
         }
         
-        /* Footer */
         footer {
             background-color: var(--dark-color);
             color: white;
@@ -339,7 +331,6 @@
             font-size: 0.9rem;
         }
         
-        /* Mobile menu */
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -349,7 +340,6 @@
             cursor: pointer;
         }
         
-        /* Responsive */
         @media (max-width: 992px) {
             .search-container {
                 max-width: 300px;
@@ -399,14 +389,12 @@
                 align-items: center;
             }
             
-            /* Mobile dropdown position fix */
             .dropdown-menu {
                 right: auto;
                 left: 50%;
                 transform: translateX(-50%);
             }
             
-            /* Force dropdown to always be in view by adjusting right edge */
             .dropdown-menu.right-align {
                 right: 0;
                 left: auto;
@@ -419,7 +407,6 @@
             }
         }
         
-        /* Backdrop when sidebar is open */
         .sidebar-backdrop {
             position: fixed;
             top: 0;
@@ -481,8 +468,6 @@
                             {% endif %}
                         </span>
                         <i class="fas fa-chevron-down dropdown-icon"></i>
-                        
-                        <!-- User Dropdown Menu -->
                         <div class="dropdown-menu" id="userDropdown">
                             <a href="/profile" class="dropdown-item">
                                 <i class="fas fa-user"></i> My Profile
@@ -509,10 +494,8 @@
         </nav>
     </header>
     
-    <!-- Sidebar Backdrop -->
     <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
     
-    <!-- Sidebar Navigation -->
     <aside class="sidebar" id="sidebar">
         <nav>
             <ul class="sidebar-links">
@@ -564,24 +547,15 @@
         </main>
     </div>
     
-    <footer id="footer">
-        <div class="footer-content">
-            <p class="footer-bottom">PawnShop &copy; 2025. All rights reserved.</p>
-        </div>
-    </footer>
-    
     <script>
-        // Sidebar and related elements
         const sidebar = document.getElementById('sidebar');
         const mainContent = document.getElementById('mainContent');
         const footer = document.getElementById('footer');
         const sidebarToggle = document.getElementById('sidebarToggle');
         const sidebarBackdrop = document.getElementById('sidebarBackdrop');
         
-        // Initialize sidebar state - hidden by default in all modes
         let sidebarVisible = false;
         
-        // Function to toggle sidebar icon between bars and close
         function updateToggleIcon() {
             const toggleIcon = sidebarToggle.querySelector('i');
             if (sidebarVisible) {
@@ -593,43 +567,35 @@
             }
         }
         
-        // Apply sidebar visibility state
         function applySidebarState() {
             if (sidebarVisible) {
-                // Show sidebar
                 sidebar.style.transform = 'translateX(0)';
                 sidebarBackdrop.classList.add('active');
                 
-                // Always adjust content on desktop
                 if (window.innerWidth > 992) {
                     mainContent.classList.add('with-sidebar');
                     footer.classList.add('with-sidebar');
                 }
             } else {
-                // Hide sidebar
                 sidebar.style.transform = 'translateX(-100%)';
                 sidebarBackdrop.classList.remove('active');
                 mainContent.classList.remove('with-sidebar');
                 footer.classList.remove('with-sidebar');
             }
             
-            // Update toggle button icon
             updateToggleIcon();
         }
         
-        // Toggle sidebar on button click
         sidebarToggle.addEventListener('click', function() {
             sidebarVisible = !sidebarVisible;
             applySidebarState();
         });
         
-        // Close sidebar when clicking backdrop
         sidebarBackdrop.addEventListener('click', function() {
             sidebarVisible = false;
             applySidebarState();
         });
         
-        // Close sidebar when clicking outside (includes backdrop)
         document.addEventListener('click', function(event) {
             if (sidebarVisible && 
                 !sidebar.contains(event.target) && 
@@ -639,18 +605,15 @@
             }
         });
         
-        // Initialize on page load
         window.addEventListener('load', function() {
             sidebarVisible = false;
             applySidebarState();
         });
         
-        // Handle window resize
         window.addEventListener('resize', function() {
             applySidebarState();
         });
         
-        // User profile dropdown toggle - Fixed for mobile
         const userProfile = document.getElementById('userProfile');
         const userDropdown = document.getElementById('userDropdown');
         
@@ -659,29 +622,22 @@
                 e.stopPropagation();
                 userDropdown.classList.toggle('active');
                 
-                // Fix dropdown position on mobile
                 if (window.innerWidth <= 768) {
-                    // Get positions
                     const profileRect = userProfile.getBoundingClientRect();
                     const viewportWidth = window.innerWidth;
                     
-                    // Reset any previous positioning
                     userDropdown.style.transform = '';
                     userDropdown.style.left = '';
                     userDropdown.style.right = '';
                     userDropdown.classList.remove('right-align');
                     
-                    // Check if profile is near the right edge
                     if (profileRect.right > (viewportWidth - 100)) {
-                        // If near right edge, align dropdown to right
                         userDropdown.classList.add('right-align');
                     } else {
-                        // Otherwise position in the middle
                         userDropdown.style.left = Math.max(10, profileRect.left - 75) + 'px';
                         userDropdown.style.right = 'auto';
                     }
                 } else {
-                    // Desktop positioning
                     userDropdown.style.right = '0';
                     userDropdown.style.left = 'auto';
                     userDropdown.style.transform = '';
@@ -690,7 +646,6 @@
             });
         }
         
-        // Close user dropdown when clicking outside
         document.addEventListener('click', function(event) {
             if (userProfile && userDropdown && 
                 !userProfile.contains(event.target) && 
@@ -699,7 +654,6 @@
             }
         });
     </script>
-    
     {% block scripts %}{% endblock %}
 </body>
 </html>
