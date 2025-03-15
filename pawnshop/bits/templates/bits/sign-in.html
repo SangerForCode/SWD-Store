@@ -1,73 +1,72 @@
 {% load static %}
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PawnShop - Login</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BITS Pilani Pawnshop - Sign In</title>
     <link rel="stylesheet" href="{% static 'bits/sign-in.css' %}">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
-    <div class="login-container">
-        <div class="logo">
-            <i class="fas fa-store">  BITS</i>
-            <h1 id="bits">Store</h1>
-            <p class="tagline">exclusive marketplace for BITS students</p>
-        </div>
-        
-        {% if request.session.user_data %}
-            <div class="user-info">
-                {% if request.session.user_data.picture %}
-                <img src="{{ request.session.user_data.picture }}" alt="Profile Picture" class="user-picture">
-                {% endif %}
-                
-                <p>Signed in as</p>
-                
-                {% if request.session.user_data.name %}
-                <p class="user-name">{{ request.session.user_data.name }}</p>
-                {% endif %}
-                
-                <p class="user-email">
-                    {% if user.email %}
-                        {{ user.email }}
-                    {% elif request.session.user_data.email %}
-                        {{ request.session.user_data.email }}
-                    {% endif %}
-                </p>
-                
-                <a href="{% url 'home' %}" class="btn btn-logout">
-w                    Dashboard
-                </a>
-                <a href="{% url 'sign_out' %}" class="btn btn-logout">
-                    <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i>
-                    Logout
-                </a>
+    <div class="container">
+        <div class="login-card">
+            <div class="title">
+                <h1>BITS Pawnshop</h1>
             </div>
-        {% else %}
-            <p class="login-message">Please sign in to continue</p>
-            <div class="google-signin-container">
-              <div id="g_id_onload"
-                  data-client_id="***REMOVED***"
-                  data-context="signin"
-                  data-ux_mode="redirect"
-                  data-login_uri="{% url 'auth_receiver' %}"
-                  data-nonce=""
-                  data-auto_select="true"
-                  data-itp_support="true">
-              </div>
 
-              <div class="g_id_signin"
-                  data-type="standard"
-                  data-shape="pill"
-                  data-theme="outline"
-                  data-text="signin_with"
-                  data-size="large"
-                  data-logo_alignment="left">
-              </div>
+            {% if messages %}
+            <div class="error-messages">
+                {% for message in messages %}
+                {% if message.tags == "error" %}
+                <p class="error-message">{{ message }}</p>
+                {% endif %}
+                {% endfor %}
             </div>
-        {% endif %}
+            {% endif %}
+
+            <div class="login-content">
+                <p class="description">Use your BITS Pilani Goa Campus mail ID to access the marketplace.</p>
+                
+                <div class="google-signin-wrapper">
+                    <div id="g_id_onload"
+                        data-client_id="***REMOVED***"
+                        data-context="signin"
+                        data-ux_mode="popup"
+                        data-login_uri="{% url 'auth_receiver' %}"
+                        data-nonce=""
+                        data-auto_select="true"
+                        data-itp_support="true">
+                    </div>
+                    <div class="g_id_signin"
+                        data-type="standard"
+                        data-shape="pill"
+                        data-theme="outline"
+                        data-text="signin_with"
+                        data-size="large"
+                        data-logo_alignment="left">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="accents">
+                <div class="accent-line line1"></div>
+                <div class="accent-line line2"></div>
+            </div>
+        </div>
     </div>
+
+    <style>
+        .error-messages {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+    </style>
 </body>
 </html>

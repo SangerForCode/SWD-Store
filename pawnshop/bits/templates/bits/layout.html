@@ -2,237 +2,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>PawnShop - {% block title %}Home{% endblock %}</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
-    <link rel="stylesheet" href="{% static 'bits/layout.css' %}">
-    {% block extra_styles %}{% endblock %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BITS Pilani Pawnshop{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'bits/layout.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <header>
-        <nav class="navbar">
-            <div style="display: flex; align-items: center;">
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                
-                <a href="/" class="logo-container">
-                    <i class="fas fa-store logo-icon"></i>
-                    <span class="logo-text">PawnShop</span>
-                </a>
+    <div class="main-container">
+        <header class="main-header">
+            <div class="logo">
+                <a href="{% url 'home' %}"><h1>BITS Pawnshop</h1></a>
             </div>
-            
-            <div class="search-container">
-                <form action="/search" method="get" class="search-form">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" name="q" placeholder="Search for items..." class="search-input">
+
+            <div class="category-btn desktop-only">
+                <button onclick="location.href='{% url 'feedback' %}'" class="feedback-btn">
+                    <i class="fas fa-comment-dots"></i>
+                    <span>FeedBack</span>
+                </button>
+            </div>
+
+            <div class="search-container desktop-only">
+                <form action="{% url 'home' %}" method="GET">
+                    <input type="text" placeholder="Search products..." name="q">
+                    <button type="submit"><i class="fas fa-search"></i></button>
                 </form>
             </div>
-            
-            <div class="user-actions">
-                {% if request.session.user_data %}
-                    <a href="{% url 'add_product' %}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i>
-                        <span class="sell-btn-text" style="margin-left: 8px;">Sell Item</span>
-                    </a>
-                    <div class="user-profile" id="userProfile">
-                        {% if request.session.user_data.picture %}
-                        <img src="{{ request.session.user_data.picture }}" alt="Profile" class="user-avatar">
-                        {% else %}
-                        <i class="fas fa-user-circle" style="font-size: 1.8rem; color: var(--primary-color);"></i>
-                        {% endif %}
-                        <span class="user-name">
-                            {% if request.session.user_data.name %}
-                                {{ request.session.user_data.name }}
-                            {% else %}
-                                User
-                            {% endif %}
-                        </span>
-                        <i class="fas fa-chevron-down dropdown-icon"></i>
-                        <div class="dropdown-menu" id="userDropdown">
-                            <a href="/profile" class="dropdown-item">
-                                <i class="fas fa-user"></i> My Profile
-                            </a>
-                            <a href="/my-listings" class="dropdown-item">
-                                <i class="fas fa-tag"></i> My Listings
-                            </a>
-                            <a href="/favorites" class="dropdown-item">
-                                <i class="fas fa-heart"></i> Favorites
-                            </a>
-                            <div class="dropdown-divider"></div>
-                            <a href="{% url 'sign_out' %}" class="dropdown-item">
-                                <i class="fas fa-sign-out-alt"></i> Logout
-                            </a>
-                        </div>
+
+            <div class="sell-btn desktop-only">
+                <a href="{% url 'add_product' %}">
+                    <i class="fas fa-plus"></i>
+                    <span>Sell Item</span>
+                </a>
+            </div>
+
+            <div class="header-right">
+                <div class="mobile-search-container" id="searchContainer">
+                    <div class="search-icon" id="searchIcon">
+                        <i class="fas fa-search"></i>
                     </div>
-                {% else %}
-                    <a href="/login" class="btn btn-outline">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span style="margin-left: 8px;">Login</span>
-                    </a>
-                {% endif %}
+                    <form action="{% url 'home' %}" method="GET" id="searchForm">
+                        <input type="text" placeholder="Search products..." name="q" id="searchInput">
+                        <button type="submit"><i class="fas fa-search"></i></button>
+                        <div class="cancel-icon" id="cancelSearch">
+                            <i class="fas fa-times"></i>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="profile-container">
+                    <div class="profile-pic">
+                        {% if request.session.user_data.picture %}
+                            <img src="{{ request.session.user_data.picture }}" alt="Profile">
+                        {% else %}
+                            <i class="fas fa-user"></i>
+                        {% endif %}
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="{% url 'my_listings' %}"><i class="fas fa-list"></i> My Listings</a>
+                        <a href="{% url 'feedback' %}"><i class="fas fa-comment-dots"></i>Feedback</a>
+                        <div class="dropdown-divider"></div>
+                        <a href="{% url 'sign_out' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    </div>
+                </div>
             </div>
-        </nav>
-    </header>
-       <!-- Dummy Box -->
-       <div class="content-card" style="padding: 20px; border: 1px solid #ddd; margin-bottom: 20px;">
-        <div style="text-align: center;">
-            <img src="{% static 'bits/dummy_image.png' %}" alt="Test Product 1" style="max-width: 100%; height: auto;"/>
-        </div>
-        <h2 style="margin-top: 10px;">Test Product 1</h2>
-        <p><strong>Price:</strong> <span style="font-weight: bold;">$99.99</span></p>
-        <p>Add product description here.</p>
-        <!-- Add any other necessary product details here -->
-    </div>
-    
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
-    
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-title">Quick Links</div>
-            <button class="sidebar-close" id="sidebarClose">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        <nav>
-            <ul class="sidebar-links">
-                <li>
-                    <a href="/" class="sidebar-link">
-                        <i class="fas fa-home"></i> Home
-                    </a>
-                </li>
-                <li>
-                    <a href="/marketplace" class="sidebar-link">
-                        <i class="fas fa-store"></i> Marketplace
-                    </a>
-                </li>
-                <li>
-                    <a href="/categories" class="sidebar-link">
-                        <i class="fas fa-th-large"></i> Categories
-                    </a>
-                </li>
-                <li>
-                    <a href="/contact" class="sidebar-link">
-                        <i class="fas fa-envelope"></i> Contact
-                    </a>
-                </li>
-            </ul>
-        </nav>
-    </aside>
-    
-    <div class="content-wrapper">
-        <main id="mainContent">
+        </header>
+
+        <main class="content">
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="message {% if message.tags %}message-{{ message.tags }}{% endif %}">
+                    <div class="message-content">
+                        <i class="message-icon fas {% if message.tags == 'success' %}fa-check-circle{% elif message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                        <span>{{ message }}</span>
+                    </div>
+                    <button class="message-close"><i class="fas fa-times"></i></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             {% block content %}
-            <h1 class="page-title">Welcome to PawnShop</h1>
-            <div class="content-card">
-                <p>This is the default content. Please override this block in your templates.</p>
-            </div>
+
             {% endblock %}
         </main>
+        
+        <nav class="mobile-nav">
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i><span>Home</span></a>
+            <div class="add-btn-container">
+                <a href="{% url 'add_product' %}" class="add-btn"><i class="fas fa-plus"></i></a>
+            </div>
+            <a href="{% url 'feedback' %}"><i class="fas fa-comment-dots"></i><span>FeedBack</span></a>
+        </nav>
     </div>
+
+    {% block scripts %}
+    <script src="{% static 'bits/layout.js' %}"></script>
+    {% endblock %}
+    {% block extra_js %}{% endblock %}
     
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebarClose = document.getElementById('sidebarClose');
-        const sidebarBackdrop = document.getElementById('sidebarBackdrop');
-        
-        let sidebarVisible = false;
-        
-        function updateToggleIcon() {
-            const toggleIcon = sidebarToggle.querySelector('i');
-            if (sidebarVisible) {
-                toggleIcon.classList.remove('fa-bars');
-                toggleIcon.classList.add('fa-times');
-            } else {
-                toggleIcon.classList.remove('fa-times');
-                toggleIcon.classList.add('fa-bars');
-            }
-        }
-        
-        function applySidebarState() {
-            if (sidebarVisible) {
-                sidebar.style.transform = 'translateX(0)';
-                sidebarBackdrop.classList.add('active');
-            } else {
-                sidebar.style.transform = 'translateX(-100%)';
-                sidebarBackdrop.classList.remove('active');
-            }
-            
-            updateToggleIcon();
-        }
-        
-        function toggleSidebar() {
-            sidebarVisible = !sidebarVisible;
-            applySidebarState();
-        }
-        
-        function closeSidebar() {
-            sidebarVisible = false;
-            applySidebarState();
-        }
-        
-        sidebarToggle.addEventListener('click', toggleSidebar);
-        sidebarClose.addEventListener('click', closeSidebar);
-        
-        sidebarBackdrop.addEventListener('click', closeSidebar);
-        
-        document.addEventListener('click', function(event) {
-            if (sidebarVisible && 
-                !sidebar.contains(event.target) && 
-                !sidebarToggle.contains(event.target)) {
-                closeSidebar();
-            }
-        });
-        
-        window.addEventListener('load', function() {
-            sidebarVisible = false;
-            applySidebarState();
-        });
-        
-        const userProfile = document.getElementById('userProfile');
-        const userDropdown = document.getElementById('userDropdown');
-        
-        if (userProfile && userDropdown) {
-            userProfile.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userDropdown.classList.toggle('active');
-                
-                if (window.innerWidth <= 768) {
-                    const profileRect = userProfile.getBoundingClientRect();
-                    const viewportWidth = window.innerWidth;
-                    
-                    userDropdown.style.transform = '';
-                    userDropdown.style.left = '';
-                    userDropdown.style.right = '';
-                    userDropdown.classList.remove('right-align');
-                    
-                    if (profileRect.right > (viewportWidth - 100)) {
-                        userDropdown.classList.add('right-align');
-                    } else {
-                        userDropdown.style.left = Math.max(10, profileRect.left - 75) + 'px';
-                        userDropdown.style.right = 'auto';
-                    }
-                } else {
-                    userDropdown.style.right = '0';
-                    userDropdown.style.left = 'auto';
-                    userDropdown.style.transform = '';
-                    userDropdown.classList.remove('right-align');
-                }
-            });
-        }
-        
-        document.addEventListener('click', function(event) {
-            if (userProfile && userDropdown && 
-                !userProfile.contains(event.target) && 
-                userDropdown.classList.contains('active')) {
-                userDropdown.classList.remove('active');
-            }
-        });
-    </script>
-    {% block scripts %}{% endblock %}
 </body>
 </html>

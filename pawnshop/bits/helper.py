@@ -1,8 +1,9 @@
 import os
 from dotenv import load_dotenv
 from twilio.rest import Client
-from twilio.base.exceptions import TwilioRestException
 import urllib.parse
+from django.db.models import Case, When, IntegerField, BooleanField, Value
+from django.utils import timezone
 
 load_dotenv()
 
@@ -10,12 +11,10 @@ account_sid = os.environ['TWILIO_ACCOUNT_SID']
 auth_token = os.environ['TWILIO_AUTH_TOKEN']
 client = Client(account_sid, auth_token)
 
-service = client.verify.v2.services.create(
-    friendly_name="Bits Pilani Pawnshop"
-)
-
-
 def generate_whatsapp_link(phone_number, message=None):
+    phone_number = ''.join(filter(str.isdigit, phone_number))
+    if len(phone_number) == 10:
+        phone_number = f"91{phone_number}"
     base_url = "https://wa.me/"
     if message:
       encoded_message = urllib.parse.quote(message)
@@ -25,4 +24,15 @@ def generate_whatsapp_link(phone_number, message=None):
     return url
 
 def verify_phone_number(phone_number):
+    service = client.verify.v2.services.create(friendly_name="Bits Pilani Pawnshop")
     return client.lookups.v2.phone_numbers(phone_number).fetch().valid
+
+
+
+def items_sort(items_list):
+    items_list = list(items_list)
+    for item in items_list:
+        item.is_recent = item.added_at >= timezone.now() - timezone.timedelta(days=3)
+        item.relevance_score = 1000 if not item.is_sold and item.is_recent else 500 if not item.is_sold else 0
+    
+    return sorted(items_list, key=lambda x: (x.relevance_score, x.added_at), reverse=True)

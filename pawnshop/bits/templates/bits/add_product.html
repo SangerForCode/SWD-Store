@@ -1,0 +1,56 @@
+{% extends 'bits/layout.html' %}
+{% load static %}
+
+{% block title %}{% if item %}Edit Product{% else %}Add Product{% endif %}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'bits/add_product.css' %}">
+{% endblock %}
+{% block content %}
+<div class="add-product-container">
+  <h2 class="add-product-title">{% if item %}Edit Product{% else %}Add New Product{% endif %}</h2>
+
+  <form method="POST" enctype="multipart/form-data" class="add-product-form">
+      {% csrf_token %}
+      <div class="add-product-form-fields">
+          {{ form.non_field_errors }}
+          
+          {% for field in form %}
+          <div class="form-group">
+              {{ field.errors }}
+              {{ field.label_tag }}
+              {{ field }}
+              {% if field.help_text %}
+              <small class="form-text text-muted">{{ field.help_text }}</small>
+              {% endif %}
+          </div>
+          {% endfor %}
+      </div>
+      
+      <div class="add-product-image-upload">
+          <label class="add-product-image-label">Product Images</label>
+          <div id="uploadArea" class="upload-area">
+              <input type="file" id="image-input" name="images" multiple accept="image/*">
+              <p>Drag images here or click to select images</p>
+          </div>
+
+          <div id="noImagesMessage">No images selected.</div>
+
+          <div id="imagePreview" class="add-product-image-preview"></div>
+
+          <input type="hidden" name="image_order" id="imageOrder">
+          {% if item %}
+          <input type="hidden" name="existing_images" id="existingImages" value="{{ existing_images_json }}">
+          {% endif %}
+      </div>
+
+      <button type="submit" class="add-product-submit-btn">
+          {% if item %}Update Product{% else %}List Product{% endif %}
+      </button>
+  </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+<script src="{% static 'bits/add_product.js' %}"></script>
+{% endblock %}
