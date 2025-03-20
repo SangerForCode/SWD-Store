@@ -11,6 +11,9 @@ class ItemForm(forms.ModelForm):
             'category': forms.Select(choices=[(category.name, category.name) for category in Category.objects.all()]),
             'phone': forms.TextInput(attrs={'placeholder': '(WhatsApp) Required if not provided one before'})
         }
+        labels = {
+            'name': 'Product Name',
+        }
 
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)

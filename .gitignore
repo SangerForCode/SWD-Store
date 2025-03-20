@@ -1,2 +1,5 @@
 pawnshop/db.sqlite3
 pawnshop/pawnshop.zip
+pawnshop\bits\__pycache__
+pawnshop\pawnshop\__pycache__
+pawnshop\bits\migrations
