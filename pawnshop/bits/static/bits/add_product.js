@@ -82,6 +82,45 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
   
+  // Convert any image to JPG format
+  async function convertToJpg(file) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+      
+      reader.onload = (e) => {
+        img.src = e.target.result;
+        
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          canvas.width = img.width;
+          canvas.height = img.height;
+          
+          // Draw image on canvas with white background (for transparent images)
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0);
+          
+          // Convert to JPG blob
+          canvas.toBlob(
+            (blob) => {
+              // Create a new file with jpg extension
+              const newFileName = file.name.split('.')[0] + '.jpg';
+              const jpgFile = new File([blob], newFileName, { type: 'image/jpeg' });
+              resolve(jpgFile);
+            },
+            'image/jpeg',
+            0.9
+          );
+        };
+      };
+      
+      reader.readAsDataURL(file);
+    });
+  }
+  
   async function resizeAndCompressImage(file, maxWidth, maxHeight, quality) {
     return new Promise((resolve) => {
       const img = new Image();
@@ -110,11 +149,14 @@ document.addEventListener('DOMContentLoaded', () => {
           canvas.width = width;
           canvas.height = height;
           
+          // Fill with white background for transparent images
+          ctx.fillStyle = '#FFFFFF';
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
           ctx.drawImage(img, 0, 0, width, height);
           
           canvas.toBlob(
             (blob) => resolve(blob),
-            file.type || 'image/jpeg',
+            'image/jpeg', // Always convert to JPEG
             quality || 0.8
           );
         };
@@ -166,36 +208,74 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   
   async function handleFiles(files) {
-    const remainingSlots = MAX_IMAGES - uploadedFiles.length;
-    if (files.length > remainingSlots) {
-      alert(`You can only upload ${MAX_IMAGES} images total. You can add ${remainingSlots} more image(s).`);
-      return;
+const remainingSlots = MAX_IMAGES - uploadedFiles.length;
+if (files.length > remainingSlots) {
+  alert(`You can only upload ${MAX_IMAGES} images total. You can add ${remainingSlots} more image(s).`);
+  return;
+}
+
+// Show conversion message
+const originalButtonText = submitButton.textContent;
+submitButton.textContent = "Converting images...";
+
+for (const file of files) {
+  try {
+    let processedFile = file;
+    
+    // Check if file is HEIC/HEIF format
+    if (file.name.toLowerCase().endsWith('.heic') || 
+        file.name.toLowerCase().endsWith('.heif') ||
+        file.type === 'image/heic' || 
+        file.type === 'image/heif') {
+      
+      // Convert HEIC to JPEG using heic2any
+      const jpegBlob = await heic2any({
+        blob: file,
+        toType: "image/jpeg",
+        quality: 0.8
+      });
+      
+      // Create a new file with jpg extension
+      processedFile = new File(
+        [jpegBlob], 
+        file.name.replace(/\.(heic|heif)$/i, '.jpg'), 
+        { type: 'image/jpeg' }
+      );
     }
     
-    for (const file of files) {
-      if (!file.type.startsWith('image/')) continue;
-      
-      const resizedBlob =
-        file.size > 2 * 1024 * 1024 ? await resizeAndCompressImage(file, 1024, 1024, 0.8) : file;
-      
-      const resizedFile = new File([resizedBlob], file.name, { type: file.type });
-      
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        uploadedFiles.push({
-          file: resizedFile,
-          url: e.target.result,
-          isExisting: false
-        });
-        renderPreviews();
-        updateNoImagesMessage();
-        updateImageOrder();
-      };
-      reader.readAsDataURL(resizedFile);
-    }
+    // Continue with your existing conversion for other formats
+    if (!processedFile.type.startsWith('image/')) continue;
     
-    imageInput.value = null;
+    const resizedBlob = processedFile.size > 2 * 1024 * 1024 
+      ? await resizeAndCompressImage(processedFile, 1024, 1024, 0.8) 
+      : await resizeAndCompressImage(processedFile, 2048, 2048, 0.9);
+    
+    const fileName = processedFile.name.split('.')[0] + '.jpg';
+    const finalFile = new File([resizedBlob], fileName, { type: 'image/jpeg' });
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      uploadedFiles.push({
+        file: finalFile,
+        url: e.target.result,
+        isExisting: false
+      });
+      renderPreviews();
+      updateNoImagesMessage();
+      updateImageOrder();
+    };
+    reader.readAsDataURL(finalFile);
+  } catch (error) {
+    console.error('Error processing image:', error);
+    alert("There was an error processing one of your images. Please try a different format.");
   }
+}
+
+// Reset button text
+submitButton.textContent = originalButtonText;
+imageInput.value = null;
+}
+
   
   // File input change handler
   imageInput.addEventListener('change', (e) => handleFiles(e.target.files));
@@ -243,7 +323,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     const formData = new FormData(form);
     
-    // Add new files to formData
     uploadedFiles
       .filter(fileObj => !fileObj.isExisting)
       .forEach((fileObj) => {

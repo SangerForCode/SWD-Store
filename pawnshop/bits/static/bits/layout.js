@@ -71,3 +71,35 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// Category dropdown functionality
+const desktopCategoryBtn = document.getElementById('desktopCategoryBtn');
+const mobileCategoryBtn = document.getElementById('mobileCategoryBtn');
+const desktopCategoryDropdown = document.getElementById('desktopCategoryDropdown');
+const mobileCategoryDropdown = document.getElementById('mobileCategoryDropdown');
+
+function toggleDropdown(dropdown) {
+    dropdown.classList.toggle('show');
+}
+
+desktopCategoryBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    toggleDropdown(desktopCategoryDropdown);
+});
+
+mobileCategoryBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    toggleDropdown(mobileCategoryDropdown);
+});
+
+// Close dropdowns when clicking outside
+document.addEventListener('click', function(event) {
+    if (!event.target.matches('.category-btn') && !event.target.closest('.category-dropdown')) {
+        const dropdowns = document.getElementsByClassName('category-dropdown');
+        for (let i = 0; i < dropdowns.length; i++) {
+            if (dropdowns[i].classList.contains('show')) {
+                dropdowns[i].classList.remove('show');
+            }
+        }
+    }
+});

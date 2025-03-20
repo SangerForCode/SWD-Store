@@ -4,10 +4,11 @@ from .models import *
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['name', 'description', 'price', 'hostel', 'phone']
+        fields = ['name', 'description', 'price', 'category', 'hostel', 'phone']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-            'hostel': forms.Select(choices=[(hostel.name, hostel.name) for hostel in Hostel.objects.all()], attrs={'placeholder': 'Previously provided hostel will be used if not provided'}),
+            'hostel': forms.Select(choices=[(hostel.name, hostel.name) for hostel in Hostel.objects.all()]),
+            'category': forms.Select(choices=[(category.name, category.name) for category in Category.objects.all()]),
             'phone': forms.TextInput(attrs={'placeholder': '(WhatsApp) Required if not provided one before'})
         }
 

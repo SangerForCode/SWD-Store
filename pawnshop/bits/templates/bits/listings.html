@@ -65,7 +65,7 @@
                         <i class="fas fa-trash"></i> Delete
                     </a>
                     {% if not item.is_sold %}
-                    <a href="" class="mark-sold-btn">
+                    <a href="{% url 'marksold' item.id %}" class="mark-sold-btn">
                         <i class="fas fa-check-circle"></i> Mark Sold
                     </a>
                     {% endif %}

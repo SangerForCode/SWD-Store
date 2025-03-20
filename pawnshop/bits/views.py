@@ -64,6 +64,8 @@ def add_product(request):
                     person.save()
 
                 item.hostel = person.hostel
+                category = form.cleaned_data.get('category')
+                item.category = category
 
                 item.save()
 
@@ -111,20 +113,20 @@ def add_product(request):
 
 def home(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
-        try:
-            hostel = request.GET.get('hostel_side')
-            items = helper.items_sort(Item.objects.filter(Q(hostel__name__icontains=hostel)))
-        except:
-            try:
-                query = request.GET.get('q')
-                items = helper.items_sort( 
-                    Item.objects.filter(
-                    Q(name__icontains=query) | 
-                    Q(hostel__name__icontains=query) |
-                    Q(description__icontains=query)
-                ))
-            except:
-                items = helper.items_sort(Item.objects.all())
+        category = request.GET.get('c')
+        query = request.GET.get('q')
+        if category:
+            items = helper.items_sort(Item.objects.filter(Q(category__id=category)))
+        elif query:
+            items = helper.items_sort( 
+                Item.objects.filter(
+                Q(name__icontains=query) | 
+                Q(hostel__name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category__name__icontains=query)
+            ))
+        else:
+            items = helper.items_sort(Item.objects.all())
             
         return render(request, "bits/home.html", {'items': list(items)})
     else:
@@ -345,7 +347,6 @@ def feedback(request):
                 feedback.person = person
                 feedback.save()
                 
-                # Handle image uploads
                 images = request.FILES.getlist('images')
                 for image in images:
                     FeedbackImage.objects.create(
@@ -361,3 +362,19 @@ def feedback(request):
         return render(request, 'bits/feedback.html', {'form': form})
     else:
         return redirect('sign_in')
+
+def marksold(request, id):
+    if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
+        if Item.objects.filter(id=id).exists():
+            item = Item.objects.get(id=id)
+            item.is_sold = True
+            item.save()
+        return redirect('my_listings')
+    else:
+        return redirect("sign_in")
+    
+def about_us(request):
+    return render(request, 'bits/about.html')
+
+def categories(request):
+    return render(request, 'bits/categories.html', {'categories': Category.objects.all()})

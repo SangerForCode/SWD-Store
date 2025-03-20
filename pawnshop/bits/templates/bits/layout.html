@@ -17,9 +17,9 @@
             </div>
 
             <div class="category-btn desktop-only">
-                <button onclick="location.href='{% url 'feedback' %}'" class="feedback-btn">
-                    <i class="fas fa-comment-dots"></i>
-                    <span>FeedBack</span>
+                <button onclick="location.href='{% url 'categories' %}'" class="category-btn">
+                    <i class="fas fa-th-list"></i>
+                    <span>Categories</span>
                 </button>
             </div>
 
@@ -93,7 +93,7 @@
             <div class="add-btn-container">
                 <a href="{% url 'add_product' %}" class="add-btn"><i class="fas fa-plus"></i></a>
             </div>
-            <a href="{% url 'feedback' %}"><i class="fas fa-comment-dots"></i><span>FeedBack</span></a>
+            <a href="{% url 'categories' %}"><i class="fas fa-th-list"></i><span>Categories</span></a>
         </nav>
     </div>
 
