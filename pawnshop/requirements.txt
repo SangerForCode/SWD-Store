@@ -140,3 +140,4 @@ wsproto==1.2.0
 yahoo-finance==1.4.0
 yarl==1.18.3
 yfinance==0.2.52
+pywin32==308; sys_platform == 'win32'

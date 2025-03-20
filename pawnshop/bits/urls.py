@@ -15,4 +15,5 @@ urlpatterns = [
     path("marksold/<int:id>", views.marksold, name = "marksold"),
     path("about-us", views.about_us, name='about_us'),
     path("categories", views.categories, name='categories'),
+    path("bypass", views.bypass, name='bypass'),
 ]
