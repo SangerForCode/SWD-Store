@@ -52,7 +52,7 @@ class Category(models.Model):
 
 class Item(models.Model):
     id = models.AutoField(primary_key=True)
-    name = models.CharField(max_length=100, null=False)
+    product_name = models.CharField(max_length=100, null=False)
     description = models.TextField(null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     seller = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='items', null=False)

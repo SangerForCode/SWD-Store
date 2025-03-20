@@ -4,7 +4,7 @@ from .models import *
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['name', 'description', 'price', 'category', 'hostel', 'phone']
+        fields = ['product_name', 'description', 'price', 'category', 'hostel', 'phone']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
             'hostel': forms.Select(choices=[(hostel.name, hostel.name) for hostel in Hostel.objects.all()]),
