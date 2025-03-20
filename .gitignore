@@ -1,4 +1,2 @@
-db.sqlite3
-pawnshop.zip
-migrations
-__pycache__
+pawnshop/db.sqlite3
+pawnshop/pawnshop.zip
