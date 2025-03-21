@@ -44,6 +44,7 @@ def sign_out(request):
 
 def add_product(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
+        print("checkpoint 0")
         person = Person.objects.get(email=request.session.get('user_data')['email'])
 
         if request.method == 'POST':
@@ -72,7 +73,7 @@ def add_product(request):
 
                 images = request.FILES.getlist('images')
                 image_order = []
-
+                print("checkpoint 1")
                 if 'image_order' in request.POST and request.POST['image_order']:
                     try:
                         image_order = json.loads(request.POST['image_order'])
@@ -80,7 +81,7 @@ def add_product(request):
                         image_order = list(range(len(images)))
                 else:
                     image_order = list(range(len(images)))
-
+                print("checkpoint 2")
                 if images:
                     for index in range(len(image_order)):
                         try:
@@ -98,7 +99,7 @@ def add_product(request):
                     image_file = request.FILES['image']
                     image_instance = Image(item=item, image=image_file, display_order=0)
                     image_instance.save()
-
+                print("checkpoint 3")
                 messages.success(request, "Product added successfully!")
                 return redirect('my_listings')
             else:
