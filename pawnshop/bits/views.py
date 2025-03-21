@@ -26,9 +26,9 @@ def sign_in(request):
 def auth_receiver(request):
     token = request.POST['credential']
     user_data = id_token.verify_oauth2_token(token, requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID'], clock_skew_in_seconds = 10)
-    # if user_data['email'].split('@')[1] != 'goa.bits-pilani.ac.in':
-    #     messages.error(request, "Please use Goa Campus email ID. 🙏🏼")
-    #     return redirect('sign_in')
+    if user_data['email'].split('@')[1] != 'goa.bits-pilani.ac.in':
+        messages.error(request, "Please use Goa Campus email ID. 🙏🏼")
+        return redirect('sign_in')
     request.session['user_data'] = user_data
     if not Person.objects.filter(email=user_data['email']).exists():
         person = Person(email=user_data['email'], name=user_data['name'])
