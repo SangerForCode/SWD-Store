@@ -388,8 +388,8 @@ def bypass(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         return redirect('home')
     else:
-        user = authenticate(request, username='vishr', password='ebf17roh05')
-        login(request, user)
+        user = authenticate(request, username='test', password='some1234')
+        login(request, user, backend='django.contrib.auth.backends.ModelBackend')
         if not Person.objects.filter(email='contact@example.com').exists():
             Person.objects.create(
                 email='contact@example.com',
