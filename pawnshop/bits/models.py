@@ -6,13 +6,14 @@ class Campus(models.TextChoices):
     HYDERABAD = 'HYD', 'Hyderabad'
     PILANI = 'PIL', 'Pilani'
     OTHERS = 'OTH', 'Others'
+    Gmail = 'GMAIL', 'Gmail'
 
 class Person(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, null=False)
     email = models.EmailField(null=False)
     phone = models.CharField(max_length=20, null=True)
-    campus = models.CharField(max_length=4, choices=Campus.choices, null=False)
+    campus = models.CharField(max_length=5, choices=Campus.choices, null=False)
     hostel = models.ForeignKey('Hostel', on_delete=models.CASCADE, related_name='residents', null=True)
     registered_at = models.DateTimeField(auto_now_add=True)
 
@@ -21,7 +22,6 @@ class Person(models.Model):
         for item in self.items.all():
             item.save()
         campus_code = self.email.split('@')[1].split('.')[0].upper()
-        print(campus_code)
         if campus_code in Campus.values:
             self.campus = campus_code
         else:
@@ -36,7 +36,7 @@ class Person(models.Model):
     
 class Hostel(models.Model):
     name = models.CharField(max_length=4, primary_key=True)
-    campus = models.CharField(max_length=3, choices=Campus.choices, null=False, default=Campus.GOA)
+    campus = models.CharField(max_length=5, choices=Campus.choices, null=False, default=Campus.GOA)
 
     def __str__(self):
         return f"{self.name}"
