@@ -16,8 +16,9 @@ class Person(models.Model):
     campus = models.CharField(max_length=5, choices=Campus.choices, null=False)
     hostel = models.ForeignKey('Hostel', on_delete=models.CASCADE, related_name='residents', null=True)
     registered_at = models.DateTimeField(auto_now_add=True)
-    
+
     def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
         for item in self.items.all():
             item.save()
         campus_code = self.email.split('@')[1].split('.')[0].upper()
@@ -25,7 +26,6 @@ class Person(models.Model):
             self.campus = campus_code
         else:
             self.campus = Campus.OTHERS
-        super().save(*args, **kwargs)
 
     @property
     def year(self):
