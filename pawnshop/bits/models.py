@@ -18,14 +18,14 @@ class Person(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        for item in self.items.all():
-            item.save()
         campus_code = self.email.split('@')[1].split('.')[0].upper()
         if campus_code in Campus.values:
             self.campus = campus_code
         else:
             self.campus = Campus.OTHERS
+        super().save(*args, **kwargs)
+        for item in self.items.all():
+            item.save()
 
     @property
     def year(self):
