@@ -27,9 +27,6 @@ def sign_in(request):
 def auth_receiver(request):
     token = request.POST['credential']
     user_data = id_token.verify_oauth2_token(token, requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID'], clock_skew_in_seconds = 10)
-    if user_data['email'].split('@')[1] != 'goa.bits-pilani.ac.in':
-        messages.error(request, "Please use Goa Campus email ID. 🙏🏼")
-        return redirect('sign_in')
     request.session['user_data'] = user_data
     if not Person.objects.filter(email=user_data['email']).exists():
         person = Person(email=user_data['email'], name=user_data['name'])
@@ -45,7 +42,6 @@ def sign_out(request):
 
 def add_product(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
-        print("checkpoint 0")
         person = Person.objects.get(email=request.session.get('user_data')['email'])
 
         if request.method == 'POST':
@@ -74,7 +70,6 @@ def add_product(request):
 
                 images = request.FILES.getlist('images')
                 image_order = []
-                print("checkpoint 1")
                 if 'image_order' in request.POST and request.POST['image_order']:
                     try:
                         image_order = json.loads(request.POST['image_order'])
@@ -82,7 +77,6 @@ def add_product(request):
                         image_order = list(range(len(images)))
                 else:
                     image_order = list(range(len(images)))
-                print("checkpoint 2")
                 if images:
                     for index in range(len(image_order)):
                         try:
@@ -100,7 +94,6 @@ def add_product(request):
                     image_file = request.FILES['image']
                     image_instance = Image(item=item, image=image_file, display_order=0)
                     image_instance.save()
-                print("checkpoint 3")
                 messages.success(request, "Product added successfully!")
                 return redirect('my_listings')
             else:
