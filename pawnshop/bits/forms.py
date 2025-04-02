@@ -39,6 +39,10 @@ class ItemForm(forms.ModelForm):
             self.add_error('hostel', "Hostel is required as you haven't provided one before.")
 
         return cleaned_data
+    
+    def setdata(self, hostel, phone):
+        self.fields['hostel'].initial = hostel
+        self.fields['phone'].initial = phone
 
 class FeedbackForm(forms.ModelForm):
     class Meta:

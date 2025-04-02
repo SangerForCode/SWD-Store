@@ -109,8 +109,7 @@ def add_product(request):
 
         else:
             form = ItemForm(user=person)
-            form.phone = person.phone
-            form.hostel = person.hostel
+            form.setdata(person.hostel, person.phone)
 
         return render(request, 'bits/add_product.html', {'form': form})
     else:
