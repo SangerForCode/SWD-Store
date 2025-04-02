@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib import messages
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
 from .forms import *
 from . import helper
@@ -120,7 +121,7 @@ def home(request):
         if category:
             items = helper.items_sort(Item.objects.filter(Q(category__id=category)))
         elif query:
-            items = helper.items_sort( 
+            items = helper.items_sort(
                 Item.objects.filter(
                 Q(name__icontains=query) | 
                 Q(hostel__name__icontains=query) |
@@ -129,8 +130,24 @@ def home(request):
             ))
         else:
             items = helper.items_sort(Item.objects.all())
+        
+        items_per_page = 12
+        paginator = Paginator(list(items), items_per_page)
+        page = request.GET.get('page')
+        
+        try:
+            paginated_items = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_items = paginator.page(1)
+        except EmptyPage:
+            paginated_items = paginator.page(paginator.num_pages)
             
-        return render(request, "bits/home.html", {'items': list(items)})
+        return render(request, "bits/home.html", {
+            'items': paginated_items,
+            'is_paginated': True,
+            'page_obj': paginated_items,
+            'paginator': paginator
+        })
     else:
         return HttpResponseRedirect(reverse('sign_in'))
     
