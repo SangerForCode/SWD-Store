@@ -18,7 +18,7 @@ class Person(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        campus_code = self.email.split('@')[1].split('.')[0].upper()
+        campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
         if campus_code in Campus.values:
             self.campus = campus_code
         else:
@@ -35,7 +35,7 @@ class Person(models.Model):
         return f"{self.name}"
     
 class Hostel(models.Model):
-    name = models.CharField(max_length=4, primary_key=True)
+    name = models.CharField(max_length=100, primary_key=True)
     campus = models.CharField(max_length=5, choices=Campus.choices, null=False, default=Campus.GOA)
 
     def __str__(self):

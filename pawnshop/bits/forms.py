@@ -7,8 +7,7 @@ class ItemForm(forms.ModelForm):
         fields = ['name', 'description', 'price', 'category', 'hostel', 'phone']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-            'hostel': forms.Select(choices=[(hostel.name, hostel.name) for hostel in Hostel.objects.all()]),
-            'category': forms.Select(choices=[(category.name, category.name) for category in Category.objects.all()]),
+            'category': forms.Select(choices=[(category.id, category.name) for category in Category.objects.all()]),
             'phone': forms.TextInput(attrs={'placeholder': '(WhatsApp) Required if not provided one before'})
         }
         labels = {
@@ -18,6 +17,13 @@ class ItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
+        
+        if self.user and self.user.campus:
+            campus_hostels = Hostel.objects.filter(campus=self.user.campus)
+            self.fields['hostel'].widget.choices = [(hostel.name, hostel.name) for hostel in campus_hostels]
+        else:
+            self.fields['hostel'].widget.choices = [(hostel.name, hostel.name) for hostel in Hostel.objects.all()]
+        
         self.fields['hostel'].required = not self.user.hostel
         self.fields['phone'].required = not self.user.phone
 

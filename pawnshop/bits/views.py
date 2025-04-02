@@ -118,19 +118,15 @@ def home(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         current_user = Person.objects.get(email=request.session.get('user_data')['email'])
         
-        # Get filter parameters
         category = request.GET.get('c')
         query = request.GET.get('q')
         selected_campus = request.GET.get('campus')
         
-        # Start with all items
         items_query = Item.objects.all()
         
-        # Filter by category if specified
         if category:
             items_query = items_query.filter(Q(category__id=category))
         
-        # Filter by search query if specified
         if query:
             items_query = items_query.filter(
                 Q(name__icontains=query) | 
@@ -139,27 +135,20 @@ def home(request):
                 Q(category__name__icontains=query)
             )
         
-        # Filter by campus
         if selected_campus == 'ALL':
-            # Explicitly show all campuses
             selected_campus = 'ALL'
         elif selected_campus in ['GOA', 'HYD', 'PIL']:
-            # Filter by selected campus
             items_query = items_query.filter(seller__campus=selected_campus)
         elif not selected_campus:
-            # No campus selected, default to user's campus if valid
             if current_user.campus in ['GOA', 'HYD', 'PIL']:
                 items_query = items_query.filter(seller__campus=current_user.campus)
                 selected_campus = current_user.campus
             else:
-                # If user has an invalid campus, show all
                 selected_campus = 'ALL'
         
-        # Sort items
         items = helper.items_sort(items_query)
         
-        # Pagination
-        items_per_page = 12
+        items_per_page = 16
         paginator = Paginator(list(items), items_per_page)
         page = request.GET.get('page')
         
