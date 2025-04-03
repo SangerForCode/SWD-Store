@@ -64,7 +64,6 @@ class Item(models.Model):
     phone = models.CharField(max_length=20, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Handle WhatsApp link generation
         effective_phone = self.phone or self.seller.phone
         if effective_phone:
             self.whatsapp = helper.generate_whatsapp_link(
@@ -74,40 +73,39 @@ class Item(models.Model):
         else:
             self.whatsapp = None
             
-        # Ensure price is positive
         self.price = abs(self.price)
         
-        # Auto-categorize the item, regardless of whether it already has a category
-        try:
-            from .item_categorizer import categorizer
-            import logging
-            logger = logging.getLogger(__name__)
+        # # Auto-categorize the item, regardless of whether it already has a category
+        # try:
+        #     from .item_categorizer import categorizer
+        #     import logging
+        #     logger = logging.getLogger(__name__)
             
-            # Use the categorize method from our new HybridCategorizer
-            category_id = categorizer.categorize(self.name, self.description)
+        #     # Use the categorize method from our new HybridCategorizer
+        #     category_id = categorizer.categorize(self.name, self.description)
             
-            # Set the category
-            if category_id:
-                self.category = Category.objects.get(id=category_id)
-                logger.info(f"Auto-categorized item '{self.name}' as '{self.category.name}'")
-        except Exception as e:
-            # If categorization fails, set a default category
-            try:
-                # Try to find "Others" category first
-                others_category = Category.objects.filter(name__icontains="other").first()
-                if others_category:
-                    self.category = others_category
-                else:
-                    # If no "Others" category, use the first category
-                    self.category = Category.objects.first()
-            except Exception as inner_e:
-                # If we can't even set a default, log the error but don't prevent saving
-                import logging
-                logger = logging.getLogger(__name__)
-                logger.error(f"Could not categorize item '{self.name}': {str(e)}, {str(inner_e)}")
+        #     # Set the category
+        #     if category_id:
+        #         self.category = Category.objects.get(id=category_id)
+        #         logger.info(f"Auto-categorized item '{self.name}' as '{self.category.name}'")
+        # except Exception as e:
+        #     # If categorization fails, set a default category
+        #     try:
+        #         # Try to find "Others" category first
+        #         others_category = Category.objects.filter(name__icontains="other").first()
+        #         if others_category:
+        #             self.category = others_category
+        #         else:
+        #             # If no "Others" category, use the first category
+        #             self.category = Category.objects.first()
+        #     except Exception as inner_e:
+        #         # If we can't even set a default, log the error but don't prevent saving
+        #         import logging
+        #         logger = logging.getLogger(__name__)
+        #         logger.error(f"Could not categorize item '{self.name}': {str(e)}, {str(inner_e)}")
                     
-        # Call the original save method
-        super().save(*args, **kwargs)
+        # # Call the original save method
+        # super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name}-{self.seller}"

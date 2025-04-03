@@ -78,7 +78,7 @@ class HybridCategorizer:
                              "charger", "adapter", "speaker", "mouse", "keyboard", "monitor", 
                              "camera", "gadget", "cable", "electronic", "tech", "computer", "pc",
                              "device", "calculator", "watch", "smart", "digital", "gaming",
-                             "console", "playstation", "xbox", "nintendo", "power bank"],
+                             "console", "playstation", "xbox", "nintendo", "power bank", "calculator", "electric", "kettle", "VR"],
                 "description": "Electronic devices and gadgets including laptops, phones, headphones, tablets, and tech accessories"
             },
             "Kitchen & Cooking": {
@@ -86,7 +86,7 @@ class HybridCategorizer:
                              "microwave", "refrigerator", "fridge", "kettle", "blender", "mixer",
                              "toaster", "cooker", "utensil", "cookware", "kitchen", "cooking",
                              "spatula", "container", "storage", "coffee", "tea", "bottle", "jar",
-                             "food", "appliance", "gas", "stove", "dish", "cutlery"],
+                             "food", "appliance", "gas", "stove", "dish", "cutlery", "cup", "peanut", "butter"],
                 "description": "Kitchen items and cooking supplies for preparing and storing food"
             },
             "Books & Study Materials": {
@@ -94,7 +94,7 @@ class HybridCategorizer:
                              "pencil", "highlighter", "stationery", "paper", "binder", "folder",
                              "calculator", "academic", "course", "semester", "subject", "guide",
                              "manual", "reference", "dictionary", "journal", "magazine", "reading",
-                             "literature", "fiction", "nonfiction", "educational", "learning"],
+                             "literature", "fiction", "nonfiction", "educational", "learning", "chem", "bio", "dbms", "math", "phy", "history", "geography", "english", "language", "grammar", "vocabulary", "text", "study material"],
                 "description": "Books, textbooks, and study materials for academic courses and reading"
             },
             "Sports & Fitness Gear": {
@@ -117,7 +117,7 @@ class HybridCategorizer:
                 "keywords": ["bed", "mattress", "pillow", "sheet", "blanket", "duvet", "comforter", 
                              "bedding", "curtain", "lamp", "desk", "chair", "mirror", "storage",
                              "box", "organizer", "hanger", "rack", "dorm", "room", "sleep", "night",
-                             "alarm", "clock", "fan", "heater", "hostel", "dorm", "bedroom", "essential"],
+                             "alarm", "clock", "fan", "heater", "hostel", "dorm", "bedroom", "essential", "cooler", "tray", "bean bag", ],
                 "description": "Essential items for dorm rooms and bedrooms such as bedding, storage, and comfort items"
             },
             "Room Decor": {
@@ -125,7 +125,7 @@ class HybridCategorizer:
                              "flower", "wall", "art", "picture", "photo", "cushion", "pillow",
                              "rug", "carpet", "curtain", "blind", "fairy", "string", "led", "strip",
                              "ornament", "figurine", "statue", "candle", "vase", "decorative",
-                             "aesthetic", "tapestry", "flag", "banner"],
+                             "aesthetic", "tapestry", "flag", "banner", "disco"],
                 "description": "Decorative items to personalize and beautify living spaces"
             },
             "Community & Shared Resources": {
@@ -145,10 +145,7 @@ class HybridCategorizer:
                 "description": "Digital accounts, subscription services, and online platform memberships"
             },
             "Others": {
-                "keywords": ["other", "miscellaneous", "various", "random", "item", "thing", 
-                             "unique", "special", "rare", "service", "help", "assistance",
-                             "unusual", "odd", "diverse", "assorted", "mixed", "collection",
-                             "undefined", "uncategorized", "general", "generic", "else", "leftover"],
+                "keywords": [],
                 "description": "Miscellaneous items that don't fit into other categories"
             }
         }
