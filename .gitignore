@@ -1,1 +1,3 @@
 pawnshop/db.sqlite3
+pawnshop\bits\migrations\
+pawnshop\bits\__pycache__\

@@ -1,13 +1,14 @@
 from django import forms
 from .models import *
 
+# Add this to your forms.py file, replacing your existing ItemForm class
+
 class ItemForm(forms.ModelForm):
     class Meta:
         model = Item
-        fields = ['name', 'description', 'price', 'category', 'hostel', 'phone']
+        fields = ['name', 'description', 'price', 'hostel', 'phone']  # Category removed - will be auto-assigned
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-            'category': forms.Select(choices=[(category.id, category.name) for category in Category.objects.all()]),
             'phone': forms.TextInput(attrs={'placeholder': '(WhatsApp) Required if not provided one before'})
         }
         labels = {
@@ -17,7 +18,6 @@ class ItemForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         self.user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        
         if self.user and self.user.campus:
             campus_hostels = Hostel.objects.filter(campus=self.user.campus)
             self.fields['hostel'].widget.choices = [(hostel.name, hostel.name) for hostel in campus_hostels]
@@ -39,7 +39,6 @@ class ItemForm(forms.ModelForm):
             self.add_error('hostel', "Hostel is required as you haven't provided one before.")
 
         return cleaned_data
-    
     def setdata(self, hostel, phone):
         self.fields['hostel'].initial = hostel
         self.fields['phone'].initial = phone

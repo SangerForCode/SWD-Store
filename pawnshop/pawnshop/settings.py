@@ -38,7 +38,6 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.bits-pilani.store",
     "http://127.0.0.1:8000"
 ]
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -55,7 +54,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
     'social_django',
-    'pwa'
+    'pwa',
 ]
 SOCIALACCOUNT_PROVIDERS = {
     'google': {

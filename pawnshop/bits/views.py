@@ -38,6 +38,7 @@ def auth_receiver(request):
 
 def sign_out(request):
     del request.session['user_data']
+    logout(request)
     return HttpResponseRedirect(reverse('sign_in'))
 
 def add_product(request):
