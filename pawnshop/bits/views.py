@@ -109,8 +109,6 @@ def add_product(request):
         return HttpResponseRedirect(reverse('sign_in'))
     
 def home(request):
-    if request.session.get('user_data')['email'] in banned_list:
-        return HttpResponseRedirect(reverse('sign_out'))
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         current_user = Person.objects.get(email=request.session.get('user_data')['email'])
         
