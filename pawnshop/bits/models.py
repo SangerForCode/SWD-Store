@@ -53,12 +53,12 @@ class Category(models.Model):
 class Item(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, null=False)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=False)
     seller = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='items', null=False)
     is_sold = models.BooleanField(default=False)
     whatsapp = models.URLField(max_length=200, null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items', null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items', null=False)
     added_at = models.DateTimeField(auto_now_add=True)
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=False)
     phone = models.CharField(max_length=20, null=True, blank=True)
@@ -72,40 +72,8 @@ class Item(models.Model):
             )
         else:
             self.whatsapp = None
-            
         self.price = abs(self.price)
-        
-        # # Auto-categorize the item, regardless of whether it already has a category
-        # try:
-        #     from .item_categorizer import categorizer
-        #     import logging
-        #     logger = logging.getLogger(__name__)
-            
-        #     # Use the categorize method from our new HybridCategorizer
-        #     category_id = categorizer.categorize(self.name, self.description)
-            
-        #     # Set the category
-        #     if category_id:
-        #         self.category = Category.objects.get(id=category_id)
-        #         logger.info(f"Auto-categorized item '{self.name}' as '{self.category.name}'")
-        # except Exception as e:
-        #     # If categorization fails, set a default category
-        #     try:
-        #         # Try to find "Others" category first
-        #         others_category = Category.objects.filter(name__icontains="other").first()
-        #         if others_category:
-        #             self.category = others_category
-        #         else:
-        #             # If no "Others" category, use the first category
-        #             self.category = Category.objects.first()
-        #     except Exception as inner_e:
-        #         # If we can't even set a default, log the error but don't prevent saving
-        #         import logging
-        #         logger = logging.getLogger(__name__)
-        #         logger.error(f"Could not categorize item '{self.name}': {str(e)}, {str(inner_e)}")
-                    
-        # # Call the original save method
-        # super().save(*args, **kwargs)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.name}-{self.seller}"
