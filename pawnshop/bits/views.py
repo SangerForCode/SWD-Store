@@ -429,3 +429,9 @@ def bypass(request):
             'name': 'Vishrut'
         }
         return HttpResponseRedirect(reverse('home'))
+
+def custom_page_not_found(request, exception):
+    return render(request, 'bits/404.html', status=404)
+
+def custom_server_error(request):
+    return render(request, 'bits/500.html', status=500)

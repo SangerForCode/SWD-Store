@@ -27,3 +27,5 @@ urlpatterns = [
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('', include('pwa.urls')),
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+handler404 = 'bits.views.custom_page_not_found'
+handler500 = 'bits.views.custom_server_error'
