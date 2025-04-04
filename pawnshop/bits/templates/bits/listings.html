@@ -74,11 +74,11 @@
         </div>
         {% empty %}
         <div class="no-items">
-            <i class="fas fa-box-open fa-2x"></i>
+            <i class="fas fa-store fa-3x"></i>
             <p>You haven't listed any items yet.</p>
             <p>Start selling by adding your first item!</p>
-            <a href="{% url 'add_product' %}" style="background-color: #F07B3F; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 10px; display: inline-block;">
-                <i class="fas fa-plus"></i> Add New Item
+            <a href="{% url 'add_product' %}" class="add-item-btn">
+                <i></i> Add New Item
             </a>
         </div>
         {% endfor %}
