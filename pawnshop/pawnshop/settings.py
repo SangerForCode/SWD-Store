@@ -25,18 +25,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
     'www.bits-pilani.store',
     "127.0.0.1",
     "localhost",
+    "amazoff.shop",
+    "www.amazoff.shop"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://bits-pilani.store",
     "https://www.bits-pilani.store",
-    "http://127.0.0.1:8000"
+    "http://127.0.0.1:8000",
+    "https://amazoff.shop",
+    "https://www.amazoff.shop",
 ]
 # Application definition
 
@@ -183,12 +187,55 @@ PWA_APP_DISPLAY = 'standalone'
 PWA_APP_SCOPE = '/'
 PWA_APP_ORIENTATION = 'any'
 PWA_APP_START_URL = '/'
+PWA_APP_STATUS_BAR_COLOR = "default"
+PWA_SERVICE_WORKER_PATH = BASE_DIR / 'serviceworker.js'
 PWA_APP_ICONS = [
     {
         "src": "/static/images/icon.png",
         "sizes": "512x512"
     }
 ]
+
+
+
+# PWA_APP_ICONS = [
+#     {"src": "/static/pwa/icons/icon-144.png", "sizes": "144x144"},
+#     {"src": "/static/pwa/icons/icon-192.png", "sizes": "192x192"},
+#     {"src": "/static/pwa/icons/icon-512.png", "sizes": "512x512"},
+# ]
+PWA_APP_ICONS_APPLE = [
+    {"src": "/static/images/icon.png", "sizes": "512x512"},
+]
+PWA_APP_SPLASH_SCREEN = [
+    # {
+    #     "src": "/static/images/icon.png",
+    #     "media": "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
+    # }
+]
+PWA_APP_DIR = "ltr"
+PWA_APP_LANG = "en-US"
+PWA_APP_SHORTCUTS = [
+    # {
+    #     "name": "Shortcut",
+    #     "url": "/target",
+    #     "description": "Shortcut to a page in my application",
+    # }
+]
+PWA_APP_SCREENSHOTS = [
+    # Desktop screenshot from previous solution
+    {
+        "src": "/static/images/icon.png",
+        "sizes": "512x512",
+        "form_factor": "wide"
+    },
+    # Mobile screenshot
+    {
+        "src": "/static/images/icon.png",
+        "sizes": "512x512",
+    }
+]
+
+PWA_APP_DEBUG_MODE = DEBUG
 
 MEDIA_ROOT = BASE_DIR/'media'
 MEDIA_URL = '/media/'

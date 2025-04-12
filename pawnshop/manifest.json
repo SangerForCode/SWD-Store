@@ -1,0 +1,15 @@
+{
+  "name": "Bits Pilani PawnShop",
+  "short_name": "PawnShop",
+  "theme_color": "#000000",
+  "background_color": "#000000",
+  "start_url": "/",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/static/images/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
