@@ -1,0 +1,9 @@
+[{
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "store.bits_pilani.twa",
+      "sha256_cert_fingerprints": ["44:02:23:14:62:05:6E:9F:76:8C:2B:29:D6:52:C9:85:88:09:8E:26:76:8C:88:7D:CD:2A:96:FB:BE:12:CE:0C"]
+    }
+  }]
+  

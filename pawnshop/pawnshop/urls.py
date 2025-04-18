@@ -17,8 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from django.conf.urls.static import static
+from django.views.static import serve as static_serve
+from django.urls import re_path
 from . import settings
-
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,6 +27,11 @@ urlpatterns = [
     path("", include("bits.urls")),
     path('social-auth/', include('social_django.urls', namespace='social')),
     path('', include('pwa.urls')),
+    re_path(r'^\.well-known/assetlinks\.json$', static_serve, {
+    'path': 'assetlinks.json',
+    'document_root': settings.STATIC_ROOT / 'wellknown',
+}),
+
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 handler404 = 'bits.views.custom_page_not_found'
 handler500 = 'bits.views.custom_server_error'
