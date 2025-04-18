@@ -58,19 +58,25 @@
                         <i class="fas fa-building"></i> <span class="meta-label">Hostel:</span> {{ item.hostel.name }}
                     </div>
                     <div class="item-date">
-                        <i class="far fa-calendar-alt"></i> <span class="meta-label">Listed:</span> {{ item.added_at|date:"M d, Y H:i" }}
+                        <i class="far fa-calendar-alt"></i> <span class="meta-label">Last Edited:</span> {{ item.added_at|date:"M d, Y H:i" }}
                     </div>
                 </div>
 
-                {% if not item.is_sold %}
                 <div class="item-actions">
-                    {% if item.whatsapp %}
+                    {% if not item.is_sold %}
+                    {% if item.whatsapp and user != item.seller %}
                     <a href="{{ item.whatsapp }}" class="whatsapp-link" target="_blank">
                         <i class="fab fa-whatsapp"></i> Contact Seller
                     </a>
                     {% endif %}
+                    {% endif %}
+                    
+                    {% if user == item.seller %}
+                    <a href="{% url 'repost' item.id %}?source=home" class="repost-btn" onclick="return confirm('Are you sure you want to repost this item?');">
+                        <i class="fas fa-redo"></i> Repost
+                    </a>
+                    {% endif %}
                 </div>
-                {% endif %}
             </div>
         </div>
         {% empty %}

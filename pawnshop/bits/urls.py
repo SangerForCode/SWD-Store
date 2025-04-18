@@ -15,5 +15,7 @@ urlpatterns = [
     path("marksold/<int:id>", views.marksold, name = "marksold"),
     path("about-us", views.about_us, name='about_us'),
     path("categories", views.categories, name='categories'),
+    path("repost/<int:id>", views.repost, name="repost"),
+    path("bulk-action/<str:action>/", views.bulk_action, name="bulk_action"),
 #    path("bypass", views.bypass, name='bypass'),
 ]

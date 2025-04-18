@@ -1,5 +1,6 @@
 from django.db import models
 from . import helper
+from django.utils import timezone
 
 class Campus(models.TextChoices):
     GOA = 'GOA', 'Goa'
@@ -63,7 +64,7 @@ class Item(models.Model):
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=False)
     phone = models.CharField(max_length=20, null=True, blank=True)
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, change_time = True, **kwargs):
         effective_phone = self.phone or self.seller.phone
         if effective_phone:
             self.whatsapp = helper.generate_whatsapp_link(
@@ -73,6 +74,8 @@ class Item(models.Model):
         else:
             self.whatsapp = None
         self.price = abs(self.price)
+        if change_time:
+            self.added_at = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):

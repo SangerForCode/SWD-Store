@@ -3,6 +3,7 @@ import json
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils import timezone
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from google.oauth2 import id_token
@@ -154,6 +155,7 @@ def home(request):
             paginated_items = paginator.page(paginator.num_pages)
             
         return render(request, "bits/home.html", {
+            'user': current_user,
             'items': paginated_items,
             'is_paginated': True,
             'page_obj': paginated_items,
@@ -435,3 +437,71 @@ def custom_page_not_found(request, exception):
 
 def custom_server_error(request):
     return render(request, 'bits/500.html', status=500)
+
+def repost(request, id):
+    if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
+        person = Person.objects.get(email=request.session.get('user_data')['email'])
+        item = get_object_or_404(Item, id=id)
+        
+        if item.seller != person:
+            messages.error(request, "You can only repost your own items.")
+            return redirect('home')
+
+        item.added_at = timezone.now()
+        item.is_sold = False
+        item.hostel = person.hostel
+        item.save()
+        source = request.GET.get('source')
+        messages.success(request, f"'{item.name}' has been reposted successfully!")
+        print(source)
+        if source == 'home':
+            return redirect('home')
+        else:
+            return redirect('my_listings')
+    else:
+        return redirect('sign_in')
+
+@csrf_exempt
+def bulk_action(request, action):
+    if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
+        if request.method == 'POST':
+            person = Person.objects.get(email=request.session.get('user_data')['email'])
+            selected_items = request.POST.get('selected_items', '').split(',')
+            
+            items = Item.objects.filter(id__in=selected_items, seller=person)
+            
+            if not items:
+                messages.error(request, "No valid items were selected.")
+                return redirect('my_listings')
+            
+            if action == 'repost':
+                count = 0
+                for item in items:
+                    item.is_sold = False
+                    item.hostel = person.hostel
+                    item.save()
+                    count += 1
+                messages.success(request, f"Successfully reposted {count} item(s).")
+                
+            elif action == 'toggle_sold':
+                count = 0
+                for item in items:
+                    item.is_sold = not item.is_sold
+                    item.save(change_time=False)
+                    count += 1
+                messages.success(request, f"Successfully toggled sold status for {count} item(s).")
+                
+            elif action == 'delete':
+                count = 0
+                for item in items:
+                    images = Image.objects.filter(item=item)
+                    for image in images:
+                        image.image.delete(save=False)
+                        image.delete()
+                    item.delete()
+                    count += 1
+                messages.success(request, f"Successfully deleted {count} item(s).")
+            
+            return redirect('my_listings')
+    else:
+        return redirect('sign_in')

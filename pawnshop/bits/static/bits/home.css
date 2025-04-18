@@ -296,3 +296,25 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+    .repost-btn {
+        background-color: #4361ee;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-top: 5px;
+    }
+    
+    .repost-btn:hover {
+        background-color: #3a55d1;
+    }
+    
+    .repost-btn i {
+        margin-right: 6px;
+    }
