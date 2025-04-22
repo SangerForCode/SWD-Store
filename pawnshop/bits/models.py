@@ -27,7 +27,7 @@ class Person(models.Model):
             self.campus = Campus.OTHERS
         super().save(*args, **kwargs)
         for item in self.items.all():
-            item.save()
+            item.save(change_time = False)
 
     @property
     def year(self):
