@@ -172,7 +172,7 @@ def item_detail(request, id):
         hostel=item.hostel
     ).exclude(
         id=item.id
-    ).order_by('-added_at')[:5]
+    ).order_by('-updated_at')[:5]
     
     context = {
         'item': item,
@@ -447,10 +447,9 @@ def repost(request, id):
             messages.error(request, "You can only repost your own items.")
             return redirect('home')
 
-        item.added_at = timezone.now()
         item.is_sold = False
         item.hostel = person.hostel
-        item.save()
+        item.save(change_time=True)
         source = request.GET.get('source')
         messages.success(request, f"'{item.name}' has been reposted successfully!")
         print(source)

@@ -20,6 +20,7 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
+        self.phone = helper.get_clean_number(self.phone) if self.phone else None
         if campus_code in Campus.values:
             self.campus = campus_code
         else:
@@ -61,11 +62,14 @@ class Item(models.Model):
     whatsapp = models.URLField(max_length=200, null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items', null=False)
     added_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(default=timezone.now)
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=False)
     phone = models.CharField(max_length=20, null=True, blank=True)
 
     def save(self, *args, change_time = True, **kwargs):
         effective_phone = self.phone or self.seller.phone
+        self.phone = helper.get_clean_number(effective_phone) if effective_phone else None
+        effective_phone = self.phone
         if effective_phone:
             self.whatsapp = helper.generate_whatsapp_link(
                 effective_phone,
@@ -75,7 +79,7 @@ class Item(models.Model):
             self.whatsapp = None
         self.price = abs(self.price)
         if change_time:
-            self.added_at = timezone.now()
+            self.updated_at = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):
