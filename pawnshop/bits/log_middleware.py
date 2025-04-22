@@ -19,7 +19,7 @@ class RequestLoggingMiddleware:
         method = request.method
         path = request.get_full_path()
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-	ua_string = request.META.get('HTTP_USER_AGENT', '')
+        ua_string = request.META.get('HTTP_USER_AGENT', '')
         user_agent = parse(ua_string)
         browser = f"{user_agent.browser.family} {user_agent.browser.version_string}"
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
