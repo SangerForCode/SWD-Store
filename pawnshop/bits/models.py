@@ -95,6 +95,10 @@ class Image(models.Model):
     class Meta:
         ordering = ['display_order']
 
+    def delete(self, *args, **kwargs):
+        self.image.delete(save=False)
+        super().delete(*args, **kwargs)
+
     def __str__(self):
         return f"{self.item}-{self.display_order}"
     
