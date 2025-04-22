@@ -3,7 +3,7 @@
     "target": {
       "namespace": "android_app",
       "package_name": "store.bits_pilani.twa",
-      "sha256_cert_fingerprints": ["44:02:23:14:62:05:6E:9F:76:8C:2B:29:D6:52:C9:85:88:09:8E:26:76:8C:88:7D:CD:2A:96:FB:BE:12:CE:0C"]
+      "sha256_cert_fingerprints": ["21:4C:FB:4B:1F:B2:2A:CA:3C:8D:B7:FC:0D:E2:A2:CC:F2:F1:70:A4:D6:18:89:EC:0A:31:82:61:37:36:D0:B8"]
     }
   }]
   

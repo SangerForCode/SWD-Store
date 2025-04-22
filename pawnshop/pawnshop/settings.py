@@ -179,61 +179,39 @@ if not GOOGLE_OAUTH_CLIENT_ID:
 SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
-PWA_APP_NAME = 'BITS PawnShop'
-PWA_APP_DESCRIPTION = "IDK BRO SOMETHING"
+PWA_APP_NAME = 'Bits Pilani Store'
+PWA_APP_SHORT_NAME = 'Bits Store'
+PWA_APP_DESCRIPTION = 'An app made by BITSians for BITSians for on campus Marketplace.'
 PWA_APP_THEME_COLOR = '#000000'
-PWA_APP_BACKGROUND_COLOR = '#ffffff'
+PWA_APP_BACKGROUND_COLOR = '#000000'
 PWA_APP_DISPLAY = 'standalone'
 PWA_APP_SCOPE = '/'
-PWA_APP_ORIENTATION = 'any'
+PWA_APP_ORIENTATION = 'portrait'
 PWA_APP_START_URL = '/'
-PWA_APP_STATUS_BAR_COLOR = "default"
+PWA_APP_DIR = 'ltr'
+PWA_APP_LANG = 'en'
+
 PWA_SERVICE_WORKER_PATH = BASE_DIR / 'serviceworker.js'
+
 PWA_APP_ICONS = [
-    {
-        "src": "/static/images/icon.png",
-        "sizes": "512x512"
-    }
+    {"src": "/static/images/icon_144.png", "sizes": "144x144", "type": "image/png"},
+    {"src": "/static/images/icon_192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "/static/images/icon_512.png", "sizes": "512x512", "type": "image/png"},
 ]
 
-
-
-# PWA_APP_ICONS = [
-#     {"src": "/static/pwa/icons/icon-144.png", "sizes": "144x144"},
-#     {"src": "/static/pwa/icons/icon-192.png", "sizes": "192x192"},
-#     {"src": "/static/pwa/icons/icon-512.png", "sizes": "512x512"},
-# ]
 PWA_APP_ICONS_APPLE = [
-    {"src": "/static/images/icon.png", "sizes": "512x512"},
+    {"src": "/static/images/icon_512.png", "sizes": "512x512", "type": "image/png"},
 ]
-PWA_APP_SPLASH_SCREEN = [
-    # {
-    #     "src": "/static/images/icon.png",
-    #     "media": "(device-width: 320px) and (device-height: 568px) and (-webkit-device-pixel-ratio: 2)",
-    # }
-]
-PWA_APP_DIR = "ltr"
-PWA_APP_LANG = "en-US"
-PWA_APP_SHORTCUTS = [
-    # {
-    #     "name": "Shortcut",
-    #     "url": "/target",
-    #     "description": "Shortcut to a page in my application",
-    # }
-]
+
+# Optional: These are okay to keep if you want them shown in Chrome's install screen
 PWA_APP_SCREENSHOTS = [
-    # Desktop screenshot from previous solution
-    {
-        "src": "/static/images/icon.png",
-        "sizes": "512x512",
-        "form_factor": "wide"
-    },
-    # Mobile screenshot
-    {
-        "src": "/static/images/icon.png",
-        "sizes": "512x512",
-    }
+    {"src": "/static/images/icon_512.png", "sizes": "512x512", "form_factor": "wide"},
+    {"src": "/static/images/icon_512.png", "sizes": "512x512"},
 ]
+
+# Optional: If you plan to add shortcuts later
+PWA_APP_SHORTCUTS = []
+
 
 PWA_APP_DEBUG_MODE = DEBUG
 
