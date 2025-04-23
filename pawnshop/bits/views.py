@@ -166,20 +166,23 @@ def home(request):
         return HttpResponseRedirect(reverse('sign_in'))
 
 def item_detail(request, id):
-    item = get_object_or_404(Item, id=id)
-    
-    similar_items = Item.objects.filter(
-        hostel=item.hostel
-    ).exclude(
-        id=item.id
-    ).order_by('-updated_at')[:5]
-    
-    context = {
-        'item': item,
-        'similar_items': similar_items,
-    }
-    
-    return render(request, 'bits/item_detail.html', context)
+    if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
+        item = get_object_or_404(Item, id=id)
+        
+        similar_items = Item.objects.filter(
+            hostel=item.hostel
+        ).exclude(
+            id=item.id
+        ).order_by('-updated_at')[:5]
+        
+        context = {
+            'item': item,
+            'similar_items': similar_items,
+        }
+        
+        return render(request, 'bits/item_detail.html', context)
+    else:
+        return redirect('sign_in')
 
 def my_listings(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
@@ -339,34 +342,6 @@ def edit_item(request, id):
     except Item.DoesNotExist:
         messages.error(request, "Item not found.")
         return redirect('home')
-
-def feedback(request):
-    if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
-        person = Person.objects.get(email=request.session.get('user_data')['email'])
-        
-        if request.method == 'POST':
-            form = FeedbackForm(request.POST)
-            
-            if form.is_valid():
-                feedback = form.save(commit=False)
-                feedback.person = person
-                feedback.save()
-                
-                images = request.FILES.getlist('images')
-                for image in images:
-                    FeedbackImage.objects.create(
-                        feedback=feedback,
-                        image=image
-                    )
-
-                messages.success(request, "Thank you for your feedback!")
-                return redirect('home')
-        else:
-            form = FeedbackForm()
-            
-        return render(request, 'bits/feedback.html', {'form': form})
-    else:
-        return redirect('sign_in')
 
 def feedback(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
