@@ -479,3 +479,5 @@ def bulk_action(request, action):
             return redirect('my_listings')
     else:
         return redirect('sign_in')
+def terms(request):
+    return render(request, 'bits/terms.html')
