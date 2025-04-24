@@ -1,7 +1,7 @@
 import logging
 import requests
 from datetime import datetime
-from bits.models import Person, PageVisit
+from bits.models import Person
 from user_agents import parse
 
 class RequestLoggingMiddleware:
@@ -30,20 +30,6 @@ class RequestLoggingMiddleware:
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
         self.logger.info(f"{timestamp} | {person_info} | {method} | {browser} | {os} | {ip} | {path}")
-
-        lat, lon = self.get_location(ip)
-
-        PageVisit.objects.create(
-            person=person,
-            ip=ip,
-            path=path,
-            user_agent=ua_string,
-            browser=browser,
-            os=os,
-            latitude=lat,
-            longitude=lon
-        )
-
         return self.get_response(request)
 
     def get_client_ip(self, request):

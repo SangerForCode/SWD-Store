@@ -119,16 +119,3 @@ class FeedbackImage(models.Model):
 
     def __str__(self):
         return f"{self.feedback}"
-
-class PageVisit(models.Model):
-    person = models.ForeignKey(Person, on_delete=models.SET_NULL, null=True)
-    ip = models.GenericIPAddressField()
-    path = models.CharField(max_length=255)
-    user_agent = models.TextField()
-    browser = models.CharField(max_length=100)
-    os = models.CharField(max_length=100)
-    timestamp = models.DateTimeField(auto_now_add=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    def __str__(self):
-        return f"{self.person} - {self.ip} - {self.timestamp}"
