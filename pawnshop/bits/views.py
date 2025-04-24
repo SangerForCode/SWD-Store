@@ -390,8 +390,49 @@ def categories(request):
     else:
         return redirect('sign_in')
 
-def bypass(request):
-    return render(request, 'bits/home.html')
+def bypass(request):  
+    category = request.GET.get('c')
+    query = request.GET.get('q')
+    selected_campus = request.GET.get('campus')
+    items_query = Item.objects.all()
+    if category:
+        items_query = items_query.filter(Q(category__id=category))
+    if query:
+        items_query = items_query.filter(
+            Q(name__icontains=query) | 
+            Q(hostel__name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(category__name__icontains=query)
+        )
+    
+    if selected_campus == 'ALL':
+        selected_campus = 'ALL'
+    elif selected_campus in ['GOA', 'HYD', 'PIL']:
+        items_query = items_query.filter(seller__campus=selected_campus)
+    elif not selected_campus:
+        selected_campus = 'ALL'
+    
+    items = helper.items_sort(items_query)
+    
+    items_per_page = 16
+    paginator = Paginator(list(items), items_per_page)
+    page = request.GET.get('page')
+    
+    try:
+        paginated_items = paginator.page(page)
+    except PageNotAnInteger:
+        paginated_items = paginator.page(1)
+    except EmptyPage:
+        paginated_items = paginator.page(paginator.num_pages)
+        
+    return render(request, "bits/home.html", {
+        'user': None,
+        'items': paginated_items,
+        'is_paginated': True,
+        'page_obj': paginated_items,
+        'paginator': paginator,
+        'selected_campus': selected_campus
+    })
 
 def custom_page_not_found(request, exception):
     return render(request, 'bits/404.html', status=404)

@@ -51,6 +51,7 @@
                 </div>
 
                 <div class="item-meta">
+                    {% if user %}
                     <div class="item-seller">
                         <i class="fas fa-user"></i> <span class="meta-label">Seller:</span> {{ item.seller.name }}
                     </div>
@@ -60,12 +61,13 @@
                     <div class="item-date">
                         <i class="far fa-calendar-alt"></i> <span class="meta-label">Last Edited:</span> {{ item.updated_at|date:"M d, Y H:i" }}
                     </div>
+                    {% endif %}
                 </div>
 
                 <div class="item-actions">
                     {% if not item.is_sold %}
                     {% if item.whatsapp and user != item.seller %}
-                    <a href="{{ item.whatsapp }}" class="whatsapp-link" target="_blank">
+                    <a href="{% if user %}{{ item.whatsapp }}{% else %}#{% endif %}" class="whatsapp-link" target="_blank">
                         <i class="fab fa-whatsapp"></i> Contact Seller
                     </a>
                     {% endif %}
