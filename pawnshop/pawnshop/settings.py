@@ -235,6 +235,11 @@ LOGGING = {
             'class': 'logging.FileHandler',
             'filename': os.path.join(LOG_DIR, 'request_logs.log'),
         },
+        'install_file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(LOG_DIR, 'install_logs.log'),  # new install log file
+        },
     },
     'loggers': {
         'request_logger': {
@@ -242,5 +247,13 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'install_logger': {
+            'handlers': ['install_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
     },
 }
+
+from time import time
+PWA_APP_MANIFEST_URL = f"/static/manifest.json?v={int(time())}"

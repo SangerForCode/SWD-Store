@@ -1,6 +1,7 @@
 {
   "name": "Bits Pilani PawnShop",
   "short_name": "PawnShop",
+  "description": "BITS Market Place, Made by BITSians, for BITSians",
   "theme_color": "#000000",
   "background_color": "#000000",
   "orientation": "portrait",

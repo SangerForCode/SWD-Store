@@ -17,6 +17,7 @@ urlpatterns = [
     path("categories", views.categories, name='categories'),
     path("repost/<int:id>", views.repost, name="repost"),
     path("bulk-action/<str:action>/", views.bulk_action, name="bulk_action"),
+    path("log-install/", views.log_install, name="log_install"),
     path("terms", views.terms, name='terms'),
     path("bypass", views.bypass, name='bypass'),
 ]

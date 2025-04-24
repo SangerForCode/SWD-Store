@@ -1,6 +1,8 @@
+from datetime import datetime
 import os
 import json
-from django.http import HttpResponseRedirect
+import logging
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -38,6 +40,24 @@ def auth_receiver(request):
 def sign_out(request):
     del request.session['user_data']
     return HttpResponseRedirect(reverse('sign_in'))
+
+install_logger = logging.getLogger("install_logger")
+
+@csrf_exempt
+def log_install(request):
+    if request.method == "POST":
+        ip = (
+            request.META.get('HTTP_CF_CONNECTING_IP')
+            or request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0]
+            or request.META.get('REMOTE_ADDR')
+        )
+        ua_string = request.META.get('HTTP_USER_AGENT', '')
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        person = Person.objects.get(email=request.session.get('user_data')['email'])
+        install_logger.info(f"{timestamp} | INSTALL | {person.id} - {person.name} | IP: {ip} | UA: {ua_string}")
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
+
 
 def add_product(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():

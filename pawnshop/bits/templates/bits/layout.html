@@ -129,6 +129,50 @@
 
     {% block scripts %}
     <script src="{% static 'bits/layout.js' %}"></script>
+    <script>
+        function isMobileDevice() {
+            const ua = navigator.userAgent || navigator.vendor || window.opera;
+            return /android|iphone|ipad|ipod|windows phone/i.test(ua.toLowerCase());
+        }
+        
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const installButton = document.getElementById('install-button');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        
+            if (isMobileDevice()) {
+                if (installBanner) installBanner.style.display = 'block';
+            }
+        
+            if (installButton) {
+                installButton.addEventListener('click', () => {
+                    installBanner.style.display = 'none';
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(choiceResult => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+        
+                            // ✅ Log to Django
+                            fetch('/log-install/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                body: JSON.stringify({installed: true})
+                            });
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+            }
+        });
+        </script>
+        
     {% endblock %}
     {% block extra_js %}{% endblock %}
     
