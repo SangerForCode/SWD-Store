@@ -391,7 +391,7 @@ def categories(request):
         return redirect('sign_in')
 
 def bypass(request):
-    return render(request, 'bits/bypass.html')
+    return render(request, 'bits/home.html')
 
 def custom_page_not_found(request, exception):
     return render(request, 'bits/404.html', status=404)
