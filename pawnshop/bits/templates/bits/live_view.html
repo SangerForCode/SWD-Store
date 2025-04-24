@@ -1,0 +1,162 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Live Dashboard</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <!-- Chart.js + Moment.js + Adapter -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.0"></script>
+  
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    .filters { margin-bottom: 20px; }
+    .filters label { margin-right: 15px; }
+    #map { height: 300px; margin-bottom: 20px; }
+    #userList { margin-bottom: 30px; }
+    canvas { max-width: 900px; margin-bottom: 40px; display: block; }
+  </style>
+</head>
+<body>
+  <h1>🔍 Live Dashboard</h1>
+
+  <!-- FILTERS -->
+  <div class="filters">
+    <label>Start: <input type="date" id="startDate"></label>
+    <label>End:   <input type="date" id="endDate"></label>
+    <label>
+      Interval:
+      <select id="interval">
+        <option value="1min">1 Minute</option>
+        <option value="10min">10 Minutes</option>
+        <option value="30min">30 Minutes</option>
+        <option value="hour">1 Hour</option>
+        <option value="day">1 Day</option>
+        <option value="week">1 Week</option>
+        <option value="month">1 Month</option>
+      </select>
+    </label>
+    <label>Max points: <input type="number" id="limit" min="1" placeholder="e.g. 100"></label>
+    <button id="updateBtn">Update</button>
+  </div>
+
+  <!-- LIVE USERS -->
+  <h2>🌍 People Online (Last Minute)</h2>
+  <div id="map"></div>
+  <div id="userList">
+    {% for u in live_users %}
+      <p>{{ u.timestamp|date:"Y-m-d H:i:s" }} | {{ u.person }} | IP: {{ u.ip }}</p>
+    {% empty %}
+      <p>No one online right now.</p>
+    {% endfor %}
+  </div>
+
+  <!-- CHARTS -->
+  <h2>📈 Items Posted vs Time</h2>
+  <canvas id="postChart"></canvas>
+
+  <h2>👥 Registrations vs Time</h2>
+  <canvas id="regChart"></canvas>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const API = "{% url 'api_analytics' %}";
+
+    // Map
+    const map = L.map('map').setView([20,77],4);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18}).addTo(map);
+    {% for u in live_users %}
+      {% if u.latitude and u.longitude %}
+        L.marker([{{u.latitude}},{{u.longitude}}])
+          .addTo(map)
+          .bindPopup("{{u.person}}<br>{{u.ip}}");
+      {% endif %}
+    {% endfor %}
+
+    // Chart.js setup
+    const commonOpts = {
+      responsive: true,
+      scales: {
+        x: { type: 'time', time: { tooltipFormat: 'll HH:mm' }, title:{display:true,text:'Time'} },
+        y: { beginAtZero:true, title:{display:true,text:'Count'} }
+      },
+      plugins: { legend:{position:'top'} }
+    };
+    const postCtx = document.getElementById('postChart').getContext('2d');
+    const regCtx  = document.getElementById('regChart').getContext('2d');
+    const postChart = new Chart(postCtx, { type:'line', data:{datasets:[{label:'Items Posted', data:[], borderColor:'#4caf50', backgroundColor:'rgba(76,175,80,0.2)', fill:true, tension:0.3 }]} , options:commonOpts });
+    const regChart  = new Chart(regCtx,  { type:'line', data:{datasets:[{label:'New Registrations', data:[], borderColor:'#2196f3', backgroundColor:'rgba(33,150,243,0.2)', fill:true, tension:0.3 }]} , options:commonOpts });
+
+    // interval map
+    const INTERVALS = {
+      '1min':  { unit:'minutes', count:1 },
+      '10min': { unit:'minutes', count:10 },
+      '30min': { unit:'minutes', count:30 },
+      'hour':  { unit:'hours',   count:1 },
+      'day':   { unit:'days',    count:1 },
+      'week':  { unit:'weeks',   count:1 },
+      'month': { unit:'months',  count:1 }
+    };
+
+    async function fetchAndRender(){
+      const startVal = document.getElementById('startDate').value;
+      const endVal   = document.getElementById('endDate').value;
+      const ivRaw    = document.getElementById('interval').value;
+      const lim      = parseInt(document.getElementById('limit').value) || 0;
+      const ivApi    = ['1min','10min','30min'].includes(ivRaw) ? 'minute' : ivRaw;
+
+      let url = `${API}?interval=${ivApi}`;
+      if(startVal) url += `&start_date=${startVal}`;
+      if(endVal)   url += `&end_date=${endVal}`;
+      if(lim)      url += `&limit=${lim}`;
+
+      const resp = await fetch(url);
+      if(!resp.ok){
+        console.error('API error', resp.status, await resp.text());
+        return;
+      }
+      const { post, reg } = await resp.json();
+
+      // timeline via moment
+      let start = startVal ? moment(startVal) : moment().subtract(INTERVALS[ivRaw].count, INTERVALS[ivRaw].unit);
+      let end   = endVal   ? moment(endVal).endOf('day') : moment();
+      const {unit,count} = INTERVALS[ivRaw];
+      const times = [];
+      for(let m = start.clone(); m.isSameOrBefore(end); m.add(count, unit)){
+        times.push(m.clone());
+      }
+
+      // build maps
+      const postMap = Object.fromEntries(post.map(o=>[moment(o.period), o.count]));
+      const regMap  = Object.fromEntries(reg.map(o=> [moment(o.period), o.count]));
+
+      // assemble data
+      let postData = times.map(m=>({ x:m.toDate(), y: postMap[m]||0 }));
+      let regData  = times.map(m=>({ x:m.toDate(), y: regMap[m] ||0 }));
+
+      // apply max points
+      if(lim>0 && postData.length>lim){
+        postData = postData.slice(-lim);
+        regData  = regData.slice(-lim);
+      }
+
+      // render
+      postChart.data.datasets[0].data = postData;
+      postChart.update();
+      regChart.data.datasets[0].data  = regData;
+      regChart.update();
+    }
+
+    document.getElementById('updateBtn').addEventListener('click', fetchAndRender);
+    fetchAndRender();
+  });
+  </script>
+</body>
+</html>

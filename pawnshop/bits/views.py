@@ -1,12 +1,18 @@
 import os
 import json
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
-from django.contrib.auth import authenticate, login, logout
+from django.http import HttpResponseRedirect
+from django.utils.timezone import now, timedelta
 from django.shortcuts import render, redirect, get_object_or_404
-from django.utils import timezone
 from django.urls import reverse
+from django.utils.dateparse import parse_date
+from datetime import datetime, time
+from django.utils.timezone import make_aware
+from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.core.serializers.json import DjangoJSONEncoder
 from google.oauth2 import id_token
+from django.db.models.functions import TruncMinute, TruncHour, TruncDay, TruncWeek, TruncMonth
+from django.db.models import Count
 from google.auth.transport import requests
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -506,5 +512,79 @@ def bulk_action(request, action):
             return redirect('my_listings')
     else:
         return redirect('sign_in')
+
 def terms(request):
     return render(request, 'bits/terms.html')
+
+def live_view(request):
+    one_min_ago = now() - timedelta(minutes=1)
+    live_users = PageVisit.objects.filter(timestamp__gte=one_min_ago)
+
+    post_data = (
+        Item.objects.annotate(hour=TruncHour("added_at"))
+        .values("hour")
+        .annotate(count=Count("id"))
+        .order_by("hour")
+    )
+    reg_data = (
+        Person.objects.annotate(hour=TruncHour("registered_at"))
+        .values("hour")
+        .annotate(count=Count("id"))
+        .order_by("hour")
+    )
+
+    return render(request, 'bits/live_view.html', {
+        "live_users": live_users,
+        "post_data_json": json.dumps(list(post_data), cls=DjangoJSONEncoder),
+        "reg_data_json": json.dumps(list(reg_data), cls=DjangoJSONEncoder),
+    })
+
+def analytics_data(request):
+    raw_int  = request.GET.get('interval', 'hour')
+    start    = request.GET.get('start_date')
+    end      = request.GET.get('end_date')
+    limit    = int(request.GET.get('limit') or 0)
+
+    # choose backend bucket
+    backend_int = 'minute' if raw_int in ('1min','10min','30min') else raw_int
+    TruncFunc   = {
+        'minute': TruncMinute, 'hour': TruncHour,
+        'day':     TruncDay,    'week': TruncWeek,
+        'month':   TruncMonth
+    }[backend_int]
+
+    items = Item.objects.all()
+    users = Person.objects.all()
+
+    # full-datetime filters
+    if start:
+        d = parse_date(start)
+        start_dt = make_aware(datetime.combine(d, time.min))
+        items = items.filter(added_at__gte=start_dt)
+        users = users.filter(registered_at__gte=start_dt)
+    if end:
+        d = parse_date(end)
+        end_dt = make_aware(datetime.combine(d, time.max))
+        items = items.filter(added_at__lte=end_dt)
+        users = users.filter(registered_at__lte=end_dt)
+
+    def qs(model_qs, field):
+        return (
+            model_qs
+            .annotate(period=TruncFunc(field))
+            .values('period')
+            .annotate(count=Count('id'))
+            .order_by('period')
+        )
+
+    post_qs = qs(items, 'added_at')
+    reg_qs  = qs(users, 'registered_at')
+
+    if limit:
+        post_qs = post_qs[:limit]
+        reg_qs  = reg_qs[:limit]
+
+    return JsonResponse({
+        'post': list(post_qs),
+        'reg':  list(reg_qs),
+    }, encoder=DjangoJSONEncoder, safe=False)

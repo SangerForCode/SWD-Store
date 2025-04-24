@@ -1,6 +1,7 @@
 import logging
+import requests
 from datetime import datetime
-from bits.models import *
+from bits.models import Person, PageVisit
 from user_agents import parse
 
 class RequestLoggingMiddleware:
@@ -10,24 +11,52 @@ class RequestLoggingMiddleware:
 
     def __call__(self, request):
         email = None
-        person = "-1 None"
+        person = None
+        person_info = "-1 None"
+
         if request.session.get('user_data'):
-            email = request.session.get('user_data')['email']
-            if Person.objects.filter(email=email).exists():
-                person = f"{Person.objects.get(email=email).id}, {Person.objects.get(email=email).name}"
+            email = request.session['user_data'].get('email')
+            person = Person.objects.filter(email=email).first()
+            if person:
+                person_info = f"{person.id}, {person.name}"
+
         ip = self.get_client_ip(request)
-        method = request.method
         path = request.get_full_path()
-        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        method = request.method
         ua_string = request.META.get('HTTP_USER_AGENT', '')
         user_agent = parse(ua_string)
         browser = f"{user_agent.browser.family} {user_agent.browser.version_string}"
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
-        self.logger.info(f"{timestamp} | {browser} | {os} | {person} | {ip} | {method} {path}")
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        self.logger.info(f"{timestamp} | {person_info} | {method} | {browser} | {os} | {ip} | {path}")
+
+        lat, lon = self.get_location(ip)
+
+        PageVisit.objects.create(
+            person=person,
+            ip=ip,
+            path=path,
+            user_agent=ua_string,
+            browser=browser,
+            os=os,
+            latitude=lat,
+            longitude=lon
+        )
+
         return self.get_response(request)
 
     def get_client_ip(self, request):
-        x_forwarded_for = request.META.get('HTTP_CF_CONNECTING_IP') or request.META.get('HTTP_X_FORWARDED_FOR')
-        if x_forwarded_for:
-            return x_forwarded_for.split(',')[0]
-        return request.META.get('REMOTE_ADDR')
+        return (
+            request.META.get('HTTP_CF_CONNECTING_IP')
+            or request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0]
+            or request.META.get('REMOTE_ADDR')
+        )
+
+    def get_location(self, ip):
+        try:
+            res = requests.get(f"http://ip-api.com/json/{ip}", timeout=1)
+            data = res.json()
+            return data.get('lat'), data.get('lon')
+        except Exception:
+            return None, None
