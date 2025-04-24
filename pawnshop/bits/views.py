@@ -13,6 +13,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
 from .forms import *
 from . import helper
+from user_agents import parse
 from django.db.models import Q
 
 banned_list = []
@@ -52,9 +53,11 @@ def log_install(request):
             or request.META.get('REMOTE_ADDR')
         )
         ua_string = request.META.get('HTTP_USER_AGENT', '')
+        user_agent = parse(ua_string)
+        os = f"{user_agent.os.family} {user_agent.os.version_string}"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         person = Person.objects.get(email=request.session.get('user_data')['email'])
-        install_logger.info(f"{timestamp} | INSTALL | {person.id} - {person.name} | IP: {ip} | UA: {ua_string}")
+        install_logger.info(f"{timestamp} | INSTALL | {person.id} - {person.name} | IP: {ip} | OS: {os}")
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
 
