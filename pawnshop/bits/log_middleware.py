@@ -28,8 +28,8 @@ class RequestLoggingMiddleware:
         browser = f"{user_agent.browser.family} {user_agent.browser.version_string}"
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-        self.logger.info(f"{timestamp} | {person_info} | {method} | {browser} | {os} | {ip} | {path}")
+        if email != "contact@example.com":
+            self.logger.info(f"{timestamp}| {method} | {person_info} | {browser} | {os} | {ip} | {path}")
         return self.get_response(request)
 
     def get_client_ip(self, request):
