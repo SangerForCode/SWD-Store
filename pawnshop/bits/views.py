@@ -140,9 +140,27 @@ def home(request):
         
         items_query = Item.objects.all()
         
+        # Determine campus for filtering
+        if selected_campus == 'ALL':
+            selected_campus = 'ALL'
+            campus_filter = None
+        elif selected_campus in ['GOA', 'HYD', 'PIL']:
+            items_query = items_query.filter(seller__campus=selected_campus)
+            campus_filter = selected_campus
+        elif not selected_campus:
+            if current_user.campus in ['GOA', 'HYD', 'PIL']:
+                items_query = items_query.filter(seller__campus=current_user.campus)
+                selected_campus = current_user.campus
+                campus_filter = current_user.campus
+            else:
+                selected_campus = 'ALL'
+                campus_filter = None
+        
+        # Category filtering for displayed items
         if category:
             items_query = items_query.filter(Q(category__id=category))
         
+        # Search query
         if query:
             items_query = items_query.filter(
                 Q(name__icontains=query) | 
@@ -151,17 +169,35 @@ def home(request):
                 Q(category__name__icontains=query)
             )
         
-        if selected_campus == 'ALL':
-            selected_campus = 'ALL'
-        elif selected_campus in ['GOA', 'HYD', 'PIL']:
-            items_query = items_query.filter(seller__campus=selected_campus)
-        elif not selected_campus:
-            if current_user.campus in ['GOA', 'HYD', 'PIL']:
-                items_query = items_query.filter(seller__campus=current_user.campus)
-                selected_campus = current_user.campus
-            else:
-                selected_campus = 'ALL'
+        # Get all items for count (before pagination)
+        all_items = items_query
         
+        # Get all categories with counts for the selected campus
+        categories = Category.objects.all()
+        categories_with_counts = []
+        
+        # Count for all items in the selected campus (without category filter)
+        all_items_count = all_items.count()
+        
+        for cat in categories:
+            # Filter items by category and selected campus
+            cat_items = Item.objects.filter(category=cat)
+            if campus_filter:
+                cat_items = cat_items.filter(seller__campus=campus_filter)
+            
+            # Add category with count to the list
+            cat_dict = {
+                'id': cat.id,
+                'name': cat.name,
+                'icon_class': cat.icon_class,
+                'item_count': cat_items.count()
+            }
+            categories_with_counts.append(cat_dict)
+        
+        # Sort the categories by count (descending)
+        categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
+        
+        # Apply sorting to the items
         items = helper.items_sort(items_query)
         
         items_per_page = 16
@@ -181,11 +217,12 @@ def home(request):
             'is_paginated': True,
             'page_obj': paginated_items,
             'paginator': paginator,
-            'selected_campus': selected_campus
+            'selected_campus': selected_campus,
+            'categories_with_counts': categories_with_counts,
+            'all_items_count': all_items_count
         })
     else:
         return HttpResponseRedirect(reverse('sign_in'))
-
 def item_detail(request, id):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         item = get_object_or_404(Item, id=id)
@@ -415,9 +452,25 @@ def bypass(request):
     category = request.GET.get('c')
     query = request.GET.get('q')
     selected_campus = request.GET.get('campus')
+    
     items_query = Item.objects.all()
+    
+    # Determine campus for filtering
+    if selected_campus == 'ALL':
+        selected_campus = 'ALL'
+        campus_filter = None
+    elif selected_campus in ['GOA', 'HYD', 'PIL']:
+        items_query = items_query.filter(seller__campus=selected_campus)
+        campus_filter = selected_campus
+    elif not selected_campus:
+        selected_campus = 'ALL'
+        campus_filter = None
+    
+    # Category filtering for displayed items
     if category:
         items_query = items_query.filter(Q(category__id=category))
+    
+    # Search query
     if query:
         items_query = items_query.filter(
             Q(name__icontains=query) | 
@@ -426,12 +479,33 @@ def bypass(request):
             Q(category__name__icontains=query)
         )
     
-    if selected_campus == 'ALL':
-        selected_campus = 'ALL'
-    elif selected_campus in ['GOA', 'HYD', 'PIL']:
-        items_query = items_query.filter(seller__campus=selected_campus)
-    elif not selected_campus:
-        selected_campus = 'ALL'
+    # Get all items for count (before pagination)
+    all_items = items_query
+    
+    # Get all categories with counts for the selected campus
+    categories = Category.objects.all()
+    categories_with_counts = []
+    
+    # Count for all items in the selected campus (without category filter)
+    all_items_count = all_items.count()
+    
+    for cat in categories:
+        # Filter items by category and selected campus
+        cat_items = Item.objects.filter(category=cat)
+        if campus_filter:
+            cat_items = cat_items.filter(seller__campus=campus_filter)
+        
+        # Add category with count to the list
+        cat_dict = {
+            'id': cat.id,
+            'name': cat.name,
+            'icon_class': cat.icon_class,
+            'item_count': cat_items.count()
+        }
+        categories_with_counts.append(cat_dict)
+    
+    # Sort the categories by count (descending)
+    categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
     
     items = helper.items_sort(items_query)
     
@@ -452,7 +526,9 @@ def bypass(request):
         'is_paginated': True,
         'page_obj': paginated_items,
         'paginator': paginator,
-        'selected_campus': selected_campus
+        'selected_campus': selected_campus,
+        'categories_with_counts': categories_with_counts,
+        'all_items_count': all_items_count
     })
 
 def custom_page_not_found(request, exception):

@@ -128,68 +128,63 @@
     </div>
 
     {% block scripts %}
-    <script src="{% static 'bits/layout.js' %}"></script>
     <script>
-        function isAndroid() {
-            return /android/i.test(navigator.userAgent.toLowerCase());
-        }
+        document.addEventListener('DOMContentLoaded', () => {
+            function isAndroid() {
+                return /android/i.test(navigator.userAgent.toLowerCase());
+            }
         
-        function isIOS() {
-            return /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
-        }
+            function isIOS() {
+                return /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+            }
         
-        function isInStandaloneMode() {
-            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-        }
+            function isInStandaloneMode() {
+                return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            }
         
-        let deferredPrompt = null;
-        const installBanner = document.getElementById('install-banner');
-        const installButton = document.getElementById('install-button');
+            let deferredPrompt = null;
+            const installBanner = document.getElementById('install-banner');
+            const installButton = document.getElementById('install-button');
         
-        // 💥 Only show if mobile AND not already installed
-        if (isAndroid() && !isInStandaloneMode()) {
-            if (installBanner) installBanner.style.display = 'block';
-        }
-        
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-        
-            if (isAndroid() && !isInStandaloneMode()) {
+            // ✅ Always show the banner if on mobile and not already installed
+            if (!isInStandaloneMode() && (isAndroid() || isIOS())) {
                 if (installBanner) installBanner.style.display = 'block';
             }
-        });
         
-        if (installButton) {
-            installButton.addEventListener('click', () => {
-                installBanner.style.display = 'none';
-        
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then(choiceResult => {
-                        if (choiceResult.outcome === 'accepted') {
-                            console.log('User accepted the install prompt');
-        
-                            fetch('/log-install/', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json'
-                                },
-                                body: JSON.stringify({installed: true})
-                            });
-                        } else {
-                            console.log('User dismissed the install prompt');
-                        }
-                        deferredPrompt = null;
-                    });
-                } else {
-                    alert("To install the app, tap the 3 dots in the top-right and choose 'Add to Home screen'.");
-                }
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
             });
-        }
+        
+            if (installButton) {
+                installButton.addEventListener('click', () => {
+                    if (installBanner) installBanner.style.display = 'none';
+        
+                    if (deferredPrompt) {
+                        deferredPrompt.prompt();
+                        deferredPrompt.userChoice.then(choiceResult => {
+                            if (choiceResult.outcome === 'accepted') {
+                                console.log('✅ User installed the app');
+                                fetch('/log-install/', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify({installed: true})
+                                });
+                            } else {
+                                alert("If the install dialog didn’t appear, tap the 3 dots and choose ‘Add to Home screen’. 📲");
+                            }
+                            deferredPrompt = null;
+                        });
+                    } else {
+                        alert("To install the app, tap the 3 dots in your browser and select ‘Add to Home screen’. 📲");
+                    }
+                });
+            }
+        });
         </script>
-        
-        
+         
     {% endblock %}
     {% block extra_js %}{% endblock %}
     

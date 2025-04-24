@@ -5,6 +5,170 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'bits/home.css' %}">
+<style>
+/* Horizontal Category Selector Styles */
+.category-selector {
+    margin-bottom: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+}
+
+.category-selector-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 18px; /* Increased from 15px to create more space */
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+}
+
+.category-selector-title i {
+    margin-right: 8px;
+    color: var(--accent);
+}
+
+.category-scroll {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    scroll-behavior: smooth;
+    padding: 5px 0 10px 0; /* Added top padding to prevent icon cut-off */
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.category-scroll::-webkit-scrollbar {
+    height: 4px;
+}
+
+.category-scroll::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.category-scroll::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 10px;
+}
+
+.category-scroll::-webkit-scrollbar-thumb:hover {
+    background: #a0a0a0;
+}
+
+.category-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 15px 10px 12px 10px; /* Increased top padding */
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.2s ease;
+    position: relative;
+    text-align: center;
+    border: 1px solid #eaeaea;
+    min-width: 90px;
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.category-card:last-child {
+    margin-right: 0;
+}
+
+.category-card:hover, .category-card.active {
+    background-color: #e6f7ff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    border-color: #91d5ff;
+}
+
+.category-card.active {
+    border-color: #1890ff;
+}
+
+.category-icon {
+    font-size: 24px;
+    color: var(--primary);
+    margin-bottom: 8px;
+    height: 30px; /* Increased from 28px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%; /* Ensure full width */
+    position: relative; /* To prevent overflow issues */
+}
+
+.category-name {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.category-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--accent);
+    background-color: rgba(240, 123, 63, 0.15);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.all-categories {
+    background-color: #e8f5e9;
+}
+
+.all-categories .category-icon {
+    color: #43a047;
+}
+
+.all-categories:hover {
+    background-color: #d5e8d8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .category-card {
+        min-width: 80px;
+        padding: 12px 8px 10px 8px; /* Adjusted padding */
+        margin-right: 8px;
+    }
+    
+    .category-icon {
+        font-size: 20px;
+        margin-bottom: 6px;
+    }
+    
+    .category-name {
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .category-card {
+        min-width: 75px;
+        padding: 10px 6px 8px 6px; /* Adjusted padding */
+        margin-right: 6px;
+    }
+    
+    .category-icon {
+        font-size: 18px;
+        margin-bottom: 5px;
+    }
+    
+    .category-name {
+        font-size: 11px;
+    }
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -20,22 +184,49 @@
             All Campuses
         {% endif %}
         Items
-        <div id="install-banner" style="display: none; text-align: center; margin-bottom: 20px;">
-        <button id="install-button" style="
-            background-color: #4361ee;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-weight: bold;
-            font-size: 14px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-        ">
-            📲 Install BITS Pawnshop App
-        </button>
+        <div id="install-banner" style="display:none; text-align:center; margin-bottom:20px;">
+            <button id="install-button" style="
+                background-color: #4361ee;
+                color: white;
+                border: none;
+                border-radius: 8px;
+                padding: 10px 20px;
+                font-weight: bold;
+                font-size: 14px;
+                cursor: pointer;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+            ">
+                📲 Install BITS Pawnshop App
+            </button>
         </div>
+        
     </h2>
+
+    <!-- Category Selector -->
+    <div class="category-selector">
+        <div class="category-selector-title">
+            <i class="fas fa-tags"></i> Browse Categories
+        </div>
+        <div class="category-scroll">
+            <a href="{% url 'home' %}{% if request.GET.q %}?q={{ request.GET.q }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" class="category-card all-categories {% if not request.GET.c %}active{% endif %}">
+                <div class="category-icon">
+                    <i class="fas fa-th-large"></i>
+                </div>
+                <div class="category-name">All Items</div>
+                <div class="category-count">{{ all_items_count }}</div>
+            </a>
+            
+            {% for category in categories_with_counts %}
+            <a href="{% url 'home' %}?c={{ category.id }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" class="category-card {% if request.GET.c|add:0 == category.id %}active{% endif %}">
+                <div class="category-icon">
+                    <i class="{{ category.icon_class|default:'fas fa-box' }}"></i>
+                </div>
+                <div class="category-name">{{ category.name }}</div>
+                <div class="category-count">{{ category.item_count }}</div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
 
     <div class="items-grid">
         {% for item in items %}
