@@ -130,32 +130,46 @@
     {% block scripts %}
     <script src="{% static 'bits/layout.js' %}"></script>
     <script>
-        function isMobileDevice() {
-            const ua = navigator.userAgent || navigator.vendor || window.opera;
-            return /android|iphone|ipad|ipod|windows phone/i.test(ua.toLowerCase());
+        function isAndroid() {
+            return /android/i.test(navigator.userAgent.toLowerCase());
         }
         
-        let deferredPrompt;
+        function isIOS() {
+            return /iphone|ipad|ipod/i.test(navigator.userAgent.toLowerCase());
+        }
+        
+        function isInStandaloneMode() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+        
+        let deferredPrompt = null;
         const installBanner = document.getElementById('install-banner');
         const installButton = document.getElementById('install-button');
+        
+        // 💥 Only show if mobile AND not already installed
+        if (isAndroid() && !isInStandaloneMode()) {
+            if (installBanner) installBanner.style.display = 'block';
+        }
         
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
         
-            if (isMobileDevice()) {
+            if (isAndroid() && !isInStandaloneMode()) {
                 if (installBanner) installBanner.style.display = 'block';
             }
+        });
         
-            if (installButton) {
-                installButton.addEventListener('click', () => {
-                    installBanner.style.display = 'none';
+        if (installButton) {
+            installButton.addEventListener('click', () => {
+                installBanner.style.display = 'none';
+        
+                if (deferredPrompt) {
                     deferredPrompt.prompt();
                     deferredPrompt.userChoice.then(choiceResult => {
                         if (choiceResult.outcome === 'accepted') {
                             console.log('User accepted the install prompt');
         
-                            // ✅ Log to Django
                             fetch('/log-install/', {
                                 method: 'POST',
                                 headers: {
@@ -168,10 +182,13 @@
                         }
                         deferredPrompt = null;
                     });
-                });
-            }
-        });
+                } else {
+                    alert("To install the app, tap the 3 dots in the top-right and choose 'Add to Home screen'.");
+                }
+            });
+        }
         </script>
+        
         
     {% endblock %}
     {% block extra_js %}{% endblock %}
