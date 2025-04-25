@@ -6,6 +6,7 @@ class Campus(models.TextChoices):
     GOA = 'GOA', 'Goa'
     HYDERABAD = 'HYD', 'Hyderabad'
     PILANI = 'PIL', 'Pilani'
+    DUBAI = 'DUB', 'Dubai'
     OTHERS = 'OTH', 'Others'
     Gmail = 'GMAIL', 'Gmail'
 

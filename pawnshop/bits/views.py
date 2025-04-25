@@ -140,11 +140,10 @@ def home(request):
         
         items_query = Item.objects.all()
         
-        # Determine campus for filtering
         if selected_campus == 'ALL':
             selected_campus = 'ALL'
             campus_filter = None
-        elif selected_campus in ['GOA', 'HYD', 'PIL']:
+        elif selected_campus in ['GOA', 'HYD', 'PIL', 'DUB']:
             items_query = items_query.filter(seller__campus=selected_campus)
             campus_filter = selected_campus
         elif not selected_campus:
@@ -156,11 +155,9 @@ def home(request):
                 selected_campus = 'ALL'
                 campus_filter = None
         
-        # Category filtering for displayed items
         if category:
             items_query = items_query.filter(Q(category__id=category))
         
-        # Search query
         if query:
             items_query = items_query.filter(
                 Q(name__icontains=query) | 
@@ -169,23 +166,18 @@ def home(request):
                 Q(category__name__icontains=query)
             )
         
-        # Get all items for count (before pagination)
         all_items = items_query
         
-        # Get all categories with counts for the selected campus
         categories = Category.objects.all()
         categories_with_counts = []
         
-        # Count for all items in the selected campus (without category filter)
         all_items_count = all_items.count()
         
         for cat in categories:
-            # Filter items by category and selected campus
             cat_items = Item.objects.filter(category=cat)
             if campus_filter:
                 cat_items = cat_items.filter(seller__campus=campus_filter)
             
-            # Add category with count to the list
             cat_dict = {
                 'id': cat.id,
                 'name': cat.name,
@@ -194,10 +186,8 @@ def home(request):
             }
             categories_with_counts.append(cat_dict)
         
-        # Sort the categories by count (descending)
         categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
         
-        # Apply sorting to the items
         items = helper.items_sort(items_query)
         
         items_per_page = 16
@@ -455,22 +445,19 @@ def bypass(request):
     
     items_query = Item.objects.all()
     
-    # Determine campus for filtering
     if selected_campus == 'ALL':
         selected_campus = 'ALL'
         campus_filter = None
-    elif selected_campus in ['GOA', 'HYD', 'PIL']:
+    elif selected_campus in ['GOA', 'HYD', 'PIL', 'DUB']:
         items_query = items_query.filter(seller__campus=selected_campus)
         campus_filter = selected_campus
     elif not selected_campus:
         selected_campus = 'ALL'
         campus_filter = None
     
-    # Category filtering for displayed items
     if category:
         items_query = items_query.filter(Q(category__id=category))
     
-    # Search query
     if query:
         items_query = items_query.filter(
             Q(name__icontains=query) | 
@@ -479,23 +466,18 @@ def bypass(request):
             Q(category__name__icontains=query)
         )
     
-    # Get all items for count (before pagination)
     all_items = items_query
     
-    # Get all categories with counts for the selected campus
     categories = Category.objects.all()
     categories_with_counts = []
     
-    # Count for all items in the selected campus (without category filter)
     all_items_count = all_items.count()
     
     for cat in categories:
-        # Filter items by category and selected campus
         cat_items = Item.objects.filter(category=cat)
         if campus_filter:
             cat_items = cat_items.filter(seller__campus=campus_filter)
         
-        # Add category with count to the list
         cat_dict = {
             'id': cat.id,
             'name': cat.name,
@@ -504,7 +486,6 @@ def bypass(request):
         }
         categories_with_counts.append(cat_dict)
     
-    # Sort the categories by count (descending)
     categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
     
     items = helper.items_sort(items_query)
