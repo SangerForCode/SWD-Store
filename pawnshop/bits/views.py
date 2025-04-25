@@ -606,7 +606,3 @@ def bulk_action(request, action):
 
 def terms(request):
     return render(request, 'bits/terms.html')
-
-def manifest_version(request):
-    from time import time
-    return {'timestamp': int(time())}

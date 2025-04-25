@@ -3,8 +3,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- {% progressive_web_app_meta %} -->
-    <link rel="manifest" href="{% url 'manifest' %}?v={{ timestamp }}">
+    {% progressive_web_app_meta %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BITS Pilani Pawnshop{% endblock %}</title>
@@ -130,7 +129,7 @@
 
     {% block scripts %}
     <script src="{% static 'bits/layout.js' %}"></script>
-    <script>
+    <!-- <script>
         document.addEventListener('DOMContentLoaded', () => {
             function isAndroid() {
                 return /android/i.test(navigator.userAgent.toLowerCase());
@@ -185,7 +184,7 @@
                 });
             }
         });
-        </script>
+        </script> -->
          
     {% endblock %}
     {% block extra_js %}{% endblock %}
