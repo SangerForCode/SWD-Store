@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
@@ -182,7 +182,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 PWA_APP_NAME = 'Bits Pilani Store'
 PWA_APP_SHORT_NAME = 'Bits Store'
-PWA_APP_DESCRIPTION = 'An app made by BITSians for BITSians for on campus Marketplace.'
+PWA_APP_DESCRIPTION = 'test.'
 PWA_APP_THEME_COLOR = '#000000'
 PWA_APP_BACKGROUND_COLOR = '#000000'
 PWA_APP_DISPLAY = 'standalone'
@@ -255,5 +255,4 @@ LOGGING = {
     },
 }
 
-from time import time
-PWA_APP_MANIFEST_URL = f"/static/manifest.json?v={int(time())}"
+PWA_APP_MANIFEST_URL = f"/static/manifest.json?v=6"

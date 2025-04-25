@@ -129,7 +129,7 @@
 
     {% block scripts %}
     <script src="{% static 'bits/layout.js' %}"></script>
-    <!-- <script>
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
             function isAndroid() {
                 return /android/i.test(navigator.userAgent.toLowerCase());
@@ -184,8 +184,7 @@
                 });
             }
         });
-        </script> -->
-         
+        </script>
     {% endblock %}
     {% block extra_js %}{% endblock %}
     
