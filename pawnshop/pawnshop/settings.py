@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
@@ -182,7 +182,7 @@ SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
 
 PWA_APP_NAME = 'Bits Pilani Store'
 PWA_APP_SHORT_NAME = 'Bits Store'
-PWA_APP_DESCRIPTION = 'test.'
+PWA_APP_DESCRIPTION = 'A BITS Market place, made by BITSians, for BITSians!'
 PWA_APP_THEME_COLOR = '#000000'
 PWA_APP_BACKGROUND_COLOR = '#000000'
 PWA_APP_DISPLAY = 'standalone'
