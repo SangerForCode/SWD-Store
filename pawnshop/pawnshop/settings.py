@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
@@ -254,5 +254,3 @@ LOGGING = {
         },
     },
 }
-
-PWA_APP_MANIFEST_URL = f"/static/manifest.json?v=6"
