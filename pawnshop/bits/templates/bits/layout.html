@@ -3,7 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    {% progressive_web_app_meta %}
+    <!-- {% progressive_web_app_meta %} -->
+    <link rel="manifest" href="{% url 'manifest' %}?v={{ timestamp }}">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BITS Pilani Pawnshop{% endblock %}</title>

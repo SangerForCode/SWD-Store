@@ -257,3 +257,4 @@ LOGGING = {
 
 from time import time
 # PWA_APP_MANIFEST_URL = f"/static/manifest.json?v={int(time())}"
+TEMPLATES[0]['OPTIONS']['context_processors'].append('bits.context_processors.manifest_version')
