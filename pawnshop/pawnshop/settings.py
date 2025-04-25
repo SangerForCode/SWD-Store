@@ -256,4 +256,4 @@ LOGGING = {
 }
 
 from time import time
-PWA_APP_MANIFEST_URL = f"/static/manifest.json?v={int(time())}"
+# PWA_APP_MANIFEST_URL = f"/static/manifest.json?v={int(time())}"
