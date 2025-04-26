@@ -1,0 +1,351 @@
+{% extends "bits/layout.html" %}
+{% block content %}
+<div class="analytics-dashboard">
+  <div class="dashboard-header">
+    <h1>Analytics Dashboard</h1>
+    <div class="dashboard-filters">
+      <form method="get" class="filter-form">
+        <div class="form-container">
+          {{ form.as_p }}
+          <button type="submit" class="btn-primary">Apply Filters</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    {% if chart_data %}
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h2>Trend Analysis</h2>
+      </div>
+      <div class="card-body">
+        <canvas id="analyticsChart"></canvas>
+      </div>
+    </div>
+    {% endif %}
+
+    {% if map_points %}
+    <div class="dashboard-card">
+      <div class="card-header">
+        <h2>Geographic Distribution</h2>
+      </div>
+      <div class="card-body">
+        <div id="map"></div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Styles -->
+<style>
+  .analytics-dashboard {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+    color: #333;
+  }
+
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+
+  .dashboard-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2C3E50;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-filters {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  .filter-form {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .form-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+
+  .form-container p {
+    margin: 0;
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .form-container label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+  }
+
+  .form-container input, .form-container select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease-in-out;
+  }
+
+  .form-container input:focus, .form-container select:focus {
+    border-color: #3b82f6;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  }
+
+  .btn-primary {
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out;
+  }
+
+  .btn-primary:hover {
+    background-color: #2563eb;
+  }
+
+  .dashboard-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  @media (min-width: 768px) {
+    .dashboard-content {
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    }
+  }
+
+  .dashboard-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #edf2f7;
+  }
+
+  .card-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 1.5rem;
+    min-height: 400px;
+  }
+
+  #map {
+    height: 450px;
+    width: 100%;
+    border-radius: 8px;
+  }
+</style>
+
+<!-- Scripts -->
+{% if chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('analyticsChart').getContext('2d');
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
+    
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: {{ chart_data.labels|safe }},
+        datasets: [{
+          label: "{{ chart_data.dataset.label }}",
+          data: {{ chart_data.dataset.data|safe }},
+          borderColor: '#3b82f6',
+          backgroundColor: gradient,
+          fill: true,
+          tension: 0.4,
+          borderWidth: 3,
+          pointBackgroundColor: '#3b82f6',
+          pointBorderColor: '#fff',
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'top',
+            labels: {
+              font: {
+                size: 13,
+                family: "'Inter', sans-serif"
+              }
+            }
+          },
+          tooltip: {
+            mode: 'index',
+            intersect: false,
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+            titleColor: '#2C3E50',
+            bodyColor: '#4b5563',
+            borderColor: '#e5e7eb',
+            borderWidth: 1,
+            padding: 12,
+            boxPadding: 6,
+            titleFont: {
+              weight: 'bold'
+            },
+            callbacks: {
+              label: function(context) {
+                return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              font: {
+                size: 12
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: '#f3f4f6'
+            },
+            ticks: {
+              font: {
+                size: 12
+              },
+              callback: function(value) {
+                return value.toLocaleString();
+              }
+            }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endif %}
+
+{% if map_points %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const map = L.map('map').setView([22.0, 79.0], 5);  // center of India
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    const points = {{ map_points|safe }};
+    
+    // Create a custom icon
+    const customIcon = L.divIcon({
+      className: 'custom-marker',
+      html: '<div class="marker-pin"></div>',
+      iconSize: [30, 30],
+      iconAnchor: [15, 30]
+    });
+
+    // Add markers with custom styling
+    points.forEach(p => {
+      const marker = L.circleMarker([p.lat, p.lon], {
+        radius: 7,
+        fillColor: '#3b82f6',
+        color: '#fff',
+        weight: 2,
+        opacity: 1,
+        fillOpacity: 0.8
+      });
+      
+      marker.bindPopup(`
+        <div class="custom-popup">
+          <strong>Timestamp:</strong> ${p.timestamp}
+          ${p.name ? `<br><strong>Name:</strong> ${p.name}` : ''}
+          ${p.value ? `<br><strong>Value:</strong> ${p.value}` : ''}
+        </div>
+      `, {
+        className: 'custom-popup'
+      });
+      
+      marker.addTo(map);
+    });
+
+    // Add a style for the popup
+    const style = document.createElement('style');
+    style.textContent = `
+      .custom-popup .leaflet-popup-content-wrapper {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 3px 14px rgba(0,0,0,0.2);
+      }
+      .custom-popup .leaflet-popup-content {
+        margin: 12px;
+        line-height: 1.6;
+        font-family: 'Inter', sans-serif;
+        font-size: 14px;
+      }
+      .custom-popup .leaflet-popup-tip {
+        background-color: white;
+      }
+      .marker-pin {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background-color: #3b82f6;
+        border: 2px solid #ffffff;
+        box-shadow: 0 0 4px rgba(0,0,0,0.3);
+      }
+    `;
+    document.head.appendChild(style);
+    
+    // Fit bounds to show all markers
+    if (points.length > 0) {
+      const latLngs = points.map(p => [p.lat, p.lon]);
+      map.fitBounds(latLngs, { padding: [50, 50] });
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}

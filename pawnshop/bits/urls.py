@@ -20,4 +20,5 @@ urlpatterns = [
     path("log-install/", views.log_install, name="log_install"),
     path("terms", views.terms, name='terms'),
     path("bypass", views.bypass, name='bypass'),
+    path('analytics/', views.analytics, name='analytics'),
 ]
