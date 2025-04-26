@@ -13,12 +13,13 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
 from .forms import *
 from . import helper
-from datetime import datetime, timedelta
-from django.conf import settings
 from user_agents import parse
 from django.db.models import Q
 
-import os, requests
+banned_list = []
+
+import os
+import requests as req
 from datetime import datetime, timedelta
 from django.conf import settings
 from django.shortcuts import render
@@ -151,7 +152,7 @@ def analytics(request):
                     lat, lon = GEO_CACHE[ip]
                 else:
                     try:
-                        r = requests.get(f'http://ip-api.com/json/{ip}', timeout=0.5).json()
+                        r = req.get(f'http://ip-api.com/json/{ip}', timeout=0.5).json()
                         if r.get('status')=='success' and r.get('countryCode')=='IN':
                             lat, lon = r['lat'], r['lon']
                             GEO_CACHE[ip] = (lat, lon)
@@ -173,18 +174,6 @@ def analytics(request):
         'map_points': map_points,
         'show_map':   show_map,
     })
-
-
-
-
-
-
-######### BRO ACTUAL SHIT STARTS HERE!! 😭😭😭 WHY THE FUCK IS THIS SOO CONFUSING!!???
-
-
-#i am going to cook myself
-
-banned_list = []
 
 @csrf_exempt
 def sign_in(request):
