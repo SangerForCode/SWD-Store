@@ -218,25 +218,47 @@
             }
             
             function subscribeUserToPush() {
-              navigator.serviceWorker.ready.then(function(registration) {
-                registration.pushManager.subscribe({
-                  userVisibleOnly: true,
-                  applicationServerKey: '***REMOVED***'
-                }).then(function(subscription) {
-                  console.log('✅ User is subscribed:', subscription);
-            
-                  fetch('/save-subscription/', {
-                    method: 'POST',
-                    headers: {
-                      'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(subscription)
-                  });
-                }).catch(function(err) {
-                  console.error('❌ Failed to subscribe user:', err);
-                });
-              });
-            }
+  navigator.serviceWorker.ready.then(function(registration) {
+    registration.pushManager.getSubscription().then(function(existingSubscription) {
+      if (existingSubscription) {
+        console.log('✅ Already subscribed:', existingSubscription);
+
+        // You may choose to POST to server to ensure saved
+        fetch('/save-subscription/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(existingSubscription)
+        });
+
+        return; // Done
+      }
+
+      // Else create a new subscription
+      registration.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: '***REMOVED***'
+      }).then(function(newSubscription) {
+        console.log('✅ New subscription created:', newSubscription);
+
+        fetch('/save-subscription/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newSubscription)
+        });
+
+      }).catch(function(err) {
+        console.error('❌ Subscription failed:', err);
+      });
+    }).catch(function(err) {
+      console.error('❌ Failed to get subscription:', err);
+    });
+  });
+}
+
             
             // ====== Ask Notification Permission at Load ======
             if (isRunningStandalone()) {
