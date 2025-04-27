@@ -12,6 +12,7 @@ class Campus(models.TextChoices):
 
 class Person(models.Model):
     id = models.AutoField(primary_key=True)
+    last_notification = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=100, null=False)
     email = models.EmailField(null=False)
     phone = models.CharField(max_length=20, null=True)

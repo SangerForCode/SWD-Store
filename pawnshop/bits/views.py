@@ -1,4 +1,5 @@
 banned_list = []
+NOTIFICATION_COOLDOWN = 10 #minutes nigga
 
 import os
 import json
@@ -48,15 +49,22 @@ def generate_notification(item_name, price):
 
     return notification_title, notification_body
 
-def send_notification(person, item):
-    campus = person.campus
-    target_emails = Person.objects.filter(campus=campus).exclude(email=person.email).values_list('email', flat=True)
-    symbol = '₹'
-    if campus == 'DUB':
-        symbol = 'AED'
-    price = f"{symbol}{item.price}"
-    notif_title, notif_body = generate_notification(item.name, price)
-    threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body)).start()
+def send_notification(request, person, item):
+    if person.last_notification and (timezone.now() - person.last_notification < timedelta(minutes=NOTIFICATION_COOLDOWN)):
+        next_notification_time = person.last_notification + timedelta(minutes=NOTIFICATION_COOLDOWN)
+        time_remaining = int((next_notification_time - timezone.now()).total_seconds() // 60)
+        messages.warning(request, f"You can only send notifications once in {NOTIFICATION_COOLDOWN} minutes! Please wait {time_remaining} more minutes.")
+    else:
+        person.last_notification = timezone.now()
+        person.save()
+        campus = person.campus
+        target_emails = Person.objects.filter(campus=campus).exclude(email=person.email).values_list('email', flat=True)
+        symbol = '₹'
+        if campus == 'DUB':
+            symbol = 'AED'
+        price = f"{symbol}{item.price}"
+        notif_title, notif_body = generate_notification(item.name, price)
+        threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body)).start()
 
 SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
 
@@ -247,13 +255,13 @@ def add_product(request):
                             image_instance.save()
                         except IndexError:
                             print(f"IndexError: Invalid index in image_order for uploaded images.")
-                
+
                 elif 'image' in request.FILES:
                     image_file = request.FILES['image']
                     image_instance = Image(item=item, image=image_file, display_order=0)
                     image_instance.save()
                 messages.success(request, "Product added successfully!")
-                send_notification(person, item)
+                send_notification(request, person, item)
                 return redirect('my_listings')
             else:
                 messages.error(request, "Please correct the errors below.")
@@ -506,7 +514,7 @@ def edit_item(request, id):
                         import traceback
                         traceback.print_exc()
                     messages.success(request, "Item updated successfully!")
-                    send_notification(person, item)
+                    send_notification(request, person, item)
                     return redirect('my_listings')
                 else:
                     return render(request, 'bits/add_product.html', {
@@ -669,7 +677,7 @@ def repost(request, id):
         item.save(change_time=True)
         source = request.GET.get('source')
         messages.success(request, f"'{item.name}' has been reposted successfully!")
-        send_notification(person, item)
+        send_notification(request, person, item)
         if source == 'home':
             return redirect('home')
         else:
