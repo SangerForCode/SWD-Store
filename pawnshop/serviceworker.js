@@ -1,5 +1,5 @@
 "use strict";
-const SW_VERSION = '1.0.2';
+const SW_VERSION = '1.0.3';
 const CACHE_NAME = 'pwa-cache-v15';
 
 const urlsToCache = [
