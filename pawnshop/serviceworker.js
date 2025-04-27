@@ -1,9 +1,7 @@
 "use strict";
-const SW_VERSION = '1.0.2';  // <== Keep this at top
-// Cache name
+const SW_VERSION = '1.0.2';
 const CACHE_NAME = 'pwa-cache-v15';
 
-// List of assets to cache during install
 const urlsToCache = [
   '/',
   '/offline/',
@@ -11,7 +9,6 @@ const urlsToCache = [
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
 ];
 
-// Helper to log on screen
 function logToPage(message) {
   self.clients.matchAll().then(function(clients) {
     clients.forEach(function(client) {
@@ -20,7 +17,6 @@ function logToPage(message) {
   });
 }
 
-// Install event
 self.addEventListener('install', event => {
   self.skipWaiting();
   logToPage('Service Worker: Install event');
@@ -39,7 +35,6 @@ self.addEventListener('install', event => {
   );
 });
 
-// Activate event
 self.addEventListener('activate', event => {
   logToPage('Service Worker: Activate event');
   event.waitUntil(
@@ -60,7 +55,6 @@ self.addEventListener('activate', event => {
   );
 });
 
-// Fetch event
 self.addEventListener('fetch', event => {
   const requestUrl = event.request.url;
 
@@ -111,7 +105,6 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Push event (for receiving push notifications)
 self.addEventListener('push', function(event) {
     logToPage('Push event received.');
   
@@ -119,7 +112,7 @@ self.addEventListener('push', function(event) {
       const data = event.data.json();
       logToPage('Push payload: ' + JSON.stringify(data));
   
-      event.waitUntil(  // 🔥🔥🔥 Important!!
+      event.waitUntil(
         self.registration.showNotification(data.title, {
           body: data.body,
           icon: '/static/images/icon_512.png'
@@ -128,7 +121,7 @@ self.addEventListener('push', function(event) {
     } else {
       logToPage('Push event but no data.');
   
-      event.waitUntil(  // 🔥 Even when no data, show fallback notification yourself
+      event.waitUntil(
         self.registration.showNotification('BITS PawnShop', {
           body: 'You have a new update!',
           icon: '/static/images/icon_512.png'
