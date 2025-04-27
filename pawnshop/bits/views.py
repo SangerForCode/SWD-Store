@@ -1,7 +1,9 @@
-from datetime import datetime
+banned_list = []
+
 import os
 import json
 import logging
+import threading
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
@@ -11,169 +13,148 @@ from google.auth.transport import requests
 from django.contrib import messages
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import *
+from pywebpush import webpush, WebPushException
 from .forms import *
+from django.utils import timezone
+from django import forms
+from django.conf import settings
+import requests as req
 from . import helper
+from datetime import datetime, timedelta
 from user_agents import parse
 from django.db.models import Q
 
-banned_list = []
+import random
 
-import os
-import requests as req
-from datetime import datetime, timedelta
-from django.conf import settings
-from django.shortcuts import render
-from django import forms
-from django.utils import timezone
+def generate_notification(item_name, price):
+    title_options = [
+        "🛒 New Item!",
+        "✨ Fresh Drop!",
+        "🚀 New Product!",
+        "🔥 Hot Listing!",
+        "🎯 Item Alert!"
+    ]
 
-LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
-GEO_CACHE = {}  # simple in-memory cache: IP → (lat, lon)
+    body_templates = [
+        f"{item_name} at {price}!",
+        f"Grab {item_name} for {price}!",
+        f"Now selling: {item_name} at {price}",
+        f"Get your {item_name} – {price}",
+        f"Available now: {item_name} for {price}!"
+    ]
 
-# ── Your new metrics ───────────────────────────────────────────────────────────
-METRICS = {
-    'requests': {
-        'label': 'Number of Requests',
-        'extractor': lambda e: True,                                # count every entry
-    },
-    'unique_visitors': {
-        'label': 'Unique Visitors',
-        'extractor': lambda e: e['ip'],                            # unique by IP
-    },
-    'registered_requests': {
-        'label': 'Registered Requests',
-        'extractor': lambda e: e['person'] != "-1 None",           # count if logged-in
-    },
-    'unique_registered_visitors': {
-        'label': 'Unique Registered Visitors',
-        'extractor': lambda e: e['ip'] if e['person'] != "-1 None" else False,
-    },
-    'items_added': {
-        'label': 'Items Added',
-        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/add-product'),
-    },
-    'items_updated': {
-        'label': 'Items Updated',
-        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/item/'),
-    },
+    notification_title = random.choice(title_options)
+    notification_body = random.choice(body_templates)
+
+    return notification_title, notification_body
+
+def send_notification(person, item):
+    campus = person.campus
+    target_emails = Person.objects.filter(campus=campus).exclude(email=person.email).values_list('email', flat=True)
+    symbol = '₹'
+    if campus == 'DUB':
+        symbol = 'AED'
+    price = f"{symbol}{item.price}"
+    notif_title, notif_body = generate_notification(item.name, price)
+    threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body)).start()
+
+SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
+
+if os.path.exists(SUBSCRIPTIONS_FILE):
+    with open(SUBSCRIPTIONS_FILE, 'r') as f:
+        try:
+            subscriptions = json.load(f)
+        except json.JSONDecodeError:
+            subscriptions = []
+else:
+    subscriptions = []
+
+@csrf_exempt
+def save_subscription(request):
+    data = json.loads(request.body)
+
+    email = None
+    if request.session.get('user_data'):
+        email = request.session['user_data'].get('email')
+
+    if not email:
+        return JsonResponse({"status": "error", "message": "User not logged in"}, status=401)
+
+    subscriptions = {}
+
+    if os.path.exists(SUBSCRIPTIONS_FILE):
+        with open(SUBSCRIPTIONS_FILE, 'r') as f:
+            try:
+                subscriptions = json.load(f)
+                if not isinstance(subscriptions, dict):
+                    subscriptions = {}
+            except json.JSONDecodeError:
+                subscriptions = {}
+
+    subscriptions[email] = data
+
+    with open(SUBSCRIPTIONS_FILE, 'w') as f:
+        json.dump(subscriptions, f, indent=2)
+
+    return JsonResponse({"status": "subscription saved"})
+
+VAPID_PRIVATE_KEY = "***REMOVED***"
+VAPID_CLAIMS = {
+    "sub": "mailto:contact@example.com"
 }
 
-# ── Form with bigger limits ─────────────────────────────────────────────────────
-class AnalyticsForm(forms.Form):
-    metric_y   = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
-    start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(hours=1))
-    end_time   = forms.DateTimeField(label="To",   initial=lambda: timezone.now())
-    buckets    = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
-    show_map   = forms.BooleanField(label="Show Map", required=False)
-    # no max_value here → you can request arbitrarily large windows
-    map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=5)
+def send_push_notifications_to_users(target_emails, title, body):
+    if not os.path.exists(SUBSCRIPTIONS_FILE):
+        return
 
-def parse_log_line(line):
-    parts = [p.strip() for p in line.split('|')]
-    if len(parts) < 7:
-        return None
-    ts_str, method, person, browser, os_, ip, path = parts[:7]
-    try:
-        ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
-        ts = timezone.make_aware(ts, timezone.get_default_timezone())
-    except:
-        return None
-    return {
-        'timestamp': ts,
-        'method':    method,
-        'person':    person,
-        'browser':   browser,
-        'os':        os_,
-        'ip':        ip,
-        'path':      path,
-    }
+    with open(SUBSCRIPTIONS_FILE, 'r') as f:
+        subscriptions = json.load(f)
 
-def analytics(request):
-    form = AnalyticsForm(request.GET or None)
-    chart_data = None
-    map_points = []
-    show_map = False            # ← initialize here
-
-    if form.is_valid():
-        cd = form.cleaned_data
-        show_map = cd['show_map']
-
-        # ── load & filter logs ────────────────────────────────────────────────
-        entries = []
-        with open(LOGFILE) as f:
-            for line in f:
-                e = parse_log_line(line)
-                if not e:
-                    continue
-                if not (cd['start_time'] <= e['timestamp'] <= cd['end_time']):
-                    continue
-                entries.append(e)
-
-        # ── bucket & aggregate ────────────────────────────────────────────────
-        total_secs = (cd['end_time'] - cd['start_time']).total_seconds()
-        step = total_secs / cd['buckets']
-        seen = [set() for _ in range(cd['buckets'])]
-        counts = [0] * cd['buckets']
-        metric = METRICS[cd['metric_y']]
-
-        for e in entries:
-            age = (e['timestamp'] - cd['start_time']).total_seconds()
-            idx = min(int(age // step), cd['buckets'] - 1)
-            val = metric['extractor'](e)
-            if isinstance(val, bool):
-                if val:
-                    counts[idx] += 1
-            else:
-                seen[idx].add(val)
-
-        # unique counts
-        if cd['metric_y'].startswith('unique'):
-            counts = [len(s) for s in seen]
-
-        labels = [
-            (cd['start_time'] + timedelta(seconds=step * i)).strftime('%H:%M')
-            for i in range(cd['buckets'])
-        ]
-        chart_data = {
-            'labels': labels,
-            'dataset': {
-                'label': metric['label'],
-                'data': counts,
-            }
-        }
-
-        # ── geolocate for map ──────────────────────────────────────────────────
-        if cd['show_map']:
-            cutoff = timezone.now() - timedelta(minutes=cd['map_window'])
-            recent = [e for e in entries if e['timestamp'] >= cutoff]
-            unique_ips = {e['ip'] for e in recent}
-
-            for ip in unique_ips:
-                if ip in GEO_CACHE:
-                    lat, lon = GEO_CACHE[ip]
-                else:
-                    try:
-                        r = req.get(f'http://ip-api.com/json/{ip}', timeout=0.5).json()
-                        if r.get('status')=='success' and r.get('countryCode')=='IN':
-                            lat, lon = r['lat'], r['lon']
-                            GEO_CACHE[ip] = (lat, lon)
-                        else:
-                            continue
-                    except:
-                        continue
-
-                latest = max(e['timestamp'] for e in recent if e['ip']==ip)
-                map_points.append({
-                    'lat':       lat,
-                    'lon':       lon,
-                    'timestamp': latest.strftime('%H:%M:%S'),
-                })
-
-    return render(request, 'bits/analytics.html', {
-        'form':       form,
-        'chart_data': chart_data,
-        'map_points': map_points,
-        'show_map':   show_map,
+    payload = json.dumps({
+        "title": title,
+        "body": body
     })
+
+    for email in target_emails:
+        subscription = subscriptions.get(email)
+        if not subscription:
+            continue
+
+        try:
+            webpush(
+                subscription_info=subscription,
+                data=payload,
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS,
+                content_encoding='aes128gcm'
+            )
+            print(f"Push sent successfully to {email}")
+        except WebPushException as ex:
+            print(f"Web push failed for {email}: {repr(ex)}")
+
+
+def send_push_notifications_to_all(title, body):
+    payload = json.dumps({
+        "title": title,
+        "body": body
+    })
+    print("Payload being sent:", payload)
+
+    for subscription in subscriptions:
+        try:
+            webpush(
+                subscription_info=subscription,
+                data=payload,
+                vapid_private_key=VAPID_PRIVATE_KEY,
+                vapid_claims=VAPID_CLAIMS,
+                content_encoding='aes128gcm'
+            )
+            print("Push sent successfully.")
+        except WebPushException as ex:
+            print("Web push failed:", repr(ex))
+
+
+LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
 @csrf_exempt
 def sign_in(request):
@@ -218,7 +199,6 @@ def log_install(request):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"status": "error", "message": "Invalid method"}, status=400)
 
-
 def add_product(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         person = Person.objects.get(email=request.session.get('user_data')['email'])
@@ -246,7 +226,6 @@ def add_product(request):
                 item.category = category
 
                 item.save()
-
                 images = request.FILES.getlist('images')
                 image_order = []
                 if 'image_order' in request.POST and request.POST['image_order']:
@@ -274,6 +253,7 @@ def add_product(request):
                     image_instance = Image(item=item, image=image_file, display_order=0)
                     image_instance.save()
                 messages.success(request, "Product added successfully!")
+                send_notification(person, item)
                 return redirect('my_listings')
             else:
                 messages.error(request, "Please correct the errors below.")
@@ -286,6 +266,7 @@ def add_product(request):
         return render(request, 'bits/add_product.html', {'form': form})
     else:
         return HttpResponseRedirect(reverse('sign_in'))
+
     
 def home(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
@@ -456,7 +437,6 @@ def edit_item(request, id):
                         image_order_data = json.loads(image_order_raw)
                         
                         existing_images = list(item.images.all())
-                        existing_image_ids = [img.id for img in existing_images]
                         
                         if isinstance(image_order_data, dict):
                             existing_ids = image_order_data.get('existing', [])
@@ -525,8 +505,8 @@ def edit_item(request, id):
                     except Exception as e:
                         import traceback
                         traceback.print_exc()
-                    
                     messages.success(request, "Item updated successfully!")
+                    send_notification(person, item)
                     return redirect('my_listings')
                 else:
                     return render(request, 'bits/add_product.html', {
@@ -689,7 +669,7 @@ def repost(request, id):
         item.save(change_time=True)
         source = request.GET.get('source')
         messages.success(request, f"'{item.name}' has been reposted successfully!")
-        print(source)
+        send_notification(person, item)
         if source == 'home':
             return redirect('home')
         else:
@@ -718,7 +698,9 @@ def bulk_action(request, action):
                     item.save()
                     count += 1
                 messages.success(request, f"Successfully reposted {count} item(s).")
-                
+                target_emails = Person.objects.filter(campus=person.campus).exclude(email=person.email).values_list('email', flat=True)
+                send_push_notifications_to_users(target_emails, "Reposted Items", f"{count} item(s) have been reposted! Check them out!")
+
             elif action == 'toggle_sold':
                 count = 0
                 for item in items:
