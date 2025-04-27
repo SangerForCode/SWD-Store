@@ -1,5 +1,5 @@
 "use strict";
-const SW_VERSION = '1.0.3';
+const SW_VERSION = '1.0.4';
 const CACHE_NAME = 'pwa-cache-v15';
 
 const urlsToCache = [
@@ -119,14 +119,6 @@ self.addEventListener('push', function(event) {
         })
       );
     } else {
-      logToPage('Push event but no data.');
-  
-      event.waitUntil(
-        self.registration.showNotification('BITS PawnShop', {
-          body: 'You have a new update!',
-          icon: '/static/images/icon_512.png'
-        })
-      );
     }
   });
   

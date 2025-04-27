@@ -26,6 +26,11 @@ from user_agents import parse
 from django.db.models import Q
 import random
 
+VAPID_PRIVATE_KEY = "***REMOVED***"
+VAPID_CLAIMS = {
+    "sub": "mailto:contact@example.com"
+}
+
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 GEO_CACHE = {}
 
@@ -36,11 +41,11 @@ METRICS = {
     },
     'unique_visitors': {
         'label': 'Unique Visitors',
-        'extractor': lambda e: e['ip'],                            # unique by IP
+        'extractor': lambda e: e['ip'],
     },
     'registered_requests': {
         'label': 'Registered Requests',
-        'extractor': lambda e: e['person'] != "-1 None",           # count if logged-in
+        'extractor': lambda e: e['person'] != "-1 None",
     },
     'unique_registered_visitors': {
         'label': 'Unique Registered Visitors',
@@ -56,14 +61,12 @@ METRICS = {
     },
 }
 
-# ── Form with bigger limits ─────────────────────────────────────────────────────
 class AnalyticsForm(forms.Form):
     metric_y   = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
     start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(hours=1))
     end_time   = forms.DateTimeField(label="To",   initial=lambda: timezone.now())
     buckets    = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
     show_map   = forms.BooleanField(label="Show Map", required=False)
-    # no max_value here → you can request arbitrarily large windows
     map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=5)
 
 def parse_log_line(line):
@@ -253,11 +256,6 @@ def save_subscription(request):
 
     return JsonResponse({"status": "subscription saved"})
 
-VAPID_PRIVATE_KEY = "***REMOVED***"
-VAPID_CLAIMS = {
-    "sub": "mailto:contact@example.com"
-}
-
 def send_push_notifications_to_users(target_emails, title, body):
     if not os.path.exists(SUBSCRIPTIONS_FILE):
         return
@@ -270,6 +268,8 @@ def send_push_notifications_to_users(target_emails, title, body):
         "body": body
     })
 
+    updated = False
+
     for email in target_emails:
         subscription = subscriptions.get(email)
         if not subscription:
@@ -281,12 +281,22 @@ def send_push_notifications_to_users(target_emails, title, body):
                 data=payload,
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
-                content_encoding='aes128gcm'
+                content_encoding='aes128gcm',
+                ttl=36000
             )
-            print(f"Push sent successfully to {email}")
+            print(f"✅ Push sent successfully to {email}")
         except WebPushException as ex:
-            print(f"Web push failed for {email}: {repr(ex)}")
+            print(f"❌ Web push failed for {email}: {repr(ex)}")
 
+            if ex.response and ex.response.status_code == 410:
+                print(f"⚡ Subscription for {email} is gone (expired or unsubscribed). Removing it.")
+                subscriptions.pop(email, None)
+                updated = True
+
+    if updated:
+        with open(SUBSCRIPTIONS_FILE, 'w') as f:
+            json.dump(subscriptions, f, indent=2)
+        print("✅ Cleaned up dead subscriptions.")
 
 def send_push_notifications_to_all(title, body):
     payload = json.dumps({
@@ -885,3 +895,7 @@ def bulk_action(request, action):
 
 def terms(request):
     return render(request, 'bits/terms.html')
+
+def test(request):
+    send_push_notifications_to_users(['contact@example.com'], "Test Notification", "This is a test notification.")
+    return JsonResponse({"status": "ok"})

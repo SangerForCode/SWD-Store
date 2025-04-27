@@ -188,103 +188,109 @@
             }
         });
         </script>
-        <script>
-            // ====== Service Worker Registration with Auto Update Handling ======
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/serviceworker.js')
-                .then(function(registration) {
-                  console.log('✅ Service Worker registered with scope:', registration.scope);
-            
-                  // Listen for new service worker waiting to activate
-                  registration.addEventListener('updatefound', () => {
-                    const newWorker = registration.installing;
-                    newWorker.addEventListener('statechange', () => {
-                      if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        console.log('🔄 New Service Worker installed. Refreshing...');
-                        window.location.reload();
-                      }
-                    });
-                  });
-                }).catch(function(error) {
-                  console.error('❌ Service Worker registration failed:', error);
-                });
-            } else {
-              console.error('❌ Service Workers not supported');
+<script>
+  // ====== Service Worker Registration with Auto Update Handling ======
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/serviceworker.js')
+      .then(function(registration) {
+        console.log('✅ Service Worker registered with scope:', registration.scope);
+  
+        // Force reloading if service worker updated
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('🔄 New Service Worker installed. Refreshing...');
+              window.location.reload();
             }
-            
-            // ====== Push Notification Subscription ======
-            function isRunningStandalone() {
-              return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
-            }
-            
-            function subscribeUserToPush() {
-  navigator.serviceWorker.ready.then(function(registration) {
-    registration.pushManager.getSubscription().then(function(existingSubscription) {
-      if (existingSubscription) {
-        console.log('✅ Already subscribed:', existingSubscription);
-
-        // You may choose to POST to server to ensure saved
-        fetch('/save-subscription/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(existingSubscription)
+          });
         });
-
-        return; // Done
-      }
-
-      // Else create a new subscription
-      registration.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: '***REMOVED***'
-      }).then(function(newSubscription) {
-        console.log('✅ New subscription created:', newSubscription);
-
-        fetch('/save-subscription/', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(newSubscription)
-        });
-
+      }).catch(function(error) {
+        console.error('❌ Service Worker registration failed:', error);
+      });
+  } else {
+    console.error('❌ Service Workers not supported');
+  }
+  
+  // ====== Push Notification Subscription Management ======
+  function isRunningStandalone() {
+    return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
+  }
+  
+  function subscribeUserToPush() {
+    navigator.serviceWorker.ready.then(function(registration) {
+      registration.pushManager.getSubscription().then(function(existingSubscription) {
+        if (existingSubscription) {
+          console.log('⚡ Old subscription found, unsubscribing first...');
+          existingSubscription.unsubscribe().then(function() {
+            console.log('✅ Old subscription unsubscribed.');
+  
+            // Now subscribe fresh
+            createNewSubscription(registration);
+  
+          }).catch(function(err) {
+            console.error('❌ Error while unsubscribing old subscription:', err);
+          });
+        } else {
+          // No old subscription, safe to create new
+          createNewSubscription(registration);
+        }
       }).catch(function(err) {
-        console.error('❌ Subscription failed:', err);
+        console.error('❌ Failed to get subscription:', err);
+      });
+    });
+  }
+  
+  function createNewSubscription(registration) {
+    registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: '***REMOVED***'
+    }).then(function(newSubscription) {
+      console.log('✅ New subscription created:', newSubscription);
+  
+      fetch('/save-subscription/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(newSubscription)
+      }).then(response => {
+        if (response.ok) {
+          console.log('✅ New subscription saved on server.');
+        } else {
+          console.error('❌ Failed to save new subscription on server.');
+        }
       });
     }).catch(function(err) {
-      console.error('❌ Failed to get subscription:', err);
+      console.error('❌ Subscription failed:', err);
     });
-  });
-}
-
-            
-            // ====== Ask Notification Permission at Load ======
-            if (isRunningStandalone()) {
-              if (Notification.permission === "granted") {
-                console.log('🔔 Notification already granted, auto-subscribing...');
-                subscribeUserToPush();
-              } else if (Notification.permission === "default") {
-                let askNotification = confirm("Do you want to enable notifications for updates?");
-                if (askNotification) {
-                  Notification.requestPermission().then(permission => {
-                    if (permission === 'granted') {
-                      console.log('🔔 Notification permission granted.');
-                      subscribeUserToPush();
-                    } else {
-                      console.log('🔕 Notification permission denied.');
-                    }
-                  });
-                }
-              } else {
-                console.log('🔕 Notifications already denied.');
-              }
-            } else {
-              console.log('🖥️ Not running standalone (maybe browser tab). Skipping push.');
-            }
-            </script>
-              
+  }
+  
+  // ====== Ask Notification Permission at Load ======
+  if (isRunningStandalone()) {
+    if (Notification.permission === "granted") {
+      console.log('🔔 Notification already granted, managing subscription...');
+      subscribeUserToPush();
+    } else if (Notification.permission === "default") {
+      let askNotification = confirm("Do you want to enable notifications for updates?");
+      if (askNotification) {
+        Notification.requestPermission().then(permission => {
+          if (permission === 'granted') {
+            console.log('🔔 Notification permission granted.');
+            subscribeUserToPush();
+          } else {
+            console.log('🔕 Notification permission denied.');
+          }
+        });
+      }
+    } else {
+      console.log('🔕 Notifications already denied.');
+    }
+  } else {
+    console.log('🖥️ Not running standalone (maybe browser tab). Skipping push.');
+  }
+  </script>
+  
     {% endblock %}
     {% block extra_js %}{% endblock %}
     
