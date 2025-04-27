@@ -24,8 +24,155 @@ from . import helper
 from datetime import datetime, timedelta
 from user_agents import parse
 from django.db.models import Q
-
 import random
+
+LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
+GEO_CACHE = {}
+
+METRICS = {
+    'requests': {
+        'label': 'Number of Requests',
+        'extractor': lambda e: True,
+    },
+    'unique_visitors': {
+        'label': 'Unique Visitors',
+        'extractor': lambda e: e['ip'],                            # unique by IP
+    },
+    'registered_requests': {
+        'label': 'Registered Requests',
+        'extractor': lambda e: e['person'] != "-1 None",           # count if logged-in
+    },
+    'unique_registered_visitors': {
+        'label': 'Unique Registered Visitors',
+        'extractor': lambda e: e['ip'] if e['person'] != "-1 None" else False,
+    },
+    'items_added': {
+        'label': 'Items Added',
+        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/add-product'),
+    },
+    'items_updated': {
+        'label': 'Items Updated',
+        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/item/'),
+    },
+}
+
+# ── Form with bigger limits ─────────────────────────────────────────────────────
+class AnalyticsForm(forms.Form):
+    metric_y   = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
+    start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(hours=1))
+    end_time   = forms.DateTimeField(label="To",   initial=lambda: timezone.now())
+    buckets    = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
+    show_map   = forms.BooleanField(label="Show Map", required=False)
+    # no max_value here → you can request arbitrarily large windows
+    map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=5)
+
+def parse_log_line(line):
+    parts = [p.strip() for p in line.split('|')]
+    if len(parts) < 7:
+        return None
+    ts_str, method, person, browser, os_, ip, path = parts[:7]
+    try:
+        ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
+        ts = timezone.make_aware(ts, timezone.get_default_timezone())
+    except:
+        return None
+    return {
+        'timestamp': ts,
+        'method':    method,
+        'person':    person,
+        'browser':   browser,
+        'os':        os_,
+        'ip':        ip,
+        'path':      path,
+    }
+
+def analytics(request):
+    form = AnalyticsForm(request.GET or None)
+    chart_data = None
+    map_points = []
+    show_map = False
+
+    if form.is_valid():
+        cd = form.cleaned_data
+        show_map = cd['show_map']
+
+        entries = []
+        with open(LOGFILE) as f:
+            for line in f:
+                e = parse_log_line(line)
+                if not e:
+                    continue
+                if not (cd['start_time'] <= e['timestamp'] <= cd['end_time']):
+                    continue
+                entries.append(e)
+
+        total_secs = (cd['end_time'] - cd['start_time']).total_seconds()
+        step = total_secs / cd['buckets']
+        seen = [set() for _ in range(cd['buckets'])]
+        counts = [0] * cd['buckets']
+        metric = METRICS[cd['metric_y']]
+
+        for e in entries:
+            age = (e['timestamp'] - cd['start_time']).total_seconds()
+            idx = min(int(age // step), cd['buckets'] - 1)
+            val = metric['extractor'](e)
+            if isinstance(val, bool):
+                if val:
+                    counts[idx] += 1
+            else:
+                seen[idx].add(val)
+
+        if cd['metric_y'].startswith('unique'):
+            counts = [len(s) for s in seen]
+
+        labels = [
+            (cd['start_time'] + timedelta(seconds=step * i)).strftime('%H:%M')
+            for i in range(cd['buckets'])
+        ]
+        chart_data = {
+            'labels': labels,
+            'dataset': {
+                'label': metric['label'],
+                'data': counts,
+            }
+        }
+
+        if cd['show_map']:
+            cutoff = timezone.now() - timedelta(minutes=cd['map_window'])
+            recent = [e for e in entries if e['timestamp'] >= cutoff]
+            unique_ips = {e['ip'] for e in recent}
+
+            for ip in unique_ips:
+                if ip in GEO_CACHE:
+                    lat, lon = GEO_CACHE[ip]
+                else:
+                    try:
+                        r = req.get(f'http://ip-api.com/json/{ip}', timeout=0.5).json()
+                        if r.get('status')=='success' and r.get('countryCode')=='IN':
+                            lat, lon = r['lat'], r['lon']
+                            GEO_CACHE[ip] = (lat, lon)
+                        else:
+                            continue
+                    except:
+                        continue
+
+                latest = max(e['timestamp'] for e in recent if e['ip']==ip)
+                map_points.append({
+                    'lat':       lat,
+                    'lon':       lon,
+                    'timestamp': latest.strftime('%H:%M:%S'),
+                })
+
+    return render(request, 'bits/analytics.html', {
+        'form':       form,
+        'chart_data': chart_data,
+        'map_points': map_points,
+        'show_map':   show_map,
+    })
+
+
+####THIS PART IS FOR NOTIFICATIONS BRO!!!####
+
 
 def generate_notification(item_name, price):
     title_options = [
@@ -163,6 +310,10 @@ def send_push_notifications_to_all(title, body):
 
 
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
+
+
+### THIS IS WHERE THE REAL SHIT STARTS ###
+
 
 @csrf_exempt
 def sign_in(request):
