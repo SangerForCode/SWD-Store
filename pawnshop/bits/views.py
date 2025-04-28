@@ -511,7 +511,6 @@ def home(request):
             paginated_items = paginator.page(1)
         except EmptyPage:
             paginated_items = paginator.page(paginator.num_pages)
-        print(selected_campus)
         for c in categories:
             if selected_campus != 'ALL':
                 c.item_count = Item.objects.filter(category=c, seller__campus=selected_campus).count()
@@ -818,7 +817,6 @@ def bypass(request):
         paginated_items = paginator.page(1)
     except EmptyPage:
         paginated_items = paginator.page(paginator.num_pages)
-    print(selected_campus)
     for c in categories:
         if selected_campus != 'ALL':
             c.item_count = Item.objects.filter(category=c, seller__campus=selected_campus).count()
@@ -915,6 +913,6 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
-# def test(request):
-#     send_push_notifications_to_users(['contact@example.com'], "Test Notification", "This is a test notification.")
-#     return JsonResponse({"status": "ok"})
+def test(request, email):
+    send_push_notifications_to_users([email], "Test Notification", "This is a test notification.")
+    return JsonResponse({"status": "ok"})
