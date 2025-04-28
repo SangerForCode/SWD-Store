@@ -758,8 +758,8 @@ def categories(request):
 def bypass(request):  
     category = request.GET.get('c')
     query = request.GET.get('q')
-    selected_campus = request.GET.get('campus')
     sort_method = request.GET.get('sort')
+    selected_campus = request.GET.get('campus')
     
     items_query = Item.objects.all()
     
@@ -818,7 +818,12 @@ def bypass(request):
         paginated_items = paginator.page(1)
     except EmptyPage:
         paginated_items = paginator.page(paginator.num_pages)
-        
+    print(selected_campus)
+    for c in categories:
+        if selected_campus != 'ALL':
+            c.item_count = Item.objects.filter(category=c, seller__campus=selected_campus).count()
+        else:
+            c.item_count = items_query.filter(category=c).count()
     return render(request, "bits/home.html", {
         'user': None,
         'items': paginated_items,
@@ -827,7 +832,9 @@ def bypass(request):
         'paginator': paginator,
         'selected_campus': selected_campus,
         'categories_with_counts': categories_with_counts,
-        'all_items_count': all_items_count
+        'all_items_count': all_items_count,
+        'categories': categories,
+        'total_items_count': len(Item.objects.all()) if selected_campus == 'ALL' else len(Item.objects.filter(seller__campus=selected_campus)),
     })
 
 def custom_page_not_found(request, exception):

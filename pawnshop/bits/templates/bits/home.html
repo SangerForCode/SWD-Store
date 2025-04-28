@@ -702,20 +702,18 @@
                 
                 <!-- Compact metadata - only name and hostel -->
                 <div class="item-meta">
-                    {% if user %}
                     <div class="item-user-info">
-                        <span class="item-seller" title="{{ item.seller.name }}">
-                            <i class="fas fa-user"></i> {{ item.seller.name }}
+                        <span class="item-seller" title="{% if user %}{{ item.seller.name }}{% else %}xxxxx{% endif %}">
+                            <i class="fas fa-user"></i> {% if user %}{{ item.seller.name }}{% else %}xxxxx{% endif %}
                         </span>
-                        <span class="item-hostel" title="{{ item.hostel.name }}">
-                            <i class="fas fa-building"></i> {{ item.hostel.name }}
+                        <span class="item-hostel" title="{% if user %}{{ item.hostel.name }}{% else %}xxxxx{% endif %}">
+                            <i class="fas fa-building"></i>  {% if user %}{{ item.hostel.name }}{% else %}xxxxx{% endif %}
                         </span>
                     </div>
-                    {% endif %}
                     
                     <!-- Date with better positioning -->
-                    <div class="item-date" title="Posted on {{ item.updated_at|date:'M d, Y H:i' }}">
-                        <i class="far fa-clock"></i> {{ item.updated_at|date:"H:i, M d" }}
+                    <div class="item-date" title='Posted on {% if user %}{{ item.updated_at|date:"H:i, M d" }}{% else %} xxxxx {% endif %}'>
+                        <i class="far fa-clock"></i> {% if user %}{{ item.updated_at|date:"H:i, M d" }}{% else %} xxxxx {% endif %}
                     </div>
                 </div>
                 

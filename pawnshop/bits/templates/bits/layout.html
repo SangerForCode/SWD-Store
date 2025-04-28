@@ -989,7 +989,11 @@ body {
                         <a href="{% url 'feedback' %}"><i class="fas fa-comment-dots"></i>Feedback</a>
                         <a href="{% url 'about_us' %}"><i class="fas fa-info-circle"></i> About Us</a>
                         <div class="dropdown-divider"></div>
-                        <a href="{% url 'sign_out' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        {% if 'user_data' in request.session %}
+                            <a href="{% url 'sign_out' %}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                        {% else %}
+                            <a href="{% url 'sign_in' %}"><i class="fas fa-sign-in-alt"></i> Login</a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
