@@ -272,8 +272,7 @@
       console.log('🔔 Notification already granted, managing subscription...');
       subscribeUserToPush();
     } else if (Notification.permission === "default") {
-      let askNotification = confirm("Do you want to enable notifications for updates?");
-      if (askNotification) {
+      if (true) {
         Notification.requestPermission().then(permission => {
           if (permission === 'granted') {
             console.log('🔔 Notification permission granted.');
