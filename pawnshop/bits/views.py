@@ -524,6 +524,7 @@ def home(request):
             'categories_with_counts': categories_with_counts,
             'all_items_count': all_items_count,
             'categories': categories,
+            'total_items_count': len(items)
         })
     else:
         return HttpResponseRedirect(reverse('sign_in'))
