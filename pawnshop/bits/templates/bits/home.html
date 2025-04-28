@@ -594,6 +594,12 @@
     background-color: rgba(255, 255, 255, 0.3);
     color: white;
 }
+@media (max-width: 768px) {
+    .pagination-container {
+        padding-bottom: max(80px, env(safe-area-inset-bottom));
+    }
+}
+
 </style>
 {% endblock %}
 
@@ -738,66 +744,66 @@
         {% endfor %}
     </div>
     
-    <!-- Pagination -->
-    {% if is_paginated %}
-    <div class="pagination-container">
-        <ul class="pagination">
-            {% if page_obj.has_previous %}
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="pagination-container">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a href="?page=1{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}">
+                    <i class="fas fa-angle-double-left"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a href="?page={{ page_obj.previous_page_number }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}">
+                    <i class="fas fa-angle-left"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span><i class="fas fa-angle-double-left"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span><i class="fas fa-angle-left"></i></span>
+            </li>
+        {% endif %}
+
+        {% for num in paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="page-item active">
+                    <span>{{ num }}</span>
+                </li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                 <li class="page-item">
-                    <a href="?page=1{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
-                        <i class="fas fa-angle-double-left"></i>
+                    <a href="?page={{ num }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}">
+                        {{ num }}
                     </a>
-                </li>
-                <li class="page-item">
-                    <a href="?page={{ page_obj.previous_page_number }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
-                        <i class="fas fa-angle-left"></i>
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span><i class="fas fa-angle-double-left"></i></span>
-                </li>
-                <li class="page-item disabled">
-                    <span><i class="fas fa-angle-left"></i></span>
                 </li>
             {% endif %}
-            
-            {% for num in paginator.page_range %}
-                {% if page_obj.number == num %}
-                    <li class="page-item active">
-                        <span>{{ num }}</span>
-                    </li>
-                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-                    <li class="page-item">
-                        <a href="?page={{ num }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
-                            {{ num }}
-                        </a>
-                    </li>
-                {% endif %}
-            {% endfor %}
-            
-            {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a href="?page={{ page_obj.next_page_number }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
-                        <i class="fas fa-angle-right"></i>
-                    </a>
-                </li>
-                <li class="page-item">
-                    <a href="?page={{ paginator.num_pages }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
-                        <i class="fas fa-angle-double-right"></i>
-                    </a>
-                </li>
-            {% else %}
-                <li class="page-item disabled">
-                    <span><i class="fas fa-angle-right"></i></span>
-                </li>
-                <li class="page-item disabled">
-                    <span><i class="fas fa-angle-double-right"></i></span>
-                </li>
-            {% endif %}
-        </ul>
-    </div>
-    {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a href="?page={{ page_obj.next_page_number }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}">
+                    <i class="fas fa-angle-right"></i>
+                </a>
+            </li>
+            <li class="page-item">
+                <a href="?page={{ paginator.num_pages }}{% for param, value in request.GET.items %}{% if param != 'page' %}&{{ param }}={{ value }}{% endif %}{% endfor %}">
+                    <i class="fas fa-angle-double-right"></i>
+                </a>
+            </li>
+        {% else %}
+            <li class="page-item disabled">
+                <span><i class="fas fa-angle-right"></i></span>
+            </li>
+            <li class="page-item disabled">
+                <span><i class="fas fa-angle-double-right"></i></span>
+            </li>
+        {% endif %}
+    </ul>
+</div>
+{% endif %}
 </div>
 {% endblock %}
 
