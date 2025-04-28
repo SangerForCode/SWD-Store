@@ -48,6 +48,7 @@ class Hostel(models.Model):
 class Category(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=100, null=False)
+    item_count = models.IntegerField(default=0)
     icon_class = models.CharField(max_length=100, null=True, blank=True)
     added_at = models.DateTimeField(auto_now_add=True)
 

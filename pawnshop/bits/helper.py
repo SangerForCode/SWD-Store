@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from twilio.rest import Client
 import urllib.parse
+from operator import attrgetter
 from django.db.models import Case, When, IntegerField, BooleanField, Value
 from django.utils import timezone
 
@@ -36,10 +37,25 @@ def verify_phone_number(phone_number):
     service = client.verify.v2.services.create(friendly_name="Bits Pilani Pawnshop")
     return client.lookups.v2.phone_numbers(phone_number).fetch().valid
 
-def items_sort(items_list):
-    items_list = list(items_list)
-    for item in items_list:
-        item.is_recent = item.updated_at >= timezone.now() - timezone.timedelta(days=3)
-        item.relevance_score = 1000 if not item.is_sold and item.is_recent else 500 if not item.is_sold else 0
-    
-    return sorted(items_list, key=lambda x: (x.relevance_score, x.updated_at), reverse=True)
+def items_sort(items_list, method='0'):
+    if not method:
+        method = '0'
+    items = list(items_list)
+    method = str(method)
+
+    unsold = [itm for itm in items if not itm.is_sold]
+    sold   = [itm for itm in items if     itm.is_sold]
+
+    if method == '0':
+        key_fn, rev = attrgetter('updated_at'), True
+    elif method == '1':
+        key_fn, rev = attrgetter('price'), False
+    elif method == '2':
+        key_fn, rev = attrgetter('price'), True
+    else:
+        raise ValueError("Invalid method. Use '0', '1' or '2'.")
+
+    unsold_sorted = sorted(unsold, key=key_fn, reverse=rev)
+    sold_sorted   = sorted(sold,   key=key_fn, reverse=rev)
+
+    return unsold_sorted + sold_sorted

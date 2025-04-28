@@ -4,12 +4,602 @@
 {% block title %}BITS Pilani Pawnshop - Home{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'bits/home.css' %}">
+<!-- <link rel="stylesheet" href="{% static 'bits/home.css' %}"> -->
+<style>
+/* Overrides to match detailed view shown in screenshot */
+.item-detail-view .item-card {
+    max-width: 100%;
+    border-radius: 16px;
+}
+
+.item-detail-view .item-image {
+    height: 0;
+    padding-bottom: 75%;
+}
+
+.item-detail-view .item-title {
+    font-size: 24px;
+    margin: 0 0 10px 0;
+}
+
+.item-detail-view .item-price {
+    font-size: 18px;
+    margin: 0 0 15px 0;
+}
+
+.item-detail-view .item-meta {
+    gap: 6px;
+}
+
+.item-detail-view .item-actions {
+    height: 48px;
+    margin-top: 10px;
+}
+
+.item-detail-view .contact-btn {
+    font-size: 16px;
+    padding: 12px;
+}.contact-btn:hover {
+    background: #43b86b;
+}/* Compact home.css with optimized card layout */
+/* Main container */
+.items-container {
+    padding: 10px 8px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Page title */
+.page-title {
+    font-size: 20px;
+    margin-bottom: 15px;
+    color: #2D4059;
+    text-align: center;
+    font-weight: 700;
+    position: relative;
+    padding-bottom: 8px;
+}
+
+.page-title:after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 3px;
+    background: #F07B3F;
+    border-radius: 2px;
+}
+
+/* PWA install banner */
+.install-banner {
+    background-color: #fff3e0;
+    border: 1px solid #ffe0b2;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.install-button {
+    background: #F07B3F;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(240, 123, 63, 0.3);
+}
+
+.install-button:hover {
+    background: #e06b2c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(240, 123, 63, 0.4);
+}
+
+/* Category navigation */
+.category-nav {
+    margin-bottom: 15px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    padding-bottom: 5px;
+}
+
+.category-nav::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Edge */
+}
+
+.category-nav ul {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    gap: 6px;
+}
+
+.category-nav li {
+    flex-shrink: 0;
+}
+
+.category-nav a {
+    display: flex;
+    align-items: center;
+    padding: 6px 12px;
+    background-color: #f8fafc;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #2D4059;
+    font-size: 13px;
+    transition: all 0.2s ease;
+    border: 1px solid #e2e8f0;
+    white-space: nowrap;
+}
+
+.category-nav a:hover {
+    background-color: #f1f5f9;
+    color: #F07B3F;
+}
+
+.category-nav a.active {
+    background-color: #F07B3F;
+    color: white;
+    border-color: #F07B3F;
+    box-shadow: 0 2px 8px rgba(240, 123, 63, 0.3);
+}
+
+.category-nav a i {
+    margin-right: 6px;
+}
+
+/* Sort options */
+.sort-options {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 12px;
+}
+
+.sort-options select {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background-color: #f8fafc;
+    font-size: 13px;
+    color: #2D4059;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%232D4059' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    padding-right: 28px;
+}
+
+/* Items grid - improved spacing */
+.items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+/* Item card styles - compact layout */
+.item-card {
+    background-color: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    height: 100%;
+    border: none;
+    max-width: 100%;
+    min-width: 0;
+}
+
+.item-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* SOLD overlay */
+.sold-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+}
+
+.sold-label {
+    background-color: #e74c3c;
+    color: white;
+    font-weight: 700;
+    padding: 4px 15px;
+    border-radius: 4px;
+    transform: rotate(-15deg);
+    font-size: 16px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+}
+
+/* Item image container - square */
+.item-image {
+    position: relative;
+    height: 0;
+    padding-bottom: 100%; /* Square aspect ratio */
+    overflow: hidden;
+    background-color: #f8fafc;
+}
+
+.item-image img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.item-card:hover .item-image img {
+    transform: scale(1.05);
+}
+
+/* New item badge */
+.new-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background-color: #2ecc71;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 6px;
+    border-radius: 3px;
+    z-index: 5;
+    box-shadow: 0 2px 4px rgba(46, 204, 113, 0.3);
+}
+
+/* Item details - more compact */
+.item-details {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: auto;
+}
+
+/* Item title style - better fit */
+.item-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #2D4059;
+    margin: 0 0 3px 0;
+    line-height: 1.2;
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
+.item-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2D4059;
+    margin: 0 0 3px 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background-color: #e0f2fe;
+    display: block;
+    width: 100%;
+}
+
+/* Meta section - consistent spacing */
+.item-meta {
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 0;
+}
+
+.item-user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 12px;
+    margin-bottom: 0;
+}
+
+.item-seller, .item-hostel {
+    color: #CC7443;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 0;
+    display: flex;
+    align-items: center;
+}
+
+.item-seller i, .item-hostel i {
+    color: #F07B3F;
+    margin-right: 3px;
+    font-size: 9px;
+}
+
+.item-date {
+    font-size: 12px;
+    color: #CC7443;
+    margin: 0 0 3px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 2px 0;
+    display: flex;
+    align-items: center;
+}
+
+.item-date i {
+    margin-right: 3px;
+    color: #F07B3F;
+    font-size: 9px;
+}
+
+/* Item buttons - more compact */
+.item-actions {
+    margin-top: 3px;
+    display: flex;
+    gap: 0;
+    height: 36px;
+    padding-top: 0;
+}
+
+.contact-btn {
+    flex: 1;
+    background: #4eca78;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: none;
+}
+
+.contact-btn i {
+    margin-right: 4px;
+    font-size: 14px;
+}
+
+.repost-btn {
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(52, 152, 219, 0.3);
+    white-space: nowrap;
+}
+
+.repost-btn:hover {
+    background: #2980b9;
+    box-shadow: 0 3px 6px rgba(52, 152, 219, 0.4);
+}
+
+.repost-btn i {
+    margin-right: 4px;
+    font-size: 10px;
+}
+
+/* No items message */
+.no-items {
+    grid-column: 1 / -1;
+    background-color: white;
+    padding: 30px 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+}
+
+.no-items i {
+    font-size: 40px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+}
+
+.no-items p {
+    color: #64748b;
+    margin: 6px 0;
+    font-size: 14px;
+}
+
+/* Pagination styles */
+.pagination-container {
+    margin-top: 15px;
+    margin-bottom: 30px;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    list-style: none;
+    padding: 0;
+    gap: 4px;
+}
+
+.page-item a,
+.page-item span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #2D4059;
+    background-color: white;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+    font-size: 13px;
+}
+
+.page-item a:hover {
+    background-color: #f1f5f9;
+    border-color: #cbd5e0;
+}
+
+.page-item.active span {
+    background: #F07B3F;
+    color: white;
+    border-color: #F07B3F;
+    box-shadow: 0 2px 4px rgba(240, 123, 63, 0.2);
+}
+
+.page-item.disabled span {
+    color: #cbd5e0;
+    pointer-events: none;
+}
+
+/* Loading and animation effects */
+.item-card.loaded {
+    animation: cardFadeIn 0.4s ease forwards;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media queries for responsive design */
+@media (min-width: 400px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (min-width: 480px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+    }
+}
+
+@media (min-width: 576px) {
+    .items-container {
+        padding: 12px 10px;
+    }
+    
+    .page-title {
+        font-size: 22px;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+    }
+    
+    .item-title {
+        font-size: 15px;
+    }
+}
+
+@media (min-width: 768px) {
+    .items-container {
+        padding: 15px;
+    }
+
+    .page-title {
+        font-size: 24px;
+        margin-bottom: 20px;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 18px;
+    }
+    
+    .item-title {
+        font-size: 16px;
+    }
+    
+    .item-price {
+        font-size: 17px;
+    }
+}
+
+@media (min-width: 992px) {
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .items-container {
+        padding: 20px;
+    }
+    
+    .page-title {
+        font-size: 26px;
+    }
+    
+    .items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+}
+.category-count {
+    background-color: rgba(45, 64, 89, 0.1);
+    color: #2D4059;
+    border-radius: 10px;
+    padding: 1px 6px;
+    font-size: 11px;
+    margin-left: 5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.category-nav a.active .category-count {
+    background-color: rgba(255, 255, 255, 0.3);
+    color: white;
+}
+</style>
 {% endblock %}
 
 {% block content %}
 <div class="items-container">
-    <h2 class="section-title">
+    <h1 class="page-title">
         {% if selected_campus == 'GOA' %}
             Goa Campus
         {% elif selected_campus == 'HYD' %}
@@ -19,72 +609,112 @@
         {% else %}
             All Campuses
         {% endif %}
-        Items
-        <div id="install-banner" style="display:none; text-align:center; margin-bottom:20px;">
-            <button id="install-button" style="
-                background-color: #4361ee;
-                color: white;
-                border: none;
-                border-radius: 8px;
-                padding: 10px 20px;
-                font-weight: bold;
-                font-size: 14px;
-                cursor: pointer;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-            ">
-                📲 Install BITS Pawnshop App
-            </button>
-        </div>
-        
-    </h2>
-
-    <div class="items-grid">
+        Marketplace
+    </h1>
+    
+    <!-- PWA Install Banner -->
+    <div id="install-banner" class="install-banner" style="display: none;">
+        <button id="install-button" class="install-button">
+            <i class="fas fa-download"></i> Install BITS Pawnshop App
+        </button>
+    </div>
+    
+    <!-- Category Navigation -->
+    <nav class="category-nav">
+        <ul>
+            <li>
+                <a href="{% url 'home' %}{% if request.GET.campus %}?campus={{ request.GET.campus }}{% endif %}" 
+                   class="{% if not request.GET.c %}active{% endif %}">
+                    <i class="fas fa-th-large"></i> All
+                    <span class="category-count">{{ total_items_count }}</span>
+                </a>
+            </li>
+            {% for category in categories %}
+            <li>
+                <a href="{% url 'home' %}?c={{ category.id }}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" 
+                   class="{% if request.GET.c|add:'0' == category.id %}active{% endif %}">
+                    {% if category.icon_class %}
+                        <i class="{{ category.icon_class }}"></i>
+                    {% else %}
+                        <i class="fas fa-tag"></i>
+                    {% endif %}
+                    {{ category.name }}
+                    <span class="category-count">{{ category.item_count }}</span>
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </nav>
+    
+    <!-- Sort Options -->
+    <div class="sort-options">
+        <select id="sort-select" onchange="applySorting(this.value)">
+            <option value="0" {% if request.GET.sort == '0' or not request.GET.sort %}selected{% endif %}>Newest First</option>
+            <option value="1" {% if request.GET.sort == '1' %}selected{% endif %}>Price: Low to High</option>
+            <option value="2" {% if request.GET.sort == '2' %}selected{% endif %}>Price: High to Low</option>
+        </select>
+        <script>
+            function applySorting(sortValue) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.set('sort', sortValue);
+            window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+            }
+        </script>
+    </div>
+    
+    <!-- Items Grid -->
+    <div class="items-grid" id="items-grid">
         {% for item in items %}
-        <div class="item-card {% if item.is_sold %}sold{% endif %}">
+        <!-- Compact Item Card -->
+        <div class="item-card">
             {% if item.is_sold %}
-            <div class="sold-marker">
-                <span class="sold-text">SOLD</span>
+            <div class="sold-overlay">
+                <div class="sold-label">SOLD</div>
             </div>
             {% endif %}
-
-            <a href="{% url 'item_detail' item.id %}">
+            
+            <a href="{% url 'item_detail' item.id %}" class="item-link">
                 <div class="item-image">
                     {% if item.images.all %}
-                    <img src="{{ item.images.first.image.url }}" alt="{{ item.name }}">
+                    <img src="{{ item.images.first.image.url }}" alt="{{ item.name }}" loading="lazy">
                     {% else %}
-                    <img src="{% static 'bits/images/placeholder.png' %}" alt="No image available">
+                    <img src="{% static 'bits/images/placeholder.png' %}" alt="No image available" loading="lazy">
+                    {% endif %}
+                    
+                    {% if item.posted_days_ago < 3 %}
+                    <div class="new-badge">New</div>
                     {% endif %}
                 </div>
             </a>
-
-            <div class="item-info">
-                <h3 class="item-title"><a href="{% url 'item_detail' item.id %}" style="color: inherit; text-decoration: none;">{{ item.name }}</a></h3>
-
+            
+            <div class="item-details">
+                <h3 class="item-title" title="{{ item.name }}">{{ item.name }}</h3>
                 <div class="item-price">₹{{ item.price }}</div>
-
-                <div class="item-description-container">
-                    <p class="item-description">{{ item.description }}</p>
-                </div>
-
+                
+                <!-- Compact metadata - only name and hostel -->
                 <div class="item-meta">
                     {% if user %}
-                    <div class="item-seller">
-                        <i class="fas fa-user"></i> <span class="meta-label">Seller:</span> {{ item.seller.name }}
-                    </div>
-                    <div class="item-hostel">
-                        <i class="fas fa-building"></i> <span class="meta-label">Hostel:</span> {{ item.hostel.name }}
-                    </div>
-                    <div class="item-date">
-                        <i class="far fa-calendar-alt"></i> <span class="meta-label">Last Edited:</span> {{ item.updated_at|date:"M d, Y H:i" }}
+                    <div class="item-user-info">
+                        <span class="item-seller" title="{{ item.seller.name }}">
+                            <i class="fas fa-user"></i> {{ item.seller.name }}
+                        </span>
+                        <span class="item-hostel" title="{{ item.hostel.name }}">
+                            <i class="fas fa-building"></i> {{ item.hostel.name }}
+                        </span>
                     </div>
                     {% endif %}
+                    
+                    <!-- Date with better positioning -->
+                    <div class="item-date" title="Posted on {{ item.updated_at|date:'M d, Y H:i' }}">
+                        <i class="far fa-clock"></i> {{ item.updated_at|date:"H:i, M d" }}
+                    </div>
                 </div>
-
+                
                 <div class="item-actions">
                     {% if not item.is_sold %}
                     {% if item.whatsapp and user != item.seller %}
-                    <a href="{% if user %}{{ item.whatsapp }}{% else %}#{% endif %}" class="whatsapp-link" target="_blank">
-                        <i class="fab fa-whatsapp"></i> Contact Seller
+                    <a href="{% if user %}{{ item.whatsapp }}{% else %}#{% endif %}" class="contact-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Contact
                     </a>
                     {% endif %}
                     {% endif %}
@@ -99,69 +729,123 @@
         </div>
         {% empty %}
         <div class="no-items">
-            <i class="fas fa-search fa-2x"></i>
+            <i class="fas fa-search"></i>
             <p>No items available at the moment.</p>
             <p>Check back soon for new listings!</p>
         </div>
         {% endfor %}
     </div>
     
+    <!-- Pagination -->
     {% if is_paginated %}
     <div class="pagination-container">
         <ul class="pagination">
             {% if page_obj.has_previous %}
                 <li class="page-item">
-                    <a class="page-link" href="?page=1{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" aria-label="First">
+                    <a href="?page=1{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
                         <i class="fas fa-angle-double-left"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" aria-label="Previous">
+                    <a href="?page={{ page_obj.previous_page_number }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
                         <i class="fas fa-angle-left"></i>
                     </a>
                 </li>
             {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-angle-double-left"></i></span>
+                    <span><i class="fas fa-angle-double-left"></i></span>
                 </li>
                 <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-angle-left"></i></span>
+                    <span><i class="fas fa-angle-left"></i></span>
                 </li>
             {% endif %}
             
             {% for num in paginator.page_range %}
                 {% if page_obj.number == num %}
                     <li class="page-item active">
-                        <span class="page-link">{{ num }}</span>
+                        <span>{{ num }}</span>
                     </li>
-                    {% elif num > page_obj.number|add:'-2' and num < page_obj.number|add:'2' %}
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ num }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}">{{ num }}</a>
+                        <a href="?page={{ num }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
+                            {{ num }}
+                        </a>
                     </li>
                 {% endif %}
             {% endfor %}
             
             {% if page_obj.has_next %}
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" aria-label="Next">
+                    <a href="?page={{ page_obj.next_page_number }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
                         <i class="fas fa-angle-right"></i>
                     </a>
                 </li>
                 <li class="page-item">
-                    <a class="page-link" href="?page={{ paginator.num_pages }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.campus %}&campus={{ request.GET.campus }}{% endif %}" aria-label="Last">
+                    <a href="?page={{ paginator.num_pages }}{% for param, value in request.GET.items %}&{{ param }}={{ value }}{% endfor %}"></a>
                         <i class="fas fa-angle-double-right"></i>
                     </a>
                 </li>
             {% else %}
                 <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-angle-right"></i></span>
+                    <span><i class="fas fa-angle-right"></i></span>
                 </li>
                 <li class="page-item disabled">
-                    <span class="page-link"><i class="fas fa-angle-double-right"></i></span>
+                    <span><i class="fas fa-angle-double-right"></i></span>
                 </li>
             {% endif %}
         </ul>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- <script src="{% static 'bits/home.js' %}"></script> -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize all items as loaded immediately
+    loadAllItemsImmediately();
+    
+    // Sorting function
+    window.applySorting = function(sortValue) {
+        const urlParams = new URLSearchParams(window.location.search);
+        urlParams.set('sort', sortValue);
+        
+        // Preserve existing page, query, category, and campus parameters
+        window.location.href = `${window.location.pathname}?${urlParams.toString()}`;
+    };
+});
+
+// Load all items immediately with fade-in effect
+function loadAllItemsImmediately() {
+    const itemCards = document.querySelectorAll('.item-card');
+    
+    // Apply loaded class to each card with a slight delay between them
+    itemCards.forEach((card, index) => {
+        setTimeout(() => {
+            card.classList.add('loaded');
+        }, index * 50);
+    });
+}
+
+// Add touch feedback for mobile devices
+if ('ontouchstart' in window) {
+    document.querySelectorAll('.item-card, .category-nav a, .page-item a').forEach(el => {
+        el.addEventListener('touchstart', function() {
+            this.style.opacity = '0.8';
+            this.style.transform = 'scale(0.98)';
+        }, {passive: true});
+        
+        el.addEventListener('touchend', function() {
+            this.style.opacity = '';
+            this.style.transform = '';
+        }, {passive: true});
+        
+        el.addEventListener('touchcancel', function() {
+            this.style.opacity = '';
+            this.style.transform = '';
+        }, {passive: true});
+    });
+};
+</script>
 {% endblock %}

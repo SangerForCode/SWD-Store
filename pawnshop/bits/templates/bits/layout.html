@@ -6,13 +6,897 @@
     <link rel="manifest" href="/manifest.json?v=5">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#4a5568">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>{% block title %}BITS Pilani Pawnshop{% endblock %}</title>
     <link rel="icon" type="image/png" href="{% static 'images/icon_144.png' %}">
-    <link rel="stylesheet" type="text/css" href="{% static 'bits/layout.css' %}">
+    <!-- <link rel="stylesheet" type="text/css" href="{% static 'bits/layout.css' %}"> -->
+    <style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&display=swap');
+
+:root {
+    --bg-color: #f5f7fa;
+    --card-color: #FFFFFF;
+    --primary: #F07B3F;
+    --primary-dark: #e06b2c;
+    --secondary: #2D4059;
+    --secondary-light: #3A6EA5;
+    --accent: #F07B3F;
+    --accent-dark: #e06b2c;
+    --text: #2D3436;
+    --light-text: #636E72;
+    --border-color: #E0E0E0;
+    --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+.main-container {
+    display: grid;
+    min-height: 100vh;
+    grid-template-rows: auto 1fr auto;
+}
+
+/* Header Styles */
+.main-header {
+    background-color: var(--card-color);
+    padding: 12px 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--secondary);
+    letter-spacing: -0.5px;
+    transition: all 0.3s ease;
+}
+
+.logo a {
+    text-decoration: none;
+}
+
+/* Category Button */
+.category-btn button {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.category-btn button:hover {
+    background-color: #e2e8f0;
+}
+
+.category-btn i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+/* Sell Button */
+.sell-btn a {
+    display: flex;
+    align-items: center;
+    background: var(--primary);
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    color: white;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(240, 123, 63, 0.3);
+}
+
+.sell-btn a:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(240, 123, 63, 0.4);
+}
+
+.sell-btn i {
+    margin-right: 8px;
+}
+
+/* Search Container */
+.search-container {
+    position: relative;
+    flex-grow: 1;
+    max-width: 500px;
+    margin: 0 20px;
+    transition: all 0.4s ease;
+}
+
+.search-container form {
+    display: flex;
+    position: relative;
+    width: 100%;
+}
+
+.search-container input {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    background-color: var(--bg-color);
+}
+
+.search-container input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(240, 123, 63, 0.2);
+}
+
+.search-container button {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: var(--light-text);
+    cursor: pointer;
+}
+
+/* Mobile Search */
+.mobile-search-container {
+    display: none;
+    position: relative;
+}
+
+.search-icon {
+    cursor: pointer;
+    color: var(--primary);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.mobile-search-container form {
+    display: none;
+    position: relative;
+    width: 100%;
+}
+
+.cancel-icon {
+    display: none;
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--light-text);
+    cursor: pointer;
+    font-size: 1.2rem;
+    z-index: 10;
+}
+
+/* Profile Container */
+.profile-container {
+    position: relative;
+}
+
+.profile-pic {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(45, 64, 89, 0.3);
+}
+
+.profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.dropdown-menu {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background-color: var(--card-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    width: 200px;
+    display: none;
+    z-index: 101;
+    border: 1px solid var(--border-color);
+}
+
+.dropdown-menu.active {
+    display: block;
+    animation: fadeIn 0.2s ease;
+}
+
+.dropdown-menu a {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+}
+
+.dropdown-menu a i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+    color: var(--primary);
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--bg-color);
+}
+
+.dropdown-divider {
+    height: 1px;
+    background-color: var(--border-color);
+    margin: 5px 0;
+}
+
+/* Main Content Area */
+.content {
+    padding: 15px;
+    overflow-y: auto;
+}
+
+/* Mobile Navigation */
+.mobile-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: var(--card-color);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+    z-index: 99;
+    padding: 10px 0;
+}
+
+.mobile-nav a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: var(--light-text);
+    font-size: 0.7rem;
+    padding: 8px 0;
+    flex: 1;
+    transition: color 0.2s;
+}
+
+.mobile-nav a.active,
+.mobile-nav a:hover {
+    color: var(--primary);
+}
+
+.mobile-nav a i {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+
+.add-btn-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 70px;
+}
+
+.add-btn {
+    background-color: var(--primary);
+    color: white !important;
+    border-radius: 50%;
+    width: 55px !important;
+    height: 55px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: -25px;
+    box-shadow: 0 4px 10px rgba(240, 123, 63, 0.3);
+    padding: 0 !important;
+    flex: none !important;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.add-btn:hover, .add-btn:active {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(240, 123, 63, 0.4);
+}
+
+.add-btn i {
+    margin: 0 !important;
+    font-size: 1.5rem !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Expanded search styles */
+.mobile-search-container.expanded {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    max-width: 100%;
+    margin: 0;
+    background-color: var(--card-color);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    animation: expandSearch 0.3s ease forwards;
+    box-shadow: var(--shadow);
+}
+
+@keyframes expandSearch {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.mobile-search-container.expanded form {
+    display: flex;
+    width: 100%;
+}
+
+.mobile-search-container.expanded input {
+    border: none;
+    border-bottom: 2px solid var(--primary);
+    border-radius: 0;
+    padding: 12px 40px 12px 5px;
+    font-size: 1rem;
+    background-color: transparent;
+    width: 100%;
+}
+
+.mobile-search-container.expanded .cancel-icon {
+    display: block;
+}
+
+.mobile-search-container.expanded button {
+    display: none;
+}
+
+/* Desktop/Mobile Visibility */
+.desktop-only {
+    display: flex;
+}
+
+/* Campus dropdown styles */
+.campus-filter-container {
+    margin: 0 15px;
+}
+
+.campus-dropdown-wrapper {
+    position: relative;
+}
+
+.campus-btn {
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-color);
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 500;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.campus-btn:hover {
+    background-color: #e2e8f0;
+}
+
+.campus-btn i {
+    margin-right: 8px;
+    color: var(--primary);
+}
+
+.campus-btn .ml-5 {
+    margin-left: 5px;
+}
+
+.campus-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: var(--card-color);
+    min-width: 160px;
+    box-shadow: var(--shadow-lg);
+    border-radius: 8px;
+    overflow: hidden;
+    z-index: 100;
+    margin-top: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.campus-menu.show {
+    display: block;
+}
+
+.campus-menu a {
+    display: block;
+    padding: 12px 15px;
+    text-decoration: none;
+    color: var(--text);
+    transition: background-color 0.2s;
+}
+
+.campus-menu a:hover {
+    background-color: var(--bg-color);
+}
+
+.campus-menu a.active {
+    background-color: var(--bg-color);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.campus-menu a.active::before {
+    content: '✓ ';
+}
+
+/* Mobile campus dropdown */
+.mobile-campus-container {
+    position: relative;
+    display: none;
+    margin-right: 10px;
+}
+
+.mobile-campus-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: var(--primary);
+    cursor: pointer;
+}
+
+.mobile-campus-btn i {
+    font-size: 18px;
+}
+
+/* Fixed positioning for mobile dropdown */
+.mobile-campus-container .campus-menu {
+    position: absolute;
+    top: 100%;
+    right: -10px;
+    left: auto;
+    width: 150px;
+    margin-top: 8px;
+    z-index: 1000;
+    visibility: hidden;
+    display: block;
+    opacity: 0;
+    transition: none;
+    transform: none;
+}
+
+.mobile-campus-container .campus-menu.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* Message notification system */
+.messages-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    width: 300px;
+    max-width: 90%;
+}
+
+.message {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    margin-bottom: 10px;
+    overflow: hidden;
+    animation: slideIn 0.3s ease-out forwards;
+    display: flex;
+    justify-content: space-between;
+}
+
+.message-content {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.message-icon {
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.message-close {
+    background: none;
+    border: none;
+    padding: 15px;
+    cursor: pointer;
+    color: var(--light-text);
+}
+
+.message-success {
+    border-left: 4px solid #2ecc71;
+}
+
+.message-success .message-icon {
+    color: #2ecc71;
+}
+
+.message-error {
+    border-left: 4px solid #e74c3c;
+}
+
+.message-error .message-icon {
+    color: #e74c3c;
+}
+
+.message-warning {
+    border-left: 4px solid #f39c12;
+}
+
+.message-warning .message-icon {
+    color: #f39c12;
+}
+
+.message-info {
+    border-left: 4px solid var(--primary);
+}
+
+.message-info .message-icon {
+    color: var(--primary);
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+.message.fade-out {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* Page transition loader */
+.page-transition {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background-color: transparent;
+    z-index: 9999;
+    pointer-events: none;
+}
+
+.page-transition::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 100%;
+    background: linear-gradient(to right, var(--secondary), var(--primary), var(--primary-dark));
+    animation: page-loader 2s ease-in-out infinite;
+}
+
+@keyframes page-loader {
+    0% {
+        width: 0;
+        left: 0;
+    }
+    50% {
+        width: 100%;
+        left: 0;
+    }
+    100% {
+        width: 0;
+        left: 100%;
+    }
+}
+
+/* Touch feedback */
+.touch-active {
+    opacity: 0.7;
+    transform: scale(0.98);
+}
+
+/* Button loading */
+.btn-loading {
+    position: relative;
+    pointer-events: none;
+    color: transparent !important;
+}
+
+.btn-loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin-top: -10px;
+    margin-left: -10px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: button-loading-spinner 0.8s linear infinite;
+}
+
+@keyframes button-loading-spinner {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Loading feedback */
+.item-card.loaded {
+    animation: cardFadeIn 0.5s ease forwards;
+}
+
+@keyframes cardFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Beautiful scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f7fafc;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e0;
+    border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a0aec0;
+}
+
+/* Media Queries for Responsive Design */
+@media (max-width: 992px) {
+    .main-container {
+        grid-template-rows: auto 1fr auto;
+    }
+    
+    .content {
+        padding-bottom: 70px; /* Space for mobile nav */
+    }
+    
+    .mobile-nav {
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .desktop-only {
+        display: none;
+    }
+    
+    .main-header {
+        position: sticky;
+        top: 0;
+        padding: 10px 12px;
+        justify-content: space-between;
+    }
+    
+    .logo {
+        flex-grow: 1;
+    }
+    
+    /* Create a wrapper for search and profile to keep them together */
+    .header-right {
+        display: flex;
+        align-items: center;
+    }
+    
+    .mobile-search-container {
+        display: block;
+        margin-right: 10px;
+    }
+    
+    .search-icon {
+        display: flex;
+        background-color: transparent;
+    }
+    
+    /* Hide everything when search is expanded */
+    .mobile-search-container.expanded ~ * {
+        display: none;
+    }
+    
+    .mobile-search-container.expanded .search-icon {
+        display: none;
+    }
+    
+    .mobile-search-container.expanded + * {
+        display: none;
+    }
+    
+    .mobile-search-container.expanded ~ .logo {
+        display: none;
+    }
+    
+    .mobile-campus-container {
+        display: block;
+    }
+    
+    .content {
+        padding: 10px 8px;
+    }
+}
+
+@media (min-width: 993px) {
+    .mobile-search-container {
+        display: none;
+    }
+    
+    .header-right {
+        display: flex;
+        align-items: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .logo h1 {
+        font-size: 1.2rem;
+    }
+    
+    .mobile-search-container.expanded {
+        padding: 0 15px;
+        height: 60px;
+    }
+    
+    .mobile-search-container.expanded input {
+        padding: 10px 35px 10px 5px;
+    }
+    
+    .content {
+        padding: 10px;
+    }
+    
+    .messages-container {
+        top: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+    }
+}
+
+@media (max-width: 576px) {
+    .main-header {
+        padding: 10px 8px;
+    }
+    
+    .logo h1 {
+        font-size: 1.1rem;
+    }
+    
+    .content {
+        padding: 8px 5px;
+    }
+    
+    .mobile-nav {
+        padding: 8px 0 5px;
+    }
+    
+    .mobile-nav a {
+        font-size: 0.65rem;
+    }
+    
+    .mobile-nav a i {
+        font-size: 1.1rem;
+    }
+    
+    .add-btn {
+        width: 50px !important;
+        height: 50px !important;
+        margin-top: -22px;
+    }
+    
+    .mobile-campus-container .campus-menu {
+        right: 0;
+    }
+}
+
+@media (min-width: 1200px) {
+    .content {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+}
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     {% block extra_css %}{% endblock %}
 </head>
-<body>     
+<body>
     <div class="main-container">
         <header class="main-header">
             <div class="logo">
@@ -34,19 +918,23 @@
                         <i class="fas fa-chevron-down ml-5"></i>
                     </button>
                     <div class="campus-menu">
-                        <a href="{% url 'home' %}?campus=GOA{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'GOA' %}class="active"{% endif %}>Goa</a>
-                        <a href="{% url 'home' %}?campus=HYD{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'HYD' %}class="active"{% endif %}>Hyderabad</a>
-                        <a href="{% url 'home' %}?campus=PIL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'PIL' %}class="active"{% endif %}>Pilani</a>
-                        <a href="{% url 'home' %}?campus=DUB{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'DUB' %}class="active"{% endif %}>Dubai</a>
-                        <a href="{% url 'home' %}?campus=ALL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'ALL' %}class="active"{% endif %}>All Campuses</a>
-                    </div>
+                        <a href="{% url 'home' %}?campus=GOA{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'GOA' %}class="active"{% endif %}>Goa</a>
+                        <a href="{% url 'home' %}?campus=HYD{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'HYD' %}class="active"{% endif %}>Hyderabad</a>
+                        <a href="{% url 'home' %}?campus=PIL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'PIL' %}class="active"{% endif %}>Pilani</a>
+                        <a href="{% url 'home' %}?campus=DUB{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'DUB' %}class="active"{% endif %}>Dubai</a>
+                        <a href="{% url 'home' %}?campus=ALL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'ALL' %}class="active"{% endif %}>All Campuses</a>                    </div>
                 </div>
             </div>
 
             <div class="search-container desktop-only">
                 <form action="{% url 'home' %}" method="GET">
-                    <input type="text" placeholder="Search products..." name="q">
+                    <input type="text" placeholder="Search products..." name="q" value="{{ request.GET.q }}">
                     <button type="submit"><i class="fas fa-search"></i></button>
+                    {% for key, value in request.GET.items %}
+                        {% if key != 'q' %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
                 </form>
             </div>
 
@@ -62,11 +950,16 @@
                         <i class="fas fa-search"></i>
                     </div>
                     <form action="{% url 'home' %}" method="GET" id="searchForm">
-                        <input type="text" placeholder="Search products..." name="q" id="searchInput">
+                        <input type="text" placeholder="Search products..." name="q" id="searchInput" value="{{ request.GET.q }}">
                         <button type="submit"><i class="fas fa-search"></i></button>
                         <div class="cancel-icon" id="cancelSearch">
                             <i class="fas fa-times"></i>
                         </div>
+                        {% for key, value in request.GET.items %}
+                            {% if key != 'q' %}
+                                <input type="hidden" name="{{ key }}" value="{{ value }}">
+                            {% endif %}
+                        {% endfor %}
                     </form>
                 </div>
 
@@ -75,11 +968,11 @@
                         <i class="fas fa-university"></i>
                     </button>
                     <div class="campus-menu">
-                        <a href="{% url 'home' %}?campus=GOA{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'GOA' %}class="active"{% endif %}>Goa</a>
-                        <a href="{% url 'home' %}?campus=HYD{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'HYD' %}class="active"{% endif %}>Hyderabad</a>
-                        <a href="{% url 'home' %}?campus=PIL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'PIL' %}class="active"{% endif %}>Pilani</a>
-                        <a href="{% url 'home' %}?campus=DUB{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'DUB' %}class="active"{% endif %}>Dubai</a>
-                        <a href="{% url 'home' %}?campus=ALL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}" {% if selected_campus == 'ALL' %}class="active"{% endif %}>All Campuses</a>
+                        <a href="{% url 'home' %}?campus=GOA{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'GOA' %}class="active"{% endif %}>Goa</a>
+                        <a href="{% url 'home' %}?campus=HYD{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'HYD' %}class="active"{% endif %}>Hyderabad</a>
+                        <a href="{% url 'home' %}?campus=PIL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'PIL' %}class="active"{% endif %}>Pilani</a>
+                        <a href="{% url 'home' %}?campus=DUB{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'DUB' %}class="active"{% endif %}>Dubai</a>
+                        <a href="{% url 'home' %}?campus=ALL{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.c %}&c={{ request.GET.c }}{% endif %}{% if request.GET.sort %}&sort={{ request.GET.sort }}{% endif %}" {% if selected_campus == 'ALL' %}class="active"{% endif %}>All Campuses</a>
                     </div>
                 </div>
 
@@ -289,7 +1182,214 @@
     console.log('🖥️ Not running standalone (maybe browser tab). Skipping push.');
   }
   </script>
-  
+  <script>
+// Modified Loading & Animation Effects
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize loading indicators and animations
+    initPageTransitions();
+    // Removed initButtonLoaders() call
+    loadAllItemsImmediately();
+    initMicroInteractions();
+});
+
+// Page Transition Loader
+function initPageTransitions() {
+    // Create page transition element
+    const pageTransition = document.createElement('div');
+    pageTransition.className = 'page-transition';
+    document.body.appendChild(pageTransition);
+    
+    // Add loading state to all navigation links
+    document.querySelectorAll('a:not([target="_blank"]):not([href^="#"])').forEach(link => {
+        // Don't add transition for download links and other special cases
+        if (link.getAttribute('download') || (link.getAttribute('href') && link.getAttribute('href').includes('mailto:'))) {
+            return;
+        }
+        
+        link.addEventListener('click', function(e) {
+            // Start page transition
+            pageTransition.style.display = 'block';
+            
+            // Allow time for animation to start before actual navigation
+            // but don't delay if it's an external link (different domain)
+            if (link.href) {
+                const currentHost = window.location.host;
+                const linkHost = new URL(this.href, window.location.href).host;
+                
+                if (currentHost === linkHost && !this.hasAttribute('data-no-transition')) {
+                    e.preventDefault();
+                    setTimeout(() => {
+                        window.location.href = this.href;
+                    }, 300);
+                }
+            }
+        });
+    });
+    
+    // Show transition on form submissions
+    document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', function() {
+            if (!this.hasAttribute('data-no-transition')) {
+                pageTransition.style.display = 'block';
+            }
+        });
+    });
+    
+    // Hide transition when page is fully loaded
+    window.addEventListener('load', function() {
+        pageTransition.style.display = 'none';
+    });
+}
+
+// Button Loading Indicators function - emptied
+function initButtonLoaders() {
+    // Function intentionally left empty to disable button loading indicators
+    // Top loading line is sufficient for loading feedback
+}
+
+// Load all items immediately
+function loadAllItemsImmediately() {
+    // Get all item cards
+    const itemCards = document.querySelectorAll('.item-card');
+    
+    // Make all items visible immediately
+    itemCards.forEach(card => {
+        card.classList.add('loaded');
+    });
+}
+
+// Micro-interactions for UI elements
+function initMicroInteractions() {
+    // Add touch feedback to touch screens
+    if ('ontouchstart' in window) {
+        const touchElements = document.querySelectorAll('button, .mobile-nav a, .item-card, .page-item a');
+        
+        touchElements.forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.classList.add('touch-active');
+            }, {passive: true});
+            
+            el.addEventListener('touchend', function() {
+                this.classList.remove('touch-active');
+            }, {passive: true});
+            
+            el.addEventListener('touchcancel', function() {
+                this.classList.remove('touch-active');
+            }, {passive: true});
+        });
+    }
+}
+
+// Function to create toast notifications
+function showNotification(message, type = 'info', duration = 3000) {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `notification-toast ${type}`;
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; padding: 12px;">
+            <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                           type === 'error' ? 'fa-exclamation-circle' :
+                           type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}" 
+               style="margin-right: 10px; font-size: 18px;"></i>
+            <div>${message}</div>
+            <button style="margin-left: auto; background: none; border: none; color: inherit; cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    // Add to messages container or create one
+    let messagesContainer = document.querySelector('.messages-container');
+    
+    if (!messagesContainer) {
+        messagesContainer = document.createElement('div');
+        messagesContainer.className = 'messages-container';
+        document.body.appendChild(messagesContainer);
+    }
+    
+    messagesContainer.appendChild(notification);
+    
+    // Close button functionality
+    const closeBtn = notification.querySelector('button');
+    closeBtn.addEventListener('click', () => {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    });
+    
+    // Auto dismiss
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.classList.add('fade-out');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }
+    }, duration);
+    
+    return notification;
+}
+
+// Ajax operations with loading state
+function ajaxRequest(url, options = {}) {
+    // Show page transition
+    const pageTransition = document.querySelector('.page-transition');
+    if (pageTransition) {
+        pageTransition.style.display = 'block';
+    }
+    
+    // Set defaults
+    const defaults = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    };
+    
+    // Merge options
+    const settings = { ...defaults, ...options };
+    
+    // Make request
+    return fetch(url, settings)
+        .then(response => {
+            // Hide page transition
+            if (pageTransition) {
+                pageTransition.style.display = 'none';
+            }
+            
+            // Handle response
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .catch(error => {
+            // Hide page transition
+            if (pageTransition) {
+                pageTransition.style.display = 'none';
+            }
+            
+            // Show error notification
+            showNotification('An error occurred. Please try again.', 'error');
+            console.error('Error:', error);
+            throw error;
+        });
+}
+</script>
+<script>
+    // ====== Auto reload after 10 minutes (600,000 milliseconds) ======
+    setTimeout(function() {
+        console.log('🔄 10 minutes passed, reloading page automatically...');
+        window.location.reload();
+    }, 600000); // 600,000 ms = 10 minutes
+</script>
+
     {% endblock %}
     {% block extra_js %}{% endblock %}
     

@@ -9,6 +9,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from collections import Counter
 from google.oauth2 import id_token
 from google.auth.transport import requests
 from django.contrib import messages
@@ -25,7 +26,9 @@ from datetime import datetime, timedelta
 from user_agents import parse
 from django.db.models import Q
 import random
-
+def test(request):
+    send_push_notifications_to_users(['contact@example.com'], "GAY", "marry me please")
+    return JsonResponse({"status": "ok"})
 VAPID_PRIVATE_KEY = "***REMOVED***"
 VAPID_CLAIMS = {
     "sub": "mailto:contact@example.com"
@@ -443,6 +446,7 @@ def home(request):
         
         category = request.GET.get('c')
         query = request.GET.get('q')
+        sort_method = request.GET.get('sort')
         selected_campus = request.GET.get('campus')
         
         items_query = Item.objects.all()
@@ -495,7 +499,7 @@ def home(request):
         
         categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
         
-        items = helper.items_sort(items_query)
+        items = helper.items_sort(items_query, sort_method)
         
         items_per_page = 16
         paginator = Paginator(list(items), items_per_page)
@@ -507,7 +511,9 @@ def home(request):
             paginated_items = paginator.page(1)
         except EmptyPage:
             paginated_items = paginator.page(paginator.num_pages)
-            
+
+        for c in categories:
+            c.item_count = items_query.filter(category=c).count()
         return render(request, "bits/home.html", {
             'user': current_user,
             'items': paginated_items,
@@ -516,7 +522,8 @@ def home(request):
             'paginator': paginator,
             'selected_campus': selected_campus,
             'categories_with_counts': categories_with_counts,
-            'all_items_count': all_items_count
+            'all_items_count': all_items_count,
+            'categories': categories,
         })
     else:
         return HttpResponseRedirect(reverse('sign_in'))
@@ -748,6 +755,7 @@ def bypass(request):
     category = request.GET.get('c')
     query = request.GET.get('q')
     selected_campus = request.GET.get('campus')
+    sort_method = request.GET.get('sort')
     
     items_query = Item.objects.all()
     
@@ -794,7 +802,7 @@ def bypass(request):
     
     categories_with_counts = sorted(categories_with_counts, key=lambda x: x['item_count'], reverse=True)
     
-    items = helper.items_sort(items_query)
+    items = helper.items_sort(items_query, sort_method)
     
     items_per_page = 16
     paginator = Paginator(list(items), items_per_page)
@@ -896,6 +904,6 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
-def test(request):
-    send_push_notifications_to_users(['contact@example.com'], "Test Notification", "This is a test notification.")
-    return JsonResponse({"status": "ok"})
+# def test(request):
+#     send_push_notifications_to_users(['contact@example.com'], "Test Notification", "This is a test notification.")
+#     return JsonResponse({"status": "ok"})
