@@ -511,9 +511,12 @@ def home(request):
             paginated_items = paginator.page(1)
         except EmptyPage:
             paginated_items = paginator.page(paginator.num_pages)
-
+        print(selected_campus)
         for c in categories:
-            c.item_count = items_query.filter(category=c).count()
+            if selected_campus != 'ALL':
+                c.item_count = Item.objects.filter(category=c, seller__campus=selected_campus).count()
+            else:
+                c.item_count = items_query.filter(category=c).count()
         return render(request, "bits/home.html", {
             'user': current_user,
             'items': paginated_items,
@@ -524,7 +527,7 @@ def home(request):
             'categories_with_counts': categories_with_counts,
             'all_items_count': all_items_count,
             'categories': categories,
-            'total_items_count': len(items)
+            'total_items_count': len(Item.objects.all()) if selected_campus == 'ALL' else len(Item.objects.filter(seller__campus=selected_campus)),
         })
     else:
         return HttpResponseRedirect(reverse('sign_in'))
