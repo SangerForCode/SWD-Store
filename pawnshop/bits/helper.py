@@ -25,13 +25,17 @@ def generate_whatsapp_link(phone_number, message=None):
 
 def get_clean_number(phone_number):
     phone_number = ''.join(filter(str.isdigit, phone_number))
+    phone_number = phone_number.lstrip('0')
     if len(phone_number) == 10:
         phone_number = f"+91{phone_number}"
-    if phone_number.startswith("91"):
+    elif len(phone_number) == 12 and phone_number.startswith("91"):
         phone_number = f"+{phone_number}"
-    if phone_number.startswith("0"):
-        phone_number = f"+91{phone_number[1:]}"
+    elif len(phone_number) == 9:
+        phone_number = f"+971{phone_number}"
+    elif phone_number.startswith("971"):
+        phone_number = f"+{phone_number}"
     return phone_number
+
 
 def verify_phone_number(phone_number):
     service = client.verify.v2.services.create(friendly_name="Bits Pilani Pawnshop")
