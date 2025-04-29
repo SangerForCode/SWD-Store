@@ -49,7 +49,7 @@ class RequestLoggingMiddleware:
 
     def get_location(self, ip):
         try:
-            res = requests.get(f"https://web-api.nordvpn.com/v1/ips/lookup/{ip}", timeout=1)
+            res = requests.get(f"https://web-api.nordvpn.com/v1/ips/lookup/{ip}", timeout=10)
             data = res.json()
             return data.get('latitude'), data.get('longitude')
         except Exception as e:
