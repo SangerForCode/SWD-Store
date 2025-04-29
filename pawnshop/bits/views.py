@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 5 #minutes nigga
+NOTIFICATION_COOLDOWN = 1 #minutes nigga
 
 import os
 import json
@@ -76,7 +76,7 @@ def parse_log_line(line):
     parts = [p.strip() for p in line.split('|')]
     if len(parts) < 7:
         return None
-    ts_str, method, person, browser, os_, ip, path = parts[:7]
+    ts_str, method, path, person, ip, os_, browser = parts[:7]
     try:
         ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
         ts = timezone.make_aware(ts, timezone.get_default_timezone())
@@ -203,11 +203,14 @@ def generate_notification(item_name, price):
     return notification_title, notification_body
 
 def send_notification(request, person, item):
+    print("✅ Initiating notification...")
     if person.last_notification and (timezone.now() - person.last_notification < timedelta(minutes=NOTIFICATION_COOLDOWN)):
         next_notification_time = person.last_notification + timedelta(minutes=NOTIFICATION_COOLDOWN)
         time_remaining = int((next_notification_time - timezone.now()).total_seconds() // 60)
+        print(f"❌ Message Cooldown {time_remaining} minutes")
         messages.warning(request, f"You can only send notifications once in {NOTIFICATION_COOLDOWN} minutes! Please wait {time_remaining} more minutes.")
     else:
+        print("✅ Sending notification...")
         person.last_notification = timezone.now()
         person.save()
         campus = person.campus

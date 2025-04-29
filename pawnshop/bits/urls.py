@@ -20,7 +20,7 @@ urlpatterns = [
     path("log-install/", views.log_install, name="log_install"),
     path("terms", views.terms, name='terms'),
     path("bypass", views.bypass, name='bypass'),
-    # path('analytics/', views.analytics, name='analytics'),
+    path('analytics/', views.analytics, name='analytics'),
     path('save-subscription/', views.save_subscription, name='save_subscription'),
     path('test/<str:email>', views.test, name='test'),
 ]
