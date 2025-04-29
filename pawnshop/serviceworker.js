@@ -1,5 +1,5 @@
 "use strict";
-const SW_VERSION = '1.0.4';
+const SW_VERSION = '1.0.5';
 const CACHE_NAME = 'pwa-cache-v15';
 
 const urlsToCache = [
@@ -106,19 +106,50 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('push', function(event) {
-    logToPage('Push event received.');
-  
-    if (event.data) {
-      const data = event.data.json();
-      logToPage('Push payload: ' + JSON.stringify(data));
-  
-      event.waitUntil(
-        self.registration.showNotification(data.title, {
-          body: data.body,
-          icon: '/static/images/icon_512.png'
-        })
-      );
-    } else {
+  logToPage('Push event received.');
+
+  if (event.data) {
+    const data = event.data.json();
+    logToPage('Push payload: ' + JSON.stringify(data));
+
+    const title = data.title || "BITS Pilani Pawnshop";
+    const options = {
+      body: data.body || "New update available!",
+      icon: '/static/images/icon_192.png',
+      badge: '/static/images/icon_144.png',
+      data: {
+        url: data.url || '/'
+      }
+    };
+
+    if (data.image) {
+      options.image = data.image;
+      logToPage('Image added to push: ' + data.image);
     }
-  });
-  
+
+    event.waitUntil(
+      self.registration.showNotification(title, options)
+    );
+  } else {
+    logToPage('Push event received but no data was sent.');
+  }
+});
+
+
+self.addEventListener('notificationclick', function(event) {
+  logToPage('Notification click received.');
+  event.notification.close();
+
+  event.waitUntil(
+    clients.matchAll({ type: "window" }).then(function(clientList) {
+      for (const client of clientList) {
+        if (client.url === '/' && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) {
+        return clients.openWindow('/');
+      }
+    })
+  );
+});

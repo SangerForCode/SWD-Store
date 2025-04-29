@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 1 #minutes nigga
+NOTIFICATION_COOLDOWN = 0 #minutes nigga
 
 import os
 import json
@@ -247,7 +247,9 @@ def send_notification(request, person, item):
             symbol = 'AED'
         price = f"{symbol}{item.price}"
         notif_title, notif_body = generate_notification(item.name, price)
-        threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body)).start()
+        first_image = item.images.first()
+        first_image_url = first_image.image.url if first_image else None
+        threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body, first_image_url)).start()
 
 SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
 
@@ -289,7 +291,7 @@ def save_subscription(request):
 
     return JsonResponse({"status": "subscription saved"})
 
-def send_push_notifications_to_users(target_emails, title, body):
+def send_push_notifications_to_users(target_emails, title, body, item_image = None):
     if not os.path.exists(SUBSCRIPTIONS_FILE):
         return
 
@@ -298,7 +300,8 @@ def send_push_notifications_to_users(target_emails, title, body):
 
     payload = json.dumps({
         "title": title,
-        "body": body
+        "body": body,
+        "image": item_image,
     })
 
     updated = False
@@ -315,7 +318,7 @@ def send_push_notifications_to_users(target_emails, title, body):
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
                 content_encoding='aes128gcm',
-                ttl=36000
+                ttl=10
             )
             print(f"✅ Push sent successfully to {email}")
         except WebPushException as ex:
