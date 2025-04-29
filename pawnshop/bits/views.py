@@ -318,7 +318,7 @@ def send_push_notifications_to_users(target_emails, title, body, item_image = No
                 vapid_private_key=VAPID_PRIVATE_KEY,
                 vapid_claims=VAPID_CLAIMS,
                 content_encoding='aes128gcm',
-                ttl=10
+                ttl=36000
             )
             print(f"✅ Push sent successfully to {email}")
         except WebPushException as ex:
