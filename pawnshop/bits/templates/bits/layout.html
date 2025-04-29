@@ -1122,18 +1122,32 @@ function subscribeUserToPush() {
   navigator.serviceWorker.ready.then(function(registration) {
     registration.pushManager.getSubscription().then(function(existingSubscription) {
       if (existingSubscription) {
-        console.log('⚡ Old subscription found, unsubscribing first...');
-        existingSubscription.unsubscribe().then(function(successful) {
-          console.log('✅ Old subscription unsubscribed.');
-          createNewSubscription(registration);
-        }).catch(function(err) {
-          console.error('⚠️ Error while unsubscribing old subscription:', err);
-          console.log('🔄 Proceeding to create new subscription anyway...');
-          createNewSubscription(registration);
+        console.log('✅ Using existing push subscription');
+
+        // Optional: Re-save to backend to refresh TTL or session
+        fetch('/save-subscription/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(existingSubscription)
         });
+
       } else {
-        console.log('📬 No old subscription found. Creating fresh.');
-        createNewSubscription(registration);
+        console.log('📬 No subscription found. Creating new...');
+
+        registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: '***REMOVED***'
+        }).then(function(newSubscription) {
+          console.log('✅ New subscription created:', newSubscription);
+
+          fetch('/save-subscription/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newSubscription)
+          });
+        }).catch(function(err) {
+          console.error('❌ Subscription failed:', err);
+        });
       }
     }).catch(function(err) {
       console.error('❌ Failed to get subscription:', err);
