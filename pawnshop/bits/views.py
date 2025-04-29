@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 0 #minutes nigga
+NOTIFICATION_COOLDOWN = 5 #minutes nigga
 
 import os
 import json
