@@ -34,8 +34,17 @@ VAPID_CLAIMS = {
     "sub": "mailto:contact@example.com"
 }
 
+# upgraded_analytics/views.py
+import os
+import logging
+from datetime import datetime, timedelta
+from django import forms
+from django.shortcuts import render
+from django.utils import timezone
+from collections import Counter, defaultdict
+from django.conf import settings
+
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
-GEO_CACHE = {}
 
 METRICS = {
     'requests': {
@@ -56,52 +65,64 @@ METRICS = {
     },
     'items_added': {
         'label': 'Items Added',
-        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/add-product'),
+        'extractor': lambda e: e['method'] == 'POST' and e['path'].startswith('/add-product'),
     },
     'items_updated': {
         'label': 'Items Updated',
-        'extractor': lambda e: e['method']=='POST' and e['path'].startswith('/item/'),
+        'extractor': lambda e: e['method'] == 'POST' and e['path'].startswith('/item/'),
     },
 }
 
 class AnalyticsForm(forms.Form):
-    metric_y   = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
+    metric_y = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
     start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(hours=1))
-    end_time   = forms.DateTimeField(label="To",   initial=lambda: timezone.now())
-    buckets    = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
-    show_map   = forms.BooleanField(label="Show Map", required=False)
+    end_time = forms.DateTimeField(label="To", initial=lambda: timezone.now())
+    buckets = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
+    show_map = forms.BooleanField(label="Show Map", required=False)
     map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=5)
 
 def parse_log_line(line):
     parts = [p.strip() for p in line.split('|')]
-    if len(parts) < 7:
+    if len(parts) < 9:
         return None
-    ts_str, method, path, person, ip, os_, browser = parts[:7]
+    ts_str, method, path, person, ip, os_, browser, lat_part, lon_part = parts[:9]
+
     try:
         ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
         ts = timezone.make_aware(ts, timezone.get_default_timezone())
     except:
         return None
+
+    def extract_coord(s):
+        try:
+            return float(s.split(':')[1].strip())
+        except:
+            return None
+
     return {
         'timestamp': ts,
-        'method':    method,
-        'person':    person,
-        'browser':   browser,
-        'os':        os_,
-        'ip':        ip,
-        'path':      path,
+        'method': method,
+        'person': person,
+        'browser': browser,
+        'os': os_,
+        'ip': ip,
+        'path': path,
+        'lat': extract_coord(lat_part),
+        'lon': extract_coord(lon_part),
     }
 
 def analytics(request):
     form = AnalyticsForm(request.GET or None)
     chart_data = None
     map_points = []
-    show_map = False
+    summary = {}
+    os_dist = Counter()
+    browser_dist = Counter()
+    hourly_hits = [0]*24
+    top_paths = Counter()
 
     if form.is_valid():
         cd = form.cleaned_data
-        show_map = cd['show_map']
-
         entries = []
         with open(LOGFILE) as f:
             for line in f:
@@ -128,6 +149,11 @@ def analytics(request):
             else:
                 seen[idx].add(val)
 
+            os_dist[e['os']] += 1
+            browser_dist[e['browser']] += 1
+            hourly_hits[e['timestamp'].hour] += 1
+            top_paths[e['path']] += 1
+
         if cd['metric_y'].startswith('unique'):
             counts = [len(s) for s in seen]
 
@@ -143,37 +169,38 @@ def analytics(request):
             }
         }
 
+        summary = {
+            'total_requests': len(entries),
+            'returning_visitors': sum(1 for c in Counter(e['ip'] for e in entries).values() if c > 1),
+            'os_distribution': dict(os_dist.most_common()),
+            'browser_distribution': dict(browser_dist.most_common()),
+            'hourly_hits': hourly_hits,
+            'top_paths': dict(top_paths.most_common(10))
+        }
+
         if cd['show_map']:
             cutoff = timezone.now() - timedelta(minutes=cd['map_window'])
             recent = [e for e in entries if e['timestamp'] >= cutoff]
-            unique_ips = {e['ip'] for e in recent}
-
-            for ip in unique_ips:
-                if ip in GEO_CACHE:
-                    lat, lon = GEO_CACHE[ip]
-                else:
-                    try:
-                        r = req.get(f'http://ip-api.com/json/{ip}', timeout=0.5).json()
-                        if r.get('status')=='success' and r.get('countryCode')=='IN':
-                            lat, lon = r['lat'], r['lon']
-                            GEO_CACHE[ip] = (lat, lon)
-                        else:
-                            continue
-                    except:
-                        continue
-
-                latest = max(e['timestamp'] for e in recent if e['ip']==ip)
+            seen_ips = set()
+            for e in recent:
+                ip = e['ip']
+                if ip in seen_ips:
+                    continue
+                seen_ips.add(ip)
+                if e['lat'] is None or e['lon'] is None:
+                    continue
                 map_points.append({
-                    'lat':       lat,
-                    'lon':       lon,
-                    'timestamp': latest.strftime('%H:%M:%S'),
+                    'lat': e['lat'],
+                    'lon': e['lon'],
+                    'timestamp': e['timestamp'].strftime('%H:%M:%S')
                 })
 
     return render(request, 'bits/analytics.html', {
-        'form':       form,
+        'form': form,
         'chart_data': chart_data,
         'map_points': map_points,
-        'show_map':   show_map,
+        'summary': summary,
+        'show_map': form.cleaned_data['show_map'] if form.is_valid() else False,
     })
 
 

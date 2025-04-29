@@ -1,8 +1,152 @@
 {% extends "bits/layout.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+/* Core Analytics Dashboard Styling */
+.analytics-dashboard {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px;
+  font-family: 'Montserrat', sans-serif;
+}
+.dashboard-header {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.dashboard-header h1 {
+  margin: 0;
+  color: var(--secondary);
+  font-size: 1.5rem;
+  border-left: 4px solid var(--primary);
+  padding-left: 10px;
+}
+.dashboard-filters {
+  background: var(--card-color);
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
+  flex-grow: 1;
+  margin-left: 20px;
+}
+.filter-form {
+  width: 100%;
+}
+.form-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+.filter-form p {
+  margin: 0;
+  flex: 1 1 200px;
+}
+.filter-form label {
+  display: block;
+  margin-bottom: 3px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--secondary);
+}
+.filter-form input, .filter-form select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background-color: #f9fafb;
+}
+.filter-form input:focus, .filter-form select:focus {
+  outline: none;
+  border-color: var(--primary);
+}
+.btn-primary {
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+.dashboard-content {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+.dashboard-card {
+  background: var(--card-color);
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  border: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+.card-header {
+  padding: 10px 15px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: #f9fafb;
+}
+.card-header h2 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--secondary);
+}
+.card-body {
+  padding: 15px;
+  flex-grow: 1;
+}
+.dashboard-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.dashboard-card ul li {
+  padding: 8px 0;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+.dashboard-card ul li:last-child {
+  border-bottom: none;
+}
+.stat-value {
+  font-weight: 600;
+  color: var(--primary);
+}
+.dashboard-card canvas {
+  width: 100% !important;
+  max-height: 250px;
+}
+#map {
+  width: 100%;
+  height: 350px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+}
+.dashboard-card.full-width {
+  grid-column: 1 / -1;
+}
+@media (max-width: 768px) {
+  .dashboard-content { grid-template-columns: 1fr; }
+  .form-container { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="analytics-dashboard">
   <div class="dashboard-header">
     <h1>Analytics Dashboard</h1>
+    <button class="btn-primary" onclick="window.print()" style="margin-left:20px;">Print</button>
     <div class="dashboard-filters">
       <form method="get" class="filter-form">
         <div class="form-container">
@@ -14,338 +158,98 @@
   </div>
 
   <div class="dashboard-content">
-    {% if chart_data %}
-    <div class="dashboard-card">
-      <div class="card-header">
-        <h2>Trend Analysis</h2>
-      </div>
+    {% if summary %}
+    <div class="dashboard-card summary-card">
+      <div class="card-header"><h2>Summary</h2></div>
       <div class="card-body">
-        <canvas id="analyticsChart"></canvas>
+        <ul>
+          <li><strong>Total Requests</strong> <span class="stat-value">{{ summary.total_requests }}</span></li>
+          <li><strong>Returning Visitors</strong> <span class="stat-value">{{ summary.returning_visitors }}</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header"><h2>OS Distribution</h2></div>
+      <div class="card-body"><canvas id="osChart"></canvas></div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header"><h2>Browser Distribution</h2></div>
+      <div class="card-body"><canvas id="browserChart"></canvas></div>
+    </div>
+
+    <div class="dashboard-card">
+      <div class="card-header"><h2>Hourly Traffic</h2></div>
+      <div class="card-body"><canvas id="hourlyChart"></canvas></div>
+    </div>
+
+    <div class="dashboard-card full-width">
+      <div class="card-header"><h2>Top Paths</h2></div>
+      <div class="card-body">
+        <ul>
+          {% for path, count in summary.top_paths.items %}
+            <li><strong>{{ path }}</strong> <span class="stat-value">{{ count }}</span></li>
+          {% endfor %}
+        </ul>
       </div>
     </div>
     {% endif %}
 
+    {% if chart_data %}
+    <div class="dashboard-card full-width">
+      <div class="card-header"><h2>Trend Analysis</h2></div>
+      <div class="card-body"><canvas id="analyticsChart"></canvas></div>
+    </div>
+    {% endif %}
+
     {% if map_points %}
-    <div class="dashboard-card">
-      <div class="card-header">
-        <h2>Geographic Distribution</h2>
-      </div>
-      <div class="card-body">
-        <div id="map"></div>
-      </div>
+    <div class="dashboard-card full-width">
+      <div class="card-header"><h2>Geographic Distribution</h2></div>
+      <div class="card-body"><div id="map"></div></div>
     </div>
     {% endif %}
   </div>
 </div>
 
-<!-- Styles -->
-<style>
-  .analytics-dashboard {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem;
-    color: #333;
-  }
+{% endblock %}
 
-  .dashboard-header {
-    margin-bottom: 2rem;
-  }
-
-  .dashboard-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #2C3E50;
-    margin-bottom: 1.5rem;
-  }
-
-  .dashboard-filters {
-    background: #f8f9fa;
-    border-radius: 12px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  }
-
-  .filter-form {
-    display: flex;
-    flex-direction: column;
-  }
-
-  .form-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
-  }
-
-  .form-container p {
-    margin: 0;
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .form-container label {
-    display: block;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-bottom: 0.5rem;
-    color: #4b5563;
-  }
-
-  .form-container input, .form-container select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-size: 0.9rem;
-    transition: border-color 0.15s ease-in-out;
-  }
-
-  .form-container input:focus, .form-container select:focus {
-    border-color: #3b82f6;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-  }
-
-  .btn-primary {
-    background-color: #3b82f6;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.15s ease-in-out;
-  }
-
-  .btn-primary:hover {
-    background-color: #2563eb;
-  }
-
-  .dashboard-content {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin-top: 2rem;
-  }
-
-  @media (min-width: 768px) {
-    .dashboard-content {
-      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    }
-  }
-
-  .dashboard-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-
-  .dashboard-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-  }
-
-  .card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid #edf2f7;
-  }
-
-  .card-header h2 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: #2d3748;
-    margin: 0;
-  }
-
-  .card-body {
-    padding: 1.5rem;
-    min-height: 400px;
-  }
-
-  #map {
-    height: 450px;
-    width: 100%;
-    border-radius: 8px;
-  }
-</style>
-
-<!-- Scripts -->
-{% if chart_data %}
+{% block scripts %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', () => {
+  {% if summary %}
+    // Charts
+    const osData = {{ summary.os_distribution|safe }};
+    const osLabels = Object.keys(osData);
+    const osCounts = Object.values(osData);
+    new Chart(document.getElementById('osChart'), {type:'pie', data:{labels:osLabels, datasets:[{data:osCounts, backgroundColor:['#3b82f6','#f97316','#10b981','#eab308','#ef4444']}]} });
+
+    const browserData = {{ summary.browser_distribution|safe }};
+    const browserLabels = Object.keys(browserData);
+    const browserCounts = Object.values(browserData);
+    new Chart(document.getElementById('browserChart'), {type:'pie', data:{labels:browserLabels, datasets:[{data:browserCounts, backgroundColor:['#6366f1','#f59e0b','#22c55e','#3b82f6','#ef4444']}]} });
+
+    const hourlyData = {{ summary.hourly_hits|safe }};
+    new Chart(document.getElementById('hourlyChart'), {type:'bar', data:{labels:Array.from({length:24},(_,i)=>i+':00'), datasets:[{data:hourlyData, backgroundColor:'#3b82f6'}]}, options:{scales:{y:{beginAtZero:true}}}});
+  {% endif %}
+
+  {% if chart_data %}
     const ctx = document.getElementById('analyticsChart').getContext('2d');
-    
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.5)');
-    gradient.addColorStop(1, 'rgba(59, 130, 246, 0)');
-    
-    new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: {{ chart_data.labels|safe }},
-        datasets: [{
-          label: "{{ chart_data.dataset.label }}",
-          data: {{ chart_data.dataset.data|safe }},
-          borderColor: '#3b82f6',
-          backgroundColor: gradient,
-          fill: true,
-          tension: 0.4,
-          borderWidth: 3,
-          pointBackgroundColor: '#3b82f6',
-          pointBorderColor: '#fff',
-          pointRadius: 4,
-          pointHoverRadius: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: {
-              font: {
-                size: 13,
-                family: "'Inter', sans-serif"
-              }
-            }
-          },
-          tooltip: {
-            mode: 'index',
-            intersect: false,
-            backgroundColor: 'rgba(255, 255, 255, 0.9)',
-            titleColor: '#2C3E50',
-            bodyColor: '#4b5563',
-            borderColor: '#e5e7eb',
-            borderWidth: 1,
-            padding: 12,
-            boxPadding: 6,
-            titleFont: {
-              weight: 'bold'
-            },
-            callbacks: {
-              label: function(context) {
-                return `${context.dataset.label}: ${context.parsed.y.toLocaleString()}`;
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: {
-              display: false
-            },
-            ticks: {
-              font: {
-                size: 12
-              }
-            }
-          },
-          y: {
-            beginAtZero: true,
-            grid: {
-              color: '#f3f4f6'
-            },
-            ticks: {
-              font: {
-                size: 12
-              },
-              callback: function(value) {
-                return value.toLocaleString();
-              }
-            }
-          }
-        }
-      }
-    });
-  });
+    const grad = ctx.createLinearGradient(0,0,0,300);
+    grad.addColorStop(0,'rgba(59,130,246,0.5)'); grad.addColorStop(1,'rgba(59,130,246,0)');
+    new Chart(ctx, {type:'line', data:{labels:{{ chart_data.labels|safe }}, datasets:[{label:"{{ chart_data.dataset.label }}", data:{{ chart_data.dataset.data|safe }}, borderColor:'#3b82f6', backgroundColor:grad, fill:true, tension:0.4}]}, options:{scales:{y:{beginAtZero:true}}}});
+  {% endif %}
+
+  {% if map_points %}
+    const map = L.map('map').setView([22,79],5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
+    const pts = {{ map_points|safe }};
+    const bounds = [];
+    pts.forEach(p=>{L.circleMarker([p.lat,p.lon],{radius:6, fillColor:'#3b82f6', color:'#fff', weight:2, fillOpacity:0.8}).addTo(map).bindPopup(`<strong>Time:</strong> ${p.timestamp}`); bounds.push([p.lat,p.lon]);});
+    if(bounds.length) map.fitBounds(bounds,{padding:[30,30]});
+  {% endif %}
+});
 </script>
-{% endif %}
-
-{% if map_points %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const map = L.map('map').setView([22.0, 79.0], 5);  // center of India
-    
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(map);
-
-    const points = {{ map_points|safe }};
-    
-    // Create a custom icon
-    const customIcon = L.divIcon({
-      className: 'custom-marker',
-      html: '<div class="marker-pin"></div>',
-      iconSize: [30, 30],
-      iconAnchor: [15, 30]
-    });
-
-    // Add markers with custom styling
-    points.forEach(p => {
-      const marker = L.circleMarker([p.lat, p.lon], {
-        radius: 7,
-        fillColor: '#3b82f6',
-        color: '#fff',
-        weight: 2,
-        opacity: 1,
-        fillOpacity: 0.8
-      });
-      
-      marker.bindPopup(`
-        <div class="custom-popup">
-          <strong>Timestamp:</strong> ${p.timestamp}
-          ${p.name ? `<br><strong>Name:</strong> ${p.name}` : ''}
-          ${p.value ? `<br><strong>Value:</strong> ${p.value}` : ''}
-        </div>
-      `, {
-        className: 'custom-popup'
-      });
-      
-      marker.addTo(map);
-    });
-
-    // Add a style for the popup
-    const style = document.createElement('style');
-    style.textContent = `
-      .custom-popup .leaflet-popup-content-wrapper {
-        background-color: white;
-        border-radius: 8px;
-        box-shadow: 0 3px 14px rgba(0,0,0,0.2);
-      }
-      .custom-popup .leaflet-popup-content {
-        margin: 12px;
-        line-height: 1.6;
-        font-family: 'Inter', sans-serif;
-        font-size: 14px;
-      }
-      .custom-popup .leaflet-popup-tip {
-        background-color: white;
-      }
-      .marker-pin {
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        background-color: #3b82f6;
-        border: 2px solid #ffffff;
-        box-shadow: 0 0 4px rgba(0,0,0,0.3);
-      }
-    `;
-    document.head.appendChild(style);
-    
-    // Fit bounds to show all markers
-    if (points.length > 0) {
-      const latLngs = points.map(p => [p.lat, p.lon]);
-      map.fitBounds(latLngs, { padding: [50, 50] });
-    }
-  });
-</script>
-{% endif %}
 {% endblock %}
