@@ -28,20 +28,30 @@ class RequestLoggingMiddleware:
         browser = f"{user_agent.browser.family} {user_agent.browser.version_string}"
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        self.logger.info(f"{timestamp}| {method} | {path} | {person_info} | {ip} | {os} | {browser}")
+
+        lat, lon = self.get_location(ip)
+        lat_str = f"{lat}" if lat is not None else "None"
+        lon_str = f"{lon}" if lon is not None else "None"
+
+        self.logger.info(
+            f"{timestamp} | {method} | {path} | {person_info} | {ip} | OS: {os} | Browser: {browser} | "
+            f"Latitude: {lat_str} | Longitude: {lon_str}"
+        )
+
         return self.get_response(request)
 
     def get_client_ip(self, request):
         return (
-            request.META.get('HTTP_CF_CONNECTING_IP')
-            or request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0]
-            or request.META.get('REMOTE_ADDR')
+            request.META.get('HTTP_CF_CONNECTING_IP') or
+            request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or
+            request.META.get('REMOTE_ADDR')
         )
 
     def get_location(self, ip):
         try:
-            res = requests.get(f"http://ip-api.com/json/{ip}", timeout=1)
+            res = requests.get(f"https://web-api.nordvpn.com/v1/ips/lookup/{ip}", timeout=1)
             data = res.json()
-            return data.get('lat'), data.get('lon')
-        except Exception:
+            return data.get('latitude'), data.get('longitude')
+        except Exception as e:
+            logging.warning(f"Could not get location for IP {ip}: {e}")
             return None, None
