@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>New Item Alert</title>
+  <style>
+    body {
+      background-color: #f5f5f5;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      padding: 0;
+      margin: 0;
+    }
+    .email-wrapper {
+      max-width: 600px;
+      margin: 40px auto;
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    }
+    .header {
+      color: #f07b3f;
+      font-size: 28px;
+      text-align: center;
+    }
+    .item-image {
+      width: 100%;
+      max-height: 280px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin: 20px 0;
+    }
+    .button {
+      background-color: #f07b3f;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .secondary-button {
+      background-color: #e0e0e0;
+      color: #333;
+      text-decoration: none;
+      padding: 10px 16px;
+      border-radius: 5px;
+      margin-top: 8px;
+      display: inline-block;
+    }
+    .section {
+      margin-top: 30px;
+      text-align: center;
+    }
+    .footer {
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: #777;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <h1 class="header">Hey {{ user_name }} 👋</h1>
+    <p style="font-size: 1.1em;">A new item was just listed on <strong>BITS Pawnshop</strong> by {{ owner_name }}! Check it out:</p>
+
+    <img src="{{ item_image_url }}" alt="Item Image" class="item-image">
+
+    <p><strong>📦 {{ item.name }}</strong></p>
+    <p><strong>💰 Price:</strong> ₹{{ item.price }}</p>
+    <p>{{ item.description }}</p>
+
+    <div style="margin-top: 20px;">
+      <a href="{{ item_link }}" class="button">🔎 View Item</a>
+    </div>
+
+    <div class="section">
+      <p>Got something to sell?</p>
+      <a href="{{ add_product_link }}" class="secondary-button">➕ Post Your Own Item</a>
+    </div>
+
+    <div class="section">
+      <p>Have 2 minutes?</p>
+      <a href="{{ feedback_link }}" class="secondary-button">💬 Give Feedback</a>
+    </div>
+
+    <div class="footer">
+      <p>Don't want emails? <a href="{{ unsubscribe_link }}">Unsubscribe</a></p>
+    </div>
+  </div>
+</body>
+</html>
