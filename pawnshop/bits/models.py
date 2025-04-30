@@ -15,6 +15,7 @@ class Person(models.Model):
     last_notification = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=100, null=False)
     email = models.EmailField(null=False)
+    is_subscribed = models.BooleanField(default=True)
     phone = models.CharField(max_length=20, null=True)
     campus = models.CharField(max_length=5, choices=Campus.choices, null=False)
     hostel = models.ForeignKey('Hostel', on_delete=models.CASCADE, related_name='residents', null=True)

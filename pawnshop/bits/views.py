@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 5 #minutes nigga
+NOTIFICATION_COOLDOWN = 10 #minutes nigga
 
 import os
 import json
@@ -7,6 +7,8 @@ import logging
 import threading
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from collections import Counter
@@ -26,24 +28,43 @@ from datetime import datetime, timedelta
 from user_agents import parse
 from django.db.models import Q
 import random
-def test(request):
-    send_push_notifications_to_users(['contact@example.com'], "GAY", "marry me please")
-    return JsonResponse({"status": "ok"})
+from django.core.mail import send_mail
+from django.http import HttpResponse
+from django.core.signing import Signer, BadSignature
+from django.contrib.auth import get_user_model
+
+
+#EMAIL SHIT STARTS HERE
+signer = Signer()
+
+def generate_unsubscribe_token(user):
+    return signer.sign(user.email)
+
+def get_email_from_token(token):
+    try:
+        return signer.unsign(token)
+    except BadSignature:
+        return None
+
+def unsubscribe_view(request, token):
+    email = get_email_from_token(token)
+    if not email:
+        return HttpResponse("Invalid unsubscribe link.", status=400)
+    user = get_object_or_404(Person, email=email)
+    if not user:
+        return HttpResponse("User does not exist.", status=404)
+    user.is_subscribed = False
+    user.save()
+    return HttpResponse("You have been unsubscribed successfully.")
+
+##EMAIL SHIT ENDS HERE
+
 VAPID_PRIVATE_KEY = "***REMOVED***"
 VAPID_CLAIMS = {
     "sub": "mailto:contact@example.com"
 }
 
 # upgraded_analytics/views.py
-import os
-import logging
-from datetime import datetime, timedelta
-from django import forms
-from django.shortcuts import render
-from django.utils import timezone
-from collections import Counter, defaultdict
-from django.conf import settings
-
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
 METRICS = {
@@ -241,15 +262,9 @@ def send_notification(request, person, item):
         person.last_notification = timezone.now()
         person.save()
         campus = person.campus
-        target_emails = Person.objects.filter(campus=campus).exclude(email=person.email).values_list('email', flat=True)
-        symbol = '₹'
-        if campus == 'DUB':
-            symbol = 'AED'
-        price = f"{symbol}{item.price}"
-        notif_title, notif_body = generate_notification(item.name, price)
-        first_image = item.images.first()
-        first_image_url = first_image.image.url if first_image else None
-        threading.Thread(target=send_push_notifications_to_users, args=(target_emails, notif_title, notif_body, first_image_url)).start()
+        target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
+        # target_persons = Person.objects.filter(name = "Vishrut Ramraj")
+        threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
 
 SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
 
@@ -291,27 +306,63 @@ def save_subscription(request):
 
     return JsonResponse({"status": "subscription saved"})
 
-def send_push_notifications_to_users(target_emails, title, body, item_image = None):
+def send_email_notification(users, subject, context, template_name):
+    for user in users:
+        html_content = render_to_string(template_name, context)
+
+        email = EmailMessage(
+            subject=subject,
+            body=html_content,
+            from_email=settings.EMAIL_HOST_USER,
+            to=[user.email],
+        )
+        email.content_subtype = "html"
+        email.send()
+
+def send_pushFemail_notification(request, target_persons, owner, item):
+    symbol = '₹'
+    if owner.campus == 'DUB':
+        symbol = 'AED'
+    price = f"{symbol}{item.price}"
+    notif_title, notif_body = generate_notification(item.name, price)
+    first_image = item.images.first()
+    first_image_url = first_image.image.url if first_image else None
+    first_image_url = request.build_absolute_uri(first_image_url)
+    print("First image URL:", first_image_url)
     if not os.path.exists(SUBSCRIPTIONS_FILE):
         return
-
     with open(SUBSCRIPTIONS_FILE, 'r') as f:
         subscriptions = json.load(f)
-
     payload = json.dumps({
-        "title": title,
-        "body": body,
-        "image": item_image,
+        "title": notif_title,
+        "body": notif_body,
+        "image": first_image_url,
     })
-
     updated = False
+    def email_person(person):
+        if person.is_subscribed:
+            token = generate_unsubscribe_token(person)
+            context = {
+                "user_name": person.name,
+                "unsubscribe_token": token,
+                "item_image_url": first_image_url,
+                "owner_name": owner.name,
+                "add_product_link": request.build_absolute_uri(reverse('add_product')),
+                "feedback_link": request.build_absolute_uri(reverse('feedback')),
+                "item": item,
+                "item_link": request.build_absolute_uri(reverse('item_detail' , args=[item.id])),
+                "unsubscribe_link": request.build_absolute_uri(reverse('unsubscribe', args=[generate_unsubscribe_token(person)])),
+            }
+            send_email_notification([person], notif_title, context, "bits/emailtemplate.html")
+            print("✅ Email sent successfully to", person.email, "with token:", token)
 
-    for email in target_emails:
-        subscription = subscriptions.get(email)
+    for person in target_persons:
+        subscription = subscriptions.get(person.email)
         if not subscription:
+            email_person(person)
             continue
-
         try:
+            # raise WebPushException("Random")
             webpush(
                 subscription_info=subscription,
                 data=payload,
@@ -320,14 +371,17 @@ def send_push_notifications_to_users(target_emails, title, body, item_image = No
                 content_encoding='aes128gcm',
                 ttl=36000
             )
-            print(f"✅ Push sent successfully to {email}")
+            print(f"✅ Push sent successfully to {person.email}")
         except WebPushException as ex:
-            print(f"❌ Web push failed for {email}: {repr(ex)}")
+            print(f"❌ Web push failed for {person.email}: {repr(ex)}")
 
             if ex.response and ex.response.status_code == 410:
-                print(f"⚡ Subscription for {email} is gone (expired or unsubscribed). Removing it.")
-                subscriptions.pop(email, None)
+                print(f"⚡ Subscription for {person.email} is gone (expired or unsubscribed). Removing it.")
+                subscriptions.pop(person.email, None)
                 updated = True
+
+            print("⚡Trying to send through emails...")
+            email_person(person)
 
     if updated:
         with open(SUBSCRIPTIONS_FILE, 'w') as f:
@@ -916,9 +970,8 @@ def bulk_action(request, action):
                     item.hostel = person.hostel
                     item.save()
                     count += 1
+                send_notification(request, person, item)
                 messages.success(request, f"Successfully reposted {count} item(s).")
-                target_emails = Person.objects.filter(campus=person.campus).exclude(email=person.email).values_list('email', flat=True)
-                send_push_notifications_to_users(target_emails, "Reposted Items", f"{count} item(s) have been reposted! Check them out!")
 
             elif action == 'toggle_sold':
                 count = 0
@@ -945,7 +998,3 @@ def bulk_action(request, action):
 
 def terms(request):
     return render(request, 'bits/terms.html')
-
-def test(request, email):
-    send_push_notifications_to_users([email], "Test Notification", "This is a test notification.")
-    return JsonResponse({"status": "ok"})

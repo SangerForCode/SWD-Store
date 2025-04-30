@@ -22,5 +22,5 @@ urlpatterns = [
     path("bypass", views.bypass, name='bypass'),
     path('analytics/', views.analytics, name='analytics'),
     path('save-subscription/', views.save_subscription, name='save_subscription'),
-    path('test/<str:email>', views.test, name='test'),
+    path('unsubscribe/<str:token>/', views.unsubscribe_view, name='unsubscribe'),
 ]
