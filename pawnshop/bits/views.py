@@ -262,7 +262,10 @@ def send_notification(request, person, item):
         person.last_notification = timezone.now()
         person.save()
         campus = person.campus
-        target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
+        if person.email == 'contact@example.com':
+            target_persons = Person.objects.filter(campus=campus)
+        else:
+            target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
         # target_persons = Person.objects.filter(name = "Vishrut Ramraj")
         threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
 
