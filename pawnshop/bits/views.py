@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 10 #minutes nigga
+NOTIFICATION_COOLDOWN = 0 #minutes nigga
 
 import os
 import json
@@ -8,6 +8,7 @@ import threading
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
+from queue import Queue
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -28,11 +29,8 @@ from datetime import datetime, timedelta
 from user_agents import parse
 from django.db.models import Q
 import random
-from django.core.mail import send_mail
 from django.http import HttpResponse
 from django.core.signing import Signer, BadSignature
-from django.contrib.auth import get_user_model
-
 
 #EMAIL SHIT STARTS HERE
 signer = Signer()
@@ -268,7 +266,6 @@ def send_notification(request, person, item):
             target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
         target_persons = list(target_persons)
         random.shuffle(target_persons)
-        # target_persons = Person.objects.filter(name = "Vishrut Ramraj")
         threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
 
 SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
@@ -318,7 +315,7 @@ def send_email_notification(users, subject, context, template_name):
         email = EmailMessage(
             subject=subject,
             body=html_content,
-            from_email=settings.EMAIL_HOST_USER,
+            from_email='contact@example.com',
             to=[user.email],
         )
         email.content_subtype = "html"
@@ -363,11 +360,12 @@ def send_pushFemail_notification(request, target_persons, owner, item):
                 print("✅ Email sent successfully to", person.email, "with token:", token)
             except:
                 print("❌ Email sending failed for", person.email)
+    email_users = []
 
     for person in target_persons:
         subscription = subscriptions.get(person.email)
         if not subscription:
-            email_person(person)
+            email_users.append(person)
             continue
         try:
             # raise WebPushException("Random")
@@ -388,13 +386,16 @@ def send_pushFemail_notification(request, target_persons, owner, item):
                 subscriptions.pop(person.email, None)
                 updated = True
 
-            print("⚡Trying to send through emails...")
-            email_person(person)
+            email_users.append(person)
 
     if updated:
         with open(SUBSCRIPTIONS_FILE, 'w') as f:
             json.dump(subscriptions, f, indent=2)
         print("✅ Cleaned up dead subscriptions.")
+
+    for p in email_users:
+        email_person(p)
+
     print("✅ Notification process completed.")
 
 def send_push_notifications_to_all(title, body):
@@ -806,30 +807,31 @@ def edit_item(request, id):
 def feedback(request):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         person = Person.objects.get(email=request.session.get('user_data')['email'])
-        
-        if request.method == 'POST':
-            form = FeedbackForm(request.POST)
-            
-            if form.is_valid():
-                feedback = form.save(commit=False)
-                feedback.person = person
-                feedback.save()
-                
-                images = request.FILES.getlist('images')
-                for image in images:
-                    FeedbackImage.objects.create(
-                        feedback=feedback,
-                        image=image
-                    )
-                
-                messages.success(request, "Thank you for your feedback!")
-                return redirect('home')
-        else:
-            form = FeedbackForm()
-            
-        return render(request, 'bits/feedback.html', {'form': form})
     else:
-        return redirect('sign_in')
+        person = None
+
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.person = person
+            feedback.save()
+            
+            images = request.FILES.getlist('images')
+            for image in images:
+                FeedbackImage.objects.create(
+                    feedback=feedback,
+                    image=image
+                )
+
+            messages.success(request, "Thank you for your feedback!")
+            if person:
+                return redirect('home')
+            return redirect('feedback')
+    else:
+        form = FeedbackForm()
+    return render(request, 'bits/feedback.html', {'form': form})
 
 def marksold(request, id):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():

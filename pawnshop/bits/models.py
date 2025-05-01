@@ -108,7 +108,7 @@ class Image(models.Model):
     
 class Feedback(models.Model):
     id = models.AutoField(primary_key=True)
-    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='feedbacks', null=False)
+    person = models.ForeignKey(Person, on_delete=models.CASCADE, related_name='feedbacks', null=True)
     message = models.TextField(null=False)
     added_at = models.DateTimeField(auto_now_add=True)
 
