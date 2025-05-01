@@ -266,6 +266,8 @@ def send_notification(request, person, item):
             target_persons = Person.objects.filter(campus=campus)
         else:
             target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
+        target_persons = list(target_persons)
+        random.shuffle(target_persons)
         # target_persons = Person.objects.filter(name = "Vishrut Ramraj")
         threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
 
@@ -356,8 +358,11 @@ def send_pushFemail_notification(request, target_persons, owner, item):
                 "item_link": request.build_absolute_uri(reverse('item_detail' , args=[item.id])),
                 "unsubscribe_link": request.build_absolute_uri(reverse('unsubscribe', args=[generate_unsubscribe_token(person)])),
             }
-            send_email_notification([person], notif_title, context, "bits/emailtemplate.html")
-            print("✅ Email sent successfully to", person.email, "with token:", token)
+            try:
+                send_email_notification([person], notif_title, context, "bits/emailtemplate.html")
+                print("✅ Email sent successfully to", person.email, "with token:", token)
+            except:
+                print("❌ Email sending failed for", person.email)
 
     for person in target_persons:
         subscription = subscriptions.get(person.email)
@@ -390,6 +395,7 @@ def send_pushFemail_notification(request, target_persons, owner, item):
         with open(SUBSCRIPTIONS_FILE, 'w') as f:
             json.dump(subscriptions, f, indent=2)
         print("✅ Cleaned up dead subscriptions.")
+    print("✅ Notification process completed.")
 
 def send_push_notifications_to_all(title, body):
     payload = json.dumps({
