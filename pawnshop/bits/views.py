@@ -365,7 +365,7 @@ def send_pushFemail_notification(request, target_persons, owner, item):
     for person in target_persons:
         subscription = subscriptions.get(person.email)
         if not subscription:
-            email_users.append(person)
+            # email_users.append(person)
             continue
         try:
             # raise WebPushException("Random")
@@ -386,15 +386,15 @@ def send_pushFemail_notification(request, target_persons, owner, item):
                 subscriptions.pop(person.email, None)
                 updated = True
 
-            email_users.append(person)
+            # email_users.append(person)
 
     if updated:
         with open(SUBSCRIPTIONS_FILE, 'w') as f:
             json.dump(subscriptions, f, indent=2)
         print("✅ Cleaned up dead subscriptions.")
 
-    for p in email_users:
-        email_person(p)
+    # for p in email_users:
+    #     email_person(p)
 
     print("✅ Notification process completed.")
 
