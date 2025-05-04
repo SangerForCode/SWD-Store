@@ -555,7 +555,7 @@ def home(request):
             items_query = items_query.filter(seller__campus=selected_campus)
             campus_filter = selected_campus
         elif not selected_campus:
-            if current_user.campus in ['GOA', 'HYD', 'PIL']:
+            if current_user.campus in ['GOA', 'HYD', 'PIL', 'DUB']:
                 items_query = items_query.filter(seller__campus=current_user.campus)
                 selected_campus = current_user.campus
                 campus_filter = current_user.campus
@@ -623,6 +623,7 @@ def home(request):
             'categories_with_counts': categories_with_counts,
             'all_items_count': all_items_count,
             'categories': categories,
+            'rupees': selected_campus != "DUB",
             'total_items_count': len(Item.objects.all()) if selected_campus == 'ALL' else len(Item.objects.filter(seller__campus=selected_campus)),
         })
     else:

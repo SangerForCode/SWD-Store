@@ -695,10 +695,14 @@
                     {% endif %}
                 </div>
             </a>
-            
+
             <div class="item-details">
                 <h3 class="item-title" title="{{ item.name }}">{{ item.name }}</h3>
-                <div class="item-price">₹{{ item.price }}</div>
+                {% if rupees %}
+                <div class="item-price">{{ item.price }} INR</div>
+                {% else %}
+                <div class="item-price">{{ item.price }} AED</div>
+                {% endif %}
                 
                 <!-- Compact metadata - only name and hostel -->
                 <div class="item-meta">
