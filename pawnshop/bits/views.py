@@ -97,7 +97,7 @@ class AnalyticsForm(forms.Form):
     start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(days=7))
     end_time = forms.DateTimeField(label="To", initial=lambda: timezone.now())
     buckets = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=84)
-    show_map = forms.BooleanField(label="Show Map", required=False)
+    show_map = forms.BooleanField(label="Show Map", required=False, initial=True)
     map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=10080)
 
 def parse_log_line(line):
