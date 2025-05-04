@@ -94,11 +94,11 @@ METRICS = {
 
 class AnalyticsForm(forms.Form):
     metric_y = forms.ChoiceField(label="Y-axis", choices=[(k, METRICS[k]['label']) for k in METRICS])
-    start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(hours=1))
+    start_time = forms.DateTimeField(label="From", initial=lambda: timezone.now() - timedelta(days=7))
     end_time = forms.DateTimeField(label="To", initial=lambda: timezone.now())
-    buckets = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=12)
+    buckets = forms.IntegerField(label="# of points", min_value=2, max_value=1000, initial=84)
     show_map = forms.BooleanField(label="Show Map", required=False)
-    map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=5)
+    map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=10080)
 
 def parse_log_line(line):
     parts = [p.strip() for p in line.split('|')]
