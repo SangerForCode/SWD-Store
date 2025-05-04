@@ -88,7 +88,7 @@ METRICS = {
     },
     'items_updated': {
         'label': 'Items Updated',
-        'extractor': lambda e: e['method'] == 'POST' and e['path'].startswith('/item/'),
+        'extractor': lambda e: e['method'] == 'POST' and (e['path'].startswith('/bulk-action/') or e['path'].startswith('/repost') or e['path'].startswith('/edit-item') or e['path'].startswith('/delete-item') or e['path'].startswith('/marksold')),
     },
 }
 
