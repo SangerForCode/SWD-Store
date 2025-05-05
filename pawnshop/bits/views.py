@@ -623,7 +623,6 @@ def home(request):
             'categories_with_counts': categories_with_counts,
             'all_items_count': all_items_count,
             'categories': categories,
-            'rupees': selected_campus != "DUB",
             'total_items_count': len(Item.objects.all()) if selected_campus == 'ALL' else len(Item.objects.filter(seller__campus=selected_campus)),
         })
     else:

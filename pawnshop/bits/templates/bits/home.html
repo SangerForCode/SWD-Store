@@ -698,7 +698,7 @@
 
             <div class="item-details">
                 <h3 class="item-title" title="{{ item.name }}">{{ item.name }}</h3>
-                {% if rupees %}
+                {% if item.seller.campus != 'DUB' %}
                 <div class="item-price">{{ item.price }} INR</div>
                 {% else %}
                 <div class="item-price">{{ item.price }} AED</div>
