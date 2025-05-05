@@ -381,8 +381,8 @@ def send_pushFemail_notification(request, target_persons, owner, item):
         except WebPushException as ex:
             print(f"❌ Web push failed for {person.email}: {repr(ex)}")
 
-            if ex.response and ex.response.status_code == 410:
-                print(f"⚡ Subscription for {person.email} is gone (expired or unsubscribed). Removing it.")
+            if ex.response and (ex.response.status_code == 410 or ex.response.status_code == 404):
+                print(f"⚡ Subscription for {person.email} is gone (unsubscribed or not found). Removing it.")
                 subscriptions.pop(person.email, None)
                 updated = True
 
