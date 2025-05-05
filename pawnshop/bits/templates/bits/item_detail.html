@@ -45,7 +45,11 @@
             <h1 class="product-title">{{ item.name }}</h1>
             
             <div class="product-price {% if item.is_sold %}sold{% endif %}">
-                ₹{{ item.price }}
+                {% if item.seller.campus != 'DUB' %}
+                {{ item.price }} INR
+                {% else %}
+                {{ item.price }} AED
+                {% endif %}
                 {% if item.is_sold %}<span class="sold-badge">SOLD</span>{% endif %}
             </div>
             
@@ -118,7 +122,7 @@
 
                     <div class="item-info">
                         <h3 class="item-title">{{ similar_item.name }}</h3>
-                        <div class="item-price">₹{{ similar_item.price }}</div>
+                        <div class="item-price">{{ similar_item.price }} {% if similar_item.seller.campus != 'DUB' %}INR{% else %}AED{% endif %}</div>
                         
                         <div class="item-meta">
                             <div class="item-seller">
