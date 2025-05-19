@@ -1005,3 +1005,27 @@ def bulk_action(request, action):
 
 def terms(request):
     return render(request, 'bits/terms.html')
+
+@csrf_exempt
+def apicall(request):
+    items = Item.objects.filter(is_sold=False).select_related('seller', 'hostel', 'category').prefetch_related('images').order_by('-added_at')
+
+    data = []
+
+    for item in items:
+        first_image = item.images.first()
+        image_url = first_image.image.url if first_image else ""
+
+        data.append({
+            "id": item.id,
+            "itemName": item.name,
+            "itemImage": request.build_absolute_uri(image_url),
+            "itemPrice": int(item.price),
+            "sellerName": item.seller.name,
+            "sellerHostel": item.hostel.name,
+            "dateAdded": item.added_at.isoformat(),
+            "contactNumber": item.phone or item.seller.phone,
+            "category": item.category.name,
+        })
+
+    return JsonResponse(data, safe=False)

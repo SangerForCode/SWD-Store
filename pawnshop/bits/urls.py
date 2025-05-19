@@ -23,4 +23,5 @@ urlpatterns = [
     path('analytics/', views.analytics, name='analytics'),
     path('save-subscription/', views.save_subscription, name='save_subscription'),
     path('unsubscribe/<str:token>/', views.unsubscribe_view, name='unsubscribe'),
+    path('api/items/', views.apicall, name='items-json')
 ]
