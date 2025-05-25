@@ -36,7 +36,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from twilio.twiml.messaging_response import MessagingResponse
 import re
-from bp_bot.bot import save_bp_reading, generate_excel_response  # import helpers you wrote
+from bp_bot.bot import save_bp_reading
 
 @csrf_exempt
 def bp_bot_webhook(request):
