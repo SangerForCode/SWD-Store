@@ -48,13 +48,13 @@ def bp_bot_webhook(request):
         if re.match(r'^\d+/\d+$', msg):
             saved = save_bp_reading(msg)
             if saved:
-                response.message(f"Over Mummy!!! I saved {msg} 🥰💖 I love you mummy!!! https://bits-pilani.store/media/bp_bot/bp_log.xlsx")
+                response.message(f"Over Mummy!!! I saved {msg} 🥰💖 I love you mummy!!!")
             else:
                 response.message("ayyo mummy!! something is wrong, call me and tell me what happened 😢")
         elif 'get report' in msg:
             response.message("Mummy's Report ready: https://bits-pilani.store/media/bp_bot/bp_log.xlsx")
         else:
-            response.message("what what things, at what what time, happenooo!! MUMMY THIS IS ONLY FOR BP! if you want to talk to me then message me directly!! I love youuuuu 💖💖")
+            response.message("what what things, at what what time, happenooo happen!! MUMMY THIS IS ONLY FOR BP! if you want to talk to me then message me directly!! I love youuuuu 💖💖")
 
         return HttpResponse(str(response), content_type='text/xml')
     return HttpResponse("OK")
