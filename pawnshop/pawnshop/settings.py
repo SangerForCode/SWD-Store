@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
@@ -33,7 +33,8 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "amazoff.shop",
-    "www.amazoff.shop"
+    "www.amazoff.shop",
+    "13.234.29.123"
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://bits-pilani.store",
