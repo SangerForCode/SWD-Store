@@ -1035,7 +1035,7 @@ def terms(request):
     return render(request, 'bits/terms.html')
 
 @csrf_exempt
-def apicall(request):
+def api_items(request):
     items = Item.objects.filter(is_sold=False).select_related('seller', 'hostel', 'category').prefetch_related('images').order_by('-added_at')
 
     data = []
@@ -1054,6 +1054,21 @@ def apicall(request):
             "dateAdded": item.added_at.isoformat(),
             "contactNumber": item.phone or item.seller.phone,
             "category": item.category.name,
+            "campus": item.seller.campus,
+            "sellerEmail": item.seller.email,
+            "description": item.description,
+            "issold": item.is_sold,
         })
 
     return JsonResponse(data, safe=False)
+
+@csrf_exempt
+def api_item_images(request, id):
+    try:
+        item = Item.objects.get(id=id)
+        images = item.images.all()
+        image_urls = [request.build_absolute_uri(img.image.url) for img in images]
+        return JsonResponse({"item_id": id, "images": image_urls})
+    except Item.DoesNotExist:
+        return JsonResponse({"error": "Item not found"}, status=404)
+

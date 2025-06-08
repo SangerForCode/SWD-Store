@@ -38,7 +38,7 @@ class Person(models.Model):
 
     def __str__(self):
         return f"{self.name}"
-    
+
 class Hostel(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
     campus = models.CharField(max_length=5, choices=Campus.choices, null=False, default=Campus.GOA)
