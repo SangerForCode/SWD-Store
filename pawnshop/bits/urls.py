@@ -25,5 +25,8 @@ urlpatterns = [
     path('unsubscribe/<str:token>/', views.unsubscribe_view, name='unsubscribe'),
     path('api/items/', views.api_items, name='items-json'),
     path('api/<int:id>/images', views.api_item_images, name='items-images'),
+    path('api/updatestats/<int:id>', views.api_update_item, name = "change sold status"),
+    path('api/feedback', views.api_feedback, name = "api feedback"),
+    # path('api/additem', views.api_item, name = "add item"),
     path("bp-bot/", views.bp_bot_webhook, name="bp_bot_webhook"),
 ]

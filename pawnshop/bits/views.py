@@ -1072,3 +1072,48 @@ def api_item_images(request, id):
     except Item.DoesNotExist:
         return JsonResponse({"error": "Item not found"}, status=404)
 
+@csrf_exempt
+def api_update_item(request, id):
+    if request.method == "PUT":
+        try:
+            item = Item.objects.get(id=id)
+        except Item.DoesNotExist:
+            return JsonResponse({"error": "Item not found"}, status=404)
+        try:
+            data = json.loads(request.body)
+            new_status = data.get("issold")
+            if new_status is None:
+                return JsonResponse({"error": "Missing 'issold' in body"}, status=400)
+            item.is_sold = bool(new_status)
+            item.save()
+            return JsonResponse({"id": item.id, "issold": item.is_sold})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    elif request.method == "DELETE":
+        try:
+            item = Item.objects.get(id=id)
+        except Item.DoesNotExist:
+            return JsonResponse({"error": "Item not found"}, status=404)
+        images = item.images.all()
+        for image in images:
+            image.image.delete(save=False)
+            image.delete()
+        item.delete()
+        return JsonResponse({"status": "deleted", "id": id})
+    else:
+        return JsonResponse({"error": "Invalid method"}, status=405)
+
+@csrf_exempt
+def api_feedback(request):
+    if request.method == "POST":
+        try:
+            description = request.POST.get('description', '')
+            images = request.FILES.getlist('images')
+            feedback = Feedback.objects.create(description=description)
+            for image in images:
+                FeedbackImage.objects.create(feedback=feedback, image=image)
+            return JsonResponse({"status": "success"})
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "Invalid method"}, status=405)
