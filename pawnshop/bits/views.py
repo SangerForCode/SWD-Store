@@ -1109,7 +1109,9 @@ def api_feedback(request):
         try:
             description = request.POST.get('description', '')
             images = request.FILES.getlist('images')
-            feedback = Feedback.objects.create(description=description)
+            feedback = Feedback.objects.create()
+            feedback.description = description
+            feedback.save()
             for image in images:
                 FeedbackImage.objects.create(feedback=feedback, image=image)
             return JsonResponse({"status": "success"})
