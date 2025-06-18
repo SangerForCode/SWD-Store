@@ -277,24 +277,25 @@ def generate_notification(item_name, price):
     return notification_title, notification_body
 
 def send_notification(request, person, item):
-    print("✅ Initiating notification...")
-    if person.last_notification and (timezone.now() - person.last_notification < timedelta(minutes=NOTIFICATION_COOLDOWN)):
-        next_notification_time = person.last_notification + timedelta(minutes=NOTIFICATION_COOLDOWN)
-        time_remaining = int((next_notification_time - timezone.now()).total_seconds() // 60)
-        print(f"❌ Message Cooldown {time_remaining} minutes")
-        messages.warning(request, f"You can only send notifications once in {NOTIFICATION_COOLDOWN} minutes! Please wait {time_remaining} more minutes.")
-    else:
-        print("✅ Sending notification...")
-        person.last_notification = timezone.now()
-        person.save()
-        campus = person.campus
-        if person.email == 'contact@example.com':
-            target_persons = Person.objects.filter(campus=campus)
+    if False:
+        print("✅ Initiating notification...")
+        if person.last_notification and (timezone.now() - person.last_notification < timedelta(minutes=NOTIFICATION_COOLDOWN)):
+            next_notification_time = person.last_notification + timedelta(minutes=NOTIFICATION_COOLDOWN)
+            time_remaining = int((next_notification_time - timezone.now()).total_seconds() // 60)
+            print(f"❌ Message Cooldown {time_remaining} minutes")
+            messages.warning(request, f"You can only send notifications once in {NOTIFICATION_COOLDOWN} minutes! Please wait {time_remaining} more minutes.")
         else:
-            target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
-        target_persons = list(target_persons)
-        random.shuffle(target_persons)
-        threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
+            print("✅ Sending notification...")
+            person.last_notification = timezone.now()
+            person.save()
+            campus = person.campus
+            if person.email == 'contact@example.com':
+                target_persons = Person.objects.filter(campus=campus)
+            else:
+                target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
+            target_persons = list(target_persons)
+            random.shuffle(target_persons)
+            threading.Thread(target=send_pushFemail_notification, args=(request, target_persons, person, item)).start()
 
 SUBSCRIPTIONS_FILE = os.path.join(settings.LOG_DIR, 'subscriptions.json')
 
@@ -350,77 +351,78 @@ def send_email_notification(users, subject, context, template_name):
         email.send()
 
 def send_pushFemail_notification(request, target_persons, owner, item):
-    symbol = '₹'
-    if owner.campus == 'DUB':
-        symbol = 'AED'
-    price = f"{symbol}{item.price}"
-    notif_title, notif_body = generate_notification(item.name, price)
-    first_image = item.images.first()
-    first_image_url = first_image.image.url if first_image else None
-    first_image_url = request.build_absolute_uri(first_image_url)
-    print("First image URL:", first_image_url)
-    if not os.path.exists(SUBSCRIPTIONS_FILE):
-        return
-    with open(SUBSCRIPTIONS_FILE, 'r') as f:
-        subscriptions = json.load(f)
-    payload = json.dumps({
-        "title": notif_title,
-        "body": notif_body,
-        "image": first_image_url,
-    })
-    updated = False
-    def email_person(person):
-        if person.is_subscribed:
-            token = generate_unsubscribe_token(person)
-            context = {
-                "user_name": person.name,
-                "unsubscribe_token": token,
-                "item_image_url": first_image_url,
-                "owner_name": owner.name,
-                "add_product_link": request.build_absolute_uri(reverse('add_product')),
-                "feedback_link": request.build_absolute_uri(reverse('feedback')),
-                "item": item,
-                "item_link": request.build_absolute_uri(reverse('item_detail' , args=[item.id])),
-                "unsubscribe_link": request.build_absolute_uri(reverse('unsubscribe', args=[generate_unsubscribe_token(person)])),
-            }
+    if False:
+        symbol = '₹'
+        if owner.campus == 'DUB':
+            symbol = 'AED'
+        price = f"{symbol}{item.price}"
+        notif_title, notif_body = generate_notification(item.name, price)
+        first_image = item.images.first()
+        first_image_url = first_image.image.url if first_image else None
+        first_image_url = request.build_absolute_uri(first_image_url)
+        print("First image URL:", first_image_url)
+        if not os.path.exists(SUBSCRIPTIONS_FILE):
+            return
+        with open(SUBSCRIPTIONS_FILE, 'r') as f:
+            subscriptions = json.load(f)
+        payload = json.dumps({
+            "title": notif_title,
+            "body": notif_body,
+            "image": first_image_url,
+        })
+        updated = False
+        def email_person(person):
+            if person.is_subscribed:
+                token = generate_unsubscribe_token(person)
+                context = {
+                    "user_name": person.name,
+                    "unsubscribe_token": token,
+                    "item_image_url": first_image_url,
+                    "owner_name": owner.name,
+                    "add_product_link": request.build_absolute_uri(reverse('add_product')),
+                    "feedback_link": request.build_absolute_uri(reverse('feedback')),
+                    "item": item,
+                    "item_link": request.build_absolute_uri(reverse('item_detail' , args=[item.id])),
+                    "unsubscribe_link": request.build_absolute_uri(reverse('unsubscribe', args=[generate_unsubscribe_token(person)])),
+                }
+                try:
+                    send_email_notification([person], notif_title, context, "bits/emailtemplate.html")
+                    print("✅ Email sent successfully to", person.email, "with token:", token)
+                except:
+                    print("❌ Email sending failed for", person.email)
+        email_users = []
+
+        for person in target_persons:
+            subscription = subscriptions.get(person.email)
+            if not subscription:
+                # email_users.append(person)
+                continue
             try:
-                send_email_notification([person], notif_title, context, "bits/emailtemplate.html")
-                print("✅ Email sent successfully to", person.email, "with token:", token)
-            except:
-                print("❌ Email sending failed for", person.email)
-    email_users = []
+                # raise WebPushException("Random")
+                webpush(
+                    subscription_info=subscription,
+                    data=payload,
+                    vapid_private_key=VAPID_PRIVATE_KEY,
+                    vapid_claims=VAPID_CLAIMS,
+                    content_encoding='aes128gcm',
+                    ttl=36000
+                )
+                print(f"✅ Push sent successfully to {person.email}")
+            except WebPushException as ex:
+                print(f"❌ Web push failed for {person.email}: {repr(ex)}")
+                subscriptions.pop(person.email, None)
+                updated = True
+                # email_users.append(person)
 
-    for person in target_persons:
-        subscription = subscriptions.get(person.email)
-        if not subscription:
-            # email_users.append(person)
-            continue
-        try:
-            # raise WebPushException("Random")
-            webpush(
-                subscription_info=subscription,
-                data=payload,
-                vapid_private_key=VAPID_PRIVATE_KEY,
-                vapid_claims=VAPID_CLAIMS,
-                content_encoding='aes128gcm',
-                ttl=36000
-            )
-            print(f"✅ Push sent successfully to {person.email}")
-        except WebPushException as ex:
-            print(f"❌ Web push failed for {person.email}: {repr(ex)}")
-            subscriptions.pop(person.email, None)
-            updated = True
-            # email_users.append(person)
+        if updated:
+            with open(SUBSCRIPTIONS_FILE, 'w') as f:
+                json.dump(subscriptions, f, indent=2)
+            print("✅ Cleaned up dead subscriptions.")
 
-    if updated:
-        with open(SUBSCRIPTIONS_FILE, 'w') as f:
-            json.dump(subscriptions, f, indent=2)
-        print("✅ Cleaned up dead subscriptions.")
+        # for p in email_users:
+        #     email_person(p)
 
-    # for p in email_users:
-    #     email_person(p)
-
-    print("✅ Notification process completed.")
+        print("✅ Notification process completed.")
 
 def send_push_notifications_to_all(title, body):
     payload = json.dumps({
