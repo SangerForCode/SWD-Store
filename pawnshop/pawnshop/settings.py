@@ -34,7 +34,8 @@ ALLOWED_HOSTS = [
     "localhost",
     "amazoff.shop",
     "www.amazoff.shop",
-    "13.234.29.123"
+    "13.234.29.123",
+    "localhost",
 ]
 CSRF_TRUSTED_ORIGINS = [
     "https://bits-pilani.store",
@@ -42,6 +43,7 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://amazoff.shop",
     "https://www.amazoff.shop",
+    "http://localhost:5173",
 ]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
