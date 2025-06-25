@@ -564,6 +564,7 @@ def add_product(request):
 
     
 def home(request):
+    print("Hi")
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         current_user = Person.objects.get(email=request.session.get('user_data')['email'])
         
