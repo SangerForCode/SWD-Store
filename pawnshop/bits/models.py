@@ -70,7 +70,7 @@ class Item(models.Model):
     hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=False)
     phone = models.CharField(max_length=20, null=True, blank=True)
 
-    def save(self, *args, change_time = True, **kwargs):
+    def save(self, *args, change_time = False, **kwargs):
         effective_phone = self.phone or self.seller.phone
         self.phone = helper.get_clean_number(effective_phone) if effective_phone else None
         effective_phone = self.phone
