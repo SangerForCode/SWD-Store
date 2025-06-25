@@ -1036,13 +1036,14 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
+def add_cors_headers(response):
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+    return response
+
 @csrf_exempt
 def api_items(request, id=None):
-    def add_cors_headers(response):
-        response["Access-Control-Allow-Origin"] = "*"
-        response["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-        response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-        return response
     if request.method == "GET":
         if id:
             try:
@@ -1094,7 +1095,10 @@ def api_items(request, id=None):
 
             return add_cors_headers(JsonResponse(data, safe=False))
     
-    elif request.method == "POST":
+    return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
+
+def api_items_post(request):
+    if request.method == "POST":
         try:
             name = request.POST.get('itemName')
             description = request.POST.get('description', '')
@@ -1242,7 +1246,6 @@ def api_items(request, id=None):
             
         except Exception as e:
             return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
-    
     return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
 
 @csrf_exempt
