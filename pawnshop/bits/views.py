@@ -1100,6 +1100,7 @@ def api_items(request, id=None):
 def api_items_post(request):
     if request.method == "POST":
         try:
+            print("Entered")
             name = request.POST.get('itemName')
             description = request.POST.get('description', '')
             price = request.POST.get('itemPrice')
@@ -1109,7 +1110,7 @@ def api_items_post(request):
             seller_email = request.POST.get('sellerEmail')
             seller_name = request.POST.get('sellerName')
             campus = request.POST.get('campus')
-            
+            print("Got data")
             if not all([name, price, category_id, seller_email]):
                 return add_cors_headers(JsonResponse({"error": "Missing required fields"}, status=400))
             
@@ -1149,7 +1150,7 @@ def api_items_post(request):
             
             first_image = item.images.first()
             image_url = first_image.image.url if first_image else ""
-            
+            print("Made new item with all stuff")
             response_data = {
                 "id": item.id,
                 "itemName": item.name,
@@ -1165,7 +1166,7 @@ def api_items_post(request):
                 "description": item.description,
                 "issold": item.is_sold,
             }
-            
+            print("Response is ready")
             return add_cors_headers(JsonResponse(response_data, status=201))
             
         except Exception as e:
