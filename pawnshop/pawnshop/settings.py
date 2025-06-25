@@ -45,9 +45,6 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.amazoff.shop",
     "http://localhost:5173",
 ]
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
 # Application definition
 
 INSTALLED_APPS = [
@@ -277,6 +274,8 @@ AWS_SECRET_ACCESS_KEY = '***REMOVED***'
 AWS_SES_REGION_NAME = 'ap-south-1'
 AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 # Add these CORS settings to your settings.py
+# Remove the duplicate CORS_ALLOWED_ORIGINS near the top
+# Keep only these CORS settings at the bottom:
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
@@ -303,3 +302,4 @@ CORS_ALLOWED_METHODS = [
     'POST',
     'PUT',
 ]
+CORS_ALLOW_ALL_ORIGINS = True
