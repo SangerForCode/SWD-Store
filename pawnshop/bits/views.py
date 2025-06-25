@@ -1098,6 +1098,7 @@ def api_items(request, id=None):
     
     return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
 
+@csrf_exempt
 def api_items_post(request):
     print(request)
     if request.method == "POST":
