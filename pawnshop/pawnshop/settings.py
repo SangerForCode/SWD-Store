@@ -276,3 +276,30 @@ AWS_ACCESS_KEY_ID  = '***REMOVED***'
 AWS_SECRET_ACCESS_KEY = '***REMOVED***'
 AWS_SES_REGION_NAME = 'ap-south-1'
 AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
+# Add these CORS settings to your settings.py
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-***REMOVED***',
+    'x-requested-with',
+]
+
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
