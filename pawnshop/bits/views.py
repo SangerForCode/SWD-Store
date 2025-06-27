@@ -1182,14 +1182,15 @@ def api_items_post(request, id = None):
             return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
 
         try:
-            name = request.POST.get('itemName')
-            description = request.POST.get('description', '')
-            price = request.POST.get('itemPrice')
-            category_id = request.POST.get('category')
-            phone = request.POST.get('contactNumber')
-            hostel_name = request.POST.get('sellerHostel')
-            seller_email = request.POST.get('sellerEmail')
-            seller_name = request.POST.get('sellerName')
+            data = request.body.decode
+            name = data.get('itemName')
+            description = data.get('description', '')
+            price = data.get('itemPrice')
+            category_id = data.get('category')
+            phone = data.get('contactNumber')
+            hostel_name = data.get('sellerHostel')
+            seller_email = data.get('sellerEmail')
+            seller_name = data.get('sellerName')
             
             if name:
                 item.name = name
