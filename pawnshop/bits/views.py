@@ -1316,3 +1316,13 @@ def api_cats(request):
         return JsonResponse(list(categories), safe=False)
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
+
+def api_hstls(request):
+    if request.method == "GET":
+        campus = request.GET.get('campus')
+        if not campus:
+            return JsonResponse({"error": "Campus not specified"}, status=400)
+        hostels = Hostel.objects.filter(campus=campus).values('id', 'name')
+        return JsonResponse(list(hostels), safe=False)
+    else:
+        return JsonResponse({"error": "Invalid method"}, status=405)
