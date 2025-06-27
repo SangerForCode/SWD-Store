@@ -1100,157 +1100,156 @@ def api_items(request, id=None):
 
 @csrf_exempt
 def api_items_post(request, id = None):
-    print(request)
-    if not id:
-        try:
-            print("Entered")
-            name = request.POST.get('itemName')
-            description = request.POST.get('description', '')
-            price = float(request.POST.get('itemPrice'))
-            category_id = request.POST.get('category')
-            phone = request.POST.get('contactNumber')
-            hostel_name = request.POST.get('sellerHostel')
-            seller_email = request.POST.get('sellerEmail')
-            seller_name = request.POST.get('sellerName')
-            campus = request.POST.get('campus')
-            print("Got data")
-            if not all([name, price, category_id, seller_email]):
-                return add_cors_headers(JsonResponse({"error": "Missing required fields"}, status=400))
-            
+    if request.method == 'POST':
+        if not id:
             try:
-                seller = Person.objects.get(email=seller_email)
-                if seller_name:
-                    seller.name = seller_name
-                    seller.save()
-            except Person.DoesNotExist:
-                return add_cors_headers(JsonResponse({"error": "Seller not found"}, status=404))
-            
-            try:
-                category = Category.objects.get(name=category_id)
-                hostel = Hostel.objects.get(name=hostel_name) if hostel_name else seller.hostel
-            except Category.DoesNotExist:
-                return add_cors_headers(JsonResponse({"error": "Invalid category"}, status=400))
-            except Hostel.DoesNotExist:
-                return add_cors_headers(JsonResponse({"error": "Invalid hostel"}, status=400))
-            
-            item = Item.objects.create(
-                name=name,
-                description=description,
-                price=price,
-                seller=seller,
-                category=category,
-                hostel=hostel,
-                phone=phone
-            )
-            
-            images = request.FILES.getlist('images')
-            for idx, image_file in enumerate(images):
-                Image.objects.create(
-                    item=item,
-                    image=image_file,
-                    display_order=idx
-                )
-            
-            first_image = item.images.first()
-            image_url = first_image.image.url if first_image else ""
-            print("Made new item with all stuff")
-            response_data = {
-                "id": item.id,
-                "itemName": item.name,
-                "itemImage": request.build_absolute_uri(image_url),
-                "itemPrice": int(item.price),
-                "sellerName": item.seller.name,
-                "sellerHostel": item.hostel.name,
-                "dateAdded": item.added_at.isoformat(),
-                "contactNumber": item.phone or item.seller.phone,
-                "category": item.category.name,
-                "campus": item.seller.campus,
-                "sellerEmail": item.seller.email,
-                "description": item.description,
-                "issold": item.is_sold,
-            }
-            print("Response is ready")
-            return add_cors_headers(JsonResponse(response_data, status=201))
-            
-        except Exception as e:
-            return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
-    
-    else:
-        try:
-            item = Item.objects.get(id=id)
-        except Item.DoesNotExist:
-            return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
-
-        try:
-            name = request.POST.get('itemName')
-            description = request.POST.get('description', '')
-            price = request.POST.get('itemPrice')
-            category_id = request.POST.get('category')
-            phone = request.POST.get('contactNumber')
-            hostel_name = request.POST.get('sellerHostel')
-            seller_email = request.POST.get('sellerEmail')
-            seller_name = request.POST.get('sellerName')
-            
-            if name:
-                item.name = name
-            if description is not None:
-                item.description = description
-            if price:
-                item.price = float(price)
-            if phone:
-                item.phone = phone
-            
-            if category_id:
-                try:
-                    category = Category.objects.get(id=category_id)
-                    item.category = category
-                except Category.DoesNotExist:
-                    pass
-            print(hostel_name)
-            if hostel_name:
-                try:
-                    hostel = Hostel.objects.get(name=hostel_name)
-                    item.hostel = hostel
-                except Hostel.DoesNotExist:
-                    print(f"hostel not there bro {hostel_name}")
-                    pass
-            
-            item.save()
-            
-            new_images = request.FILES.getlist('images')
-            if new_images:
-                max_order = item.images.aggregate(models.Max('display_order'))['display_order__max'] or -1
+                print("Entered")
+                name = request.POST.get('itemName')
+                description = request.POST.get('description', '')
+                price = float(request.POST.get('itemPrice'))
+                category_id = request.POST.get('category')
+                phone = request.POST.get('contactNumber')
+                hostel_name = request.POST.get('sellerHostel')
+                seller_email = request.POST.get('sellerEmail')
+                seller_name = request.POST.get('sellerName')
+                campus = request.POST.get('campus')
+                if not all([name, price, category_id, seller_email]):
+                    return add_cors_headers(JsonResponse({"error": "Missing required fields"}, status=400))
                 
-                for idx, image_file in enumerate(new_images):
+                try:
+                    seller = Person.objects.get(email=seller_email)
+                    if seller_name:
+                        seller.name = seller_name
+                        seller.save()
+                except Person.DoesNotExist:
+                    return add_cors_headers(JsonResponse({"error": "Seller not found"}, status=404))
+                
+                try:
+                    category = Category.objects.get(name=category_id)
+                    hostel = Hostel.objects.get(name=hostel_name) if hostel_name else seller.hostel
+                except Category.DoesNotExist:
+                    return add_cors_headers(JsonResponse({"error": "Invalid category"}, status=400))
+                except Hostel.DoesNotExist:
+                    return add_cors_headers(JsonResponse({"error": "Invalid hostel"}, status=400))
+                
+                item = Item.objects.create(
+                    name=name,
+                    description=description,
+                    price=price,
+                    seller=seller,
+                    category=category,
+                    hostel=hostel,
+                    phone=phone
+                )
+                
+                images = request.FILES.getlist('images')
+                for idx, image_file in enumerate(images):
                     Image.objects.create(
                         item=item,
                         image=image_file,
-                        display_order=max_order + idx + 1
+                        display_order=idx
                     )
-            
-            first_image = item.images.first()
-            image_url = first_image.image.url if first_image else ""
-            
-            response_data = {
-                "id": item.id,
-                "itemName": item.name,
-                "itemImage": request.build_absolute_uri(image_url),
-                "itemPrice": float(item.price),
-                "sellerName": item.seller.name,
-                "sellerHostel": item.hostel.name,
-                "dateAdded": item.added_at.isoformat(),
-                "contactNumber": item.phone or item.seller.phone,
-                "category": item.category.name,
-                "campus": item.seller.campus,
-                "sellerEmail": item.seller.email,
-                "description": item.description,
-                "issold": item.is_sold,
-            }
-            
-            return add_cors_headers(JsonResponse(response_data))
-            
-        except Exception as e:
-            return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
+                
+                first_image = item.images.first()
+                image_url = first_image.image.url if first_image else ""
+                response_data = {
+                    "id": item.id,
+                    "itemName": item.name,
+                    "itemImage": request.build_absolute_uri(image_url),
+                    "itemPrice": int(item.price),
+                    "sellerName": item.seller.name,
+                    "sellerHostel": item.hostel.name,
+                    "dateAdded": item.added_at.isoformat(),
+                    "contactNumber": item.phone or item.seller.phone,
+                    "category": item.category.name,
+                    "campus": item.seller.campus,
+                    "sellerEmail": item.seller.email,
+                    "description": item.description,
+                    "issold": item.is_sold,
+                }
+                print("Response is ready")
+                return add_cors_headers(JsonResponse(response_data, status=201))
+                
+            except Exception as e:
+                return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
+        
+        else:
+            try:
+                item = Item.objects.get(id=id)
+            except Item.DoesNotExist:
+                return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
+
+            try:
+                name = request.POST.get('itemName')
+                description = request.POST.get('description', '')
+                price = request.POST.get('itemPrice')
+                category_id = request.POST.get('category')
+                phone = request.POST.get('contactNumber')
+                hostel_name = request.POST.get('sellerHostel')
+                seller_email = request.POST.get('sellerEmail')
+                seller_name = request.POST.get('sellerName')
+                
+                if name:
+                    item.name = name
+                if description is not None:
+                    item.description = description
+                if price:
+                    item.price = float(price)
+                if phone:
+                    item.phone = phone
+                
+                if category_id:
+                    try:
+                        category = Category.objects.get(id=category_id)
+                        item.category = category
+                    except Category.DoesNotExist:
+                        pass
+                print(hostel_name)
+                if hostel_name:
+                    try:
+                        hostel = Hostel.objects.get(name=hostel_name)
+                        item.hostel = hostel
+                    except Hostel.DoesNotExist:
+                        print(f"hostel not there bro {hostel_name}")
+                        pass
+                
+                item.save()
+                
+                new_images = request.FILES.getlist('images')
+                if new_images:
+                    max_order = item.images.aggregate(models.Max('display_order'))['display_order__max'] or -1
+                    
+                    for idx, image_file in enumerate(new_images):
+                        Image.objects.create(
+                            item=item,
+                            image=image_file,
+                            display_order=max_order + idx + 1
+                        )
+                
+                first_image = item.images.first()
+                image_url = first_image.image.url if first_image else ""
+                
+                response_data = {
+                    "id": item.id,
+                    "itemName": item.name,
+                    "itemImage": request.build_absolute_uri(image_url),
+                    "itemPrice": float(item.price),
+                    "sellerName": item.seller.name,
+                    "sellerHostel": item.hostel.name,
+                    "dateAdded": item.added_at.isoformat(),
+                    "contactNumber": item.phone or item.seller.phone,
+                    "category": item.category.name,
+                    "campus": item.seller.campus,
+                    "sellerEmail": item.seller.email,
+                    "description": item.description,
+                    "issold": item.is_sold,
+                }
+                
+                return add_cors_headers(JsonResponse(response_data))
+                
+            except Exception as e:
+                return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
+    return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
 
 @csrf_exempt
 def api_item_images(request, id):
