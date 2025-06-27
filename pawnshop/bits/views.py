@@ -1182,7 +1182,7 @@ def api_items_post(request, id = None):
             return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
 
         try:
-            data = request.body.decode
+            data = json.loads(request.body.decode)
             name = data.get('itemName')
             description = data.get('description', '')
             price = data.get('itemPrice')
