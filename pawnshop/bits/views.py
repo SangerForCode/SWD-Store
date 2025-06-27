@@ -1206,7 +1206,7 @@ def api_items_post(request, id = None):
                     item.category = category
                 except Category.DoesNotExist:
                     pass
-            
+            print(hostel_name)
             if hostel_name:
                 try:
                     hostel = Hostel.objects.get(name=hostel_name)
