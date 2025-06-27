@@ -1212,6 +1212,7 @@ def api_items_post(request, id = None):
                     hostel = Hostel.objects.get(name=hostel_name)
                     item.hostel = hostel
                 except Hostel.DoesNotExist:
+                    print(f"hostel not there bro {hostel_name}")
                     pass
             
             item.save()
