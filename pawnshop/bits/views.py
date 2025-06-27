@@ -1101,7 +1101,7 @@ def api_items(request, id=None):
 @csrf_exempt
 def api_items_post(request, id = None):
     print(request)
-    if request.method == "POST":
+    if not id:
         try:
             print("Entered")
             name = request.POST.get('itemName')
@@ -1175,22 +1175,21 @@ def api_items_post(request, id = None):
         except Exception as e:
             return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
     
-    elif request.method == "PUT" and id:
+    else:
         try:
             item = Item.objects.get(id=id)
         except Item.DoesNotExist:
             return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
 
         try:
-            data = json.loads(request.body.decode('utf-8'))
-            name = data.get('itemName')
-            description = data.get('description', '')
-            price = data.get('itemPrice')
-            category_id = data.get('category')
-            phone = data.get('contactNumber')
-            hostel_name = data.get('sellerHostel')
-            seller_email = data.get('sellerEmail')
-            seller_name = data.get('sellerName')
+            name = request.POST.get('itemName')
+            description = request.POST.get('description', '')
+            price = request.POST.get('itemPrice')
+            category_id = request.POST.get('category')
+            phone = request.POST.get('contactNumber')
+            hostel_name = request.POST.get('sellerHostel')
+            seller_email = request.POST.get('sellerEmail')
+            seller_name = request.POST.get('sellerName')
             
             if name:
                 item.name = name
@@ -1252,7 +1251,6 @@ def api_items_post(request, id = None):
             
         except Exception as e:
             return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
-    return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
 
 @csrf_exempt
 def api_item_images(request, id):
