@@ -1126,7 +1126,7 @@ def api_items_post(request):
                 return add_cors_headers(JsonResponse({"error": "Seller not found"}, status=404))
             
             try:
-                category = Category.objects.get(id=category_id)
+                category = Category.objects.get(name=category_id)
                 hostel = Hostel.objects.get(name=hostel_name) if hostel_name else seller.hostel
             except Category.DoesNotExist:
                 return add_cors_headers(JsonResponse({"error": "Invalid category"}, status=400))
