@@ -1184,7 +1184,7 @@ def api_items_post(request, id = None):
         try:
             name = request.POST.get('itemName')
             description = request.POST.get('description', '')
-            price = float(request.POST.get('itemPrice'))
+            price = request.POST.get('itemPrice')
             category_id = request.POST.get('category')
             phone = request.POST.get('contactNumber')
             hostel_name = request.POST.get('sellerHostel')
@@ -1196,7 +1196,7 @@ def api_items_post(request, id = None):
             if description is not None:
                 item.description = description
             if price:
-                item.price = price
+                item.price = float(price)
             if phone:
                 item.phone = phone
             
@@ -1234,7 +1234,7 @@ def api_items_post(request, id = None):
                 "id": item.id,
                 "itemName": item.name,
                 "itemImage": request.build_absolute_uri(image_url),
-                "itemPrice": int(item.price),
+                "itemPrice": float(item.price),
                 "sellerName": item.seller.name,
                 "sellerHostel": item.hostel.name,
                 "dateAdded": item.added_at.isoformat(),
