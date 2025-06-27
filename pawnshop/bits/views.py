@@ -1309,3 +1309,10 @@ def api_feedback(request):
             return JsonResponse({"error": str(e)}, status=400)
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
+    
+def api_cats(request):
+    if request.method == "GET":
+        categories = Category.objects.all().values('id', 'name')
+        return JsonResponse(list(categories), safe=False)
+    else:
+        return JsonResponse({"error": "Invalid method"}, status=405)

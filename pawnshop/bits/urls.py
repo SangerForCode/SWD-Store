@@ -29,6 +29,7 @@ urlpatterns = [
     path('api/<int:id>/images', views.api_item_images, name='items-images'),
     path('api/updatestats/<int:id>', views.api_update_item, name = "change sold status"),
     path('api/feedback', views.api_feedback, name = "api feedback"),
+    path('api/categories', views.api_cats, name = "api categories"),
     # path('api/additem', views.api_item, name = "add item"),
     path("bp-bot/", views.bp_bot_webhook, name="bp_bot_webhook"),
 ]
