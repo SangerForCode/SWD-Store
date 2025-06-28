@@ -25,6 +25,7 @@ urlpatterns = [
     path('unsubscribe/<str:token>/', views.unsubscribe_view, name='unsubscribe'),
     path('api/items/', views.api_items, name='api_items'),
     path('api/item/<int:id>', views.api_items_post, name = 'post/put api items'),
+    path('api/item/', views.api_items_post, name = "only post"),
     path('api/items/<int:id>/', views.api_items, name='api_items_detail'),
     path('api/<int:id>/images', views.api_item_images, name='items-images'),
     path('api/updatestats/<int:id>', views.api_update_item, name = "change sold status"),
