@@ -37,14 +37,6 @@ ALLOWED_HOSTS = [
     "13.234.29.123",
     "localhost",
 ]
-CSRF_TRUSTED_ORIGINS = [
-    "https://bits-pilani.store",
-    "https://www.bits-pilani.store",
-    "http://127.0.0.1:8000",
-    "https://amazoff.shop",
-    "https://www.amazoff.shop",
-    "http://localhost:5173",
-]
 # Application definition
 
 INSTALLED_APPS = [
@@ -286,7 +278,6 @@ CORS_ALLOWED_METHODS = [
     'POST',
     'PUT',
 ]
-CORS_ALLOW_ALL_ORIGINS = False
 
 # Add these settings to your settings.py
 
@@ -302,26 +293,32 @@ def is_localhost_request():
 CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
 SESSION_COOKIE_DOMAIN = None
 
-# Common settings for all environments
-SESSION_COOKIE_SAMESITE = 'None'
-# Development settings (no HTTPS)
-SESSION_COOKIE_SECURE = False
+# settings.py
 
-# You might need to use a workaround for Chrome
-# as it requires Secure=True when SameSite=None
-CSRF_USE_SESSIONS = True  # Store CSRF in session instead
-# Make sure your CORS settings include the CSRF header
-CORS_ALLOWED_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-***REMOVED***',
-    'x-requested-with',
+# This is critical for cross-origin cookie setting
+SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = False  # False for development (HTTP)
+SESSION_COOKIE_HTTPONLY = False
+
+CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = False  # False for development (HTTP)
+CSRF_COOKIE_HTTPONLY = False
+CSRF_COOKIE_NAME = '***REMOVED***'
+
+# For Chrome 80+ in development, you might need this workaround
+CSRF_USE_SESSIONS = True  # Store CSRF token in session
+
+# CORS settings
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
 ]
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_ALL_ORIGINS = False  # Don't use True in production
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
@@ -334,16 +331,25 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Ensure CORS credentials are allowed
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-***REMOVED***',
+    'x-requested-with',
+]
 
-# Add both localhost and production URLs to CORS
-CORS_ALLOWED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
     "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://bits-pilani.store",
     "https://bits-pilani.store",
+    "http://www.bits-pilani.store",
     "https://www.bits-pilani.store",
 ]
-CSRF_COOKIE_NAME = '***REMOVED***'
-CSRF_COOKIE_HTTPONLY = False  # Allows JS to read the cookie
-CSRF_COOKIE_SAMESITE = 'Lax'  # For development
-CSRF_COOKIE_SECURE = False
