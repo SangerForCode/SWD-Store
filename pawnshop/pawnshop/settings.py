@@ -37,6 +37,14 @@ ALLOWED_HOSTS = [
     "13.234.29.123",
     "localhost",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    "https://bits-pilani.store",
+    "https://www.bits-pilani.store",
+    "http://127.0.0.1:8000",
+    "https://amazoff.shop",
+    "https://www.amazoff.shop",
+    "http://localhost:5173",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -293,44 +301,11 @@ def is_localhost_request():
 CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
 SESSION_COOKIE_DOMAIN = None
 
-# settings.py
+# Common settings for all environments
+# Development settings (no HTTPS)
 
-# This is critical for cross-origin cookie setting
-SESSION_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SECURE = False  # False for development (HTTP)
-SESSION_COOKIE_HTTPONLY = False
-
-CSRF_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_SECURE = False  # False for development (HTTP)
-CSRF_COOKIE_HTTPONLY = False
-# CSRF_COOKIE_NAME = '***REMOVED***'
-
-# For Chrome 80+ in development, you might need this workaround
-CSRF_USE_SESSIONS = True  # Store CSRF token in session
-
-# CORS settings
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-]
-
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = False  # Don't use True in production
-
-CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-***REMOVED***',
-    'x-requested-with',
-]
-
+# You might need to use a workaround for Chrome
+# as it requires Secure=True when SameSite=None
 CORS_ALLOWED_HEADERS = [
     'accept',
     'accept-encoding',
@@ -343,13 +318,7 @@ CORS_ALLOWED_HEADERS = [
     'x-requested-with',
 ]
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "http://bits-pilani.store",
-    "https://bits-pilani.store",
-    "http://www.bits-pilani.store",
-    "https://www.bits-pilani.store",
-]
+
+# Ensure CORS credentials are allowed
+
+# Add both localhost and production URLs to CORS
