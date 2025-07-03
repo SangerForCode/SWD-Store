@@ -277,7 +277,7 @@ AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 # Remove the duplicate CORS_ALLOWED_ORIGINS near the top
 # Keep only these CORS settings at the bottom:
 
-    
+
 CORS_ALLOWED_METHODS = [
     'DELETE',
     'GET',
@@ -291,19 +291,34 @@ CORS_ALLOW_ALL_ORIGINS = False
 # Add these settings to your settings.py
 
 # For development (when frontend is on http://localhost:5173)
-if DEBUG or 'localhost' in ALLOWED_HOSTS:
-    CSRF_COOKIE_SECURE = False  # Allow HTTP in development
+# Add this to your settings.py
+
+# Check if request is coming from localhost frontend
+def is_localhost_request():
+    # You can set an environment variable to indicate when serving localhost frontend
+    return os.environ.get('SERVE_LOCALHOST_FRONTEND', 'False').lower() == 'true'
+
+# CSRF and Session Cookie Settings
+if DEBUG:
+    # Pure development mode
+    CSRF_COOKIE_SECURE = False
     SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_DOMAIN = None  # Let Django handle it
+    CSRF_COOKIE_DOMAIN = None
+    SESSION_COOKIE_DOMAIN = None
+elif is_localhost_request():
+    # Production backend serving localhost frontend
+    CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
     SESSION_COOKIE_DOMAIN = None
 else:
-    # Production settings
+    # Pure production mode
     CSRF_COOKIE_SECURE = True
     SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_DOMAIN = '.bits-pilani.store'  # Allow subdomains
+    CSRF_COOKIE_DOMAIN = '.bits-pilani.store'
     SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
 
-# Common settings for both environments
+# Common settings for all environments
 CSRF_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
