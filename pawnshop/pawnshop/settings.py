@@ -303,7 +303,7 @@ SESSION_COOKIE_HTTPONLY = False
 CSRF_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_SECURE = False  # False for development (HTTP)
 CSRF_COOKIE_HTTPONLY = False
-CSRF_COOKIE_NAME = '***REMOVED***'
+# CSRF_COOKIE_NAME = '***REMOVED***'
 
 # For Chrome 80+ in development, you might need this workaround
 CSRF_USE_SESSIONS = True  # Store CSRF token in session
