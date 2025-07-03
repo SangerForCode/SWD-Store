@@ -276,12 +276,40 @@ AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 # Add these CORS settings to your settings.py
 # Remove the duplicate CORS_ALLOWED_ORIGINS near the top
 # Keep only these CORS settings at the bottom:
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+
+    
+CORS_ALLOWED_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
 ]
+CORS_ALLOW_ALL_ORIGINS = False
 
-CORS_ALLOW_CREDENTIALS = True
+# Add these settings to your settings.py
 
+# For development (when frontend is on http://localhost:5173)
+if DEBUG or 'localhost' in ALLOWED_HOSTS:
+    CSRF_COOKIE_SECURE = False  # Allow HTTP in development
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_DOMAIN = None  # Let Django handle it
+    SESSION_COOKIE_DOMAIN = None
+else:
+    # Production settings
+    CSRF_COOKIE_SECURE = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_DOMAIN = '.bits-pilani.store'  # Allow subdomains
+    SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
+
+# Common settings for both environments
+CSRF_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
+SESSION_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
+CSRF_USE_SESSIONS = False  # Store CSRF token in cookie, not session
+
+# Make sure your CORS settings include the CSRF header
 CORS_ALLOWED_HEADERS = [
     'accept',
     'accept-encoding',
@@ -294,20 +322,12 @@ CORS_ALLOWED_HEADERS = [
     'x-requested-with',
 ]
 
-CORS_ALLOWED_METHODS = [
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
+# Ensure CORS credentials are allowed
+CORS_ALLOW_CREDENTIALS = True
+
+# Add both localhost and production URLs to CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://bits-pilani.store",
+    "https://www.bits-pilani.store",
 ]
-CORS_ALLOW_ALL_ORIGINS = False
-
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
-
-CSRF_COOKIE_SAMESITE = 'None'
-SESSION_COOKIE_SAMESITE = 'None'
-
-CSRF_COOKIE_HTTPONLY = False
