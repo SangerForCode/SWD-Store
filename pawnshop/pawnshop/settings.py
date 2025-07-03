@@ -277,7 +277,7 @@ AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 # Remove the duplicate CORS_ALLOWED_ORIGINS near the top
 # Keep only these CORS settings at the bottom:
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
+    "http://localhost:5173/",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -303,3 +303,7 @@ CORS_ALLOWED_METHODS = [
     'PUT',
 ]
 CORS_ALLOW_ALL_ORIGINS = False
+CSRF_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
