@@ -324,6 +324,7 @@ SESSION_COOKIE_DOMAIN = None
 
 # Common settings for all environments
 CSRF_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
+CSRF_COOKIE_SECURE = True      # Mark CSRF cookie as secure for cross-site
 SESSION_COOKIE_SAMESITE = 'None'
 CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
 CSRF_USE_SESSIONS = False  # Store CSRF token in cookie, not session
