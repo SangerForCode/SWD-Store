@@ -286,6 +286,7 @@ CORS_ALLOWED_METHODS = [
     'POST',
     'PUT',
 ]
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Add these settings to your settings.py
 
@@ -302,10 +303,14 @@ CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
 SESSION_COOKIE_DOMAIN = None
 
 # Common settings for all environments
+SESSION_COOKIE_SAMESITE = 'None'
 # Development settings (no HTTPS)
+SESSION_COOKIE_SECURE = False
 
 # You might need to use a workaround for Chrome
 # as it requires Secure=True when SameSite=None
+CSRF_USE_SESSIONS = True  # Store CSRF in session instead
+# Make sure your CORS settings include the CSRF header
 CORS_ALLOWED_HEADERS = [
     'accept',
     'accept-encoding',
@@ -317,8 +322,28 @@ CORS_ALLOWED_HEADERS = [
     'x-***REMOVED***',
     'x-requested-with',
 ]
-
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-***REMOVED***',
+    'x-requested-with',
+]
 
 # Ensure CORS credentials are allowed
+CORS_ALLOW_CREDENTIALS = True
 
 # Add both localhost and production URLs to CORS
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "https://bits-pilani.store",
+    "https://www.bits-pilani.store",
+]
+CSRF_COOKIE_NAME = '***REMOVED***'
+CSRF_COOKIE_HTTPONLY = False  # Allows JS to read the cookie
+CSRF_COOKIE_SAMESITE = 'Lax'  # For development
+CSRF_COOKIE_SECURE = False
