@@ -299,24 +299,28 @@ def is_localhost_request():
     return os.environ.get('SERVE_LOCALHOST_FRONTEND', 'False').lower() == 'true'
 
 # CSRF and Session Cookie Settings
-if DEBUG:
-    # Pure development mode
-    CSRF_COOKIE_SECURE = False
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_DOMAIN = None
-    SESSION_COOKIE_DOMAIN = None
-elif is_localhost_request():
-    # Production backend serving localhost frontend
-    CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
-    SESSION_COOKIE_DOMAIN = None
-else:
-    # Pure production mode
-    CSRF_COOKIE_SECURE = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_DOMAIN = '.bits-pilani.store'
-    SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
+# if DEBUG:
+#     # Pure development mode
+#     CSRF_COOKIE_SECURE = False
+#     SESSION_COOKIE_SECURE = False
+#     CSRF_COOKIE_DOMAIN = None
+#     SESSION_COOKIE_DOMAIN = None
+# elif is_localhost_request():
+#     # Production backend serving localhost frontend
+#     CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
+#     SESSION_COOKIE_SECURE = False
+#     CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
+#     SESSION_COOKIE_DOMAIN = None
+# else:
+#     # Pure production mode
+#     CSRF_COOKIE_SECURE = True
+#     SESSION_COOKIE_SECURE = True
+#     CSRF_COOKIE_DOMAIN = '.bits-pilani.store'
+#     SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
+CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
+SESSION_COOKIE_DOMAIN = None
 
 # Common settings for all environments
 CSRF_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
