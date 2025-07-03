@@ -299,37 +299,30 @@ def is_localhost_request():
     return os.environ.get('SERVE_LOCALHOST_FRONTEND', 'False').lower() == 'true'
 
 # CSRF and Session Cookie Settings
-# if DEBUG:
-#     # Pure development mode
-#     CSRF_COOKIE_SECURE = False
-#     SESSION_COOKIE_SECURE = False
-#     CSRF_COOKIE_DOMAIN = None
-#     SESSION_COOKIE_DOMAIN = None
-# elif is_localhost_request():
-#     # Production backend serving localhost frontend
-#     CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
-#     SESSION_COOKIE_SECURE = False
-#     CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
-#     SESSION_COOKIE_DOMAIN = None
-# else:
-#     # Pure production mode
-#     CSRF_COOKIE_SECURE = True
-#     SESSION_COOKIE_SECURE = True
-#     CSRF_COOKIE_DOMAIN = '.bits-pilani.store'
-#     SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
-SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
 SESSION_COOKIE_DOMAIN = None
 
 # Common settings for all environments
-CSRF_COOKIE_SAMESITE = 'None'  # Required for cross-origin requests
-CSRF_COOKIE_SECURE = True      # Mark CSRF cookie as secure for cross-site
 SESSION_COOKIE_SAMESITE = 'None'
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the cookie
-CSRF_USE_SESSIONS = False  # Store CSRF token in cookie, not session
+# Development settings (no HTTPS)
+SESSION_COOKIE_SECURE = False
 
+# You might need to use a workaround for Chrome
+# as it requires Secure=True when SameSite=None
+CSRF_USE_SESSIONS = True  # Store CSRF in session instead
 # Make sure your CORS settings include the CSRF header
 CORS_ALLOWED_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-***REMOVED***',
+    'x-requested-with',
+]
+CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
     'authorization',
@@ -350,5 +343,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://bits-pilani.store",
     "https://www.bits-pilani.store",
 ]
-
 CSRF_COOKIE_NAME = '***REMOVED***'
+CSRF_COOKIE_HTTPONLY = False  # Allows JS to read the cookie
+CSRF_COOKIE_SAMESITE = 'Lax'  # For development
+CSRF_COOKIE_SECURE = False
