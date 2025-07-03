@@ -1321,46 +1321,11 @@ def api_hstls(request):
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
     
-# In your views.py
-from django.http import JsonResponse
-from django.middleware.csrf import get_token
-from django.views.decorators.csrf import ensure_csrf_cookie
-from django.views.decorators.http import require_http_methods
-
-@require_http_methods(["GET"])
+@ensure_csrf_cookie
 def get_csrf_token(request):
-    """
-    Get CSRF token and set cookie with appropriate domain
-    """
-    # Get the CSRF token
-    csrf_token = get_token(request)
-    
-    # Create response
-    response = JsonResponse({'message': 'CSRF cookie set'})
-    
-    # Determine the appropriate domain based on the request
-    origin = request.META.get('HTTP_ORIGIN', '')
-    host = request.META.get('HTTP_HOST', '')
-    
-    # Set cookie with appropriate domain
-    if 'localhost' in origin or 'localhost' in host:
-        # For localhost requests, don't set domain (let browser handle it)
-        response.set_cookie(
-            '***REMOVED***',
-            csrf_token,
-            secure=False,  # Allow HTTP for localhost
-            samesite='None',
-            httponly=False
-        )
+    if request.method == "GET":
+        return JsonResponse({'message': 'CSRF cookie set'})
+    elif request.method == "POST":
+        return JsonResponse({'message': 'CSRF token valid'})
     else:
-        # For production requests
-        response.set_cookie(
-            '***REMOVED***',
-            csrf_token,
-            domain='.bits-pilani.store',
-            secure=True,
-            samesite='None',
-            httponly=False
-        )
-    
-    return response
+        return JsonResponse({'error': 'Invalid method'}, status=405)
