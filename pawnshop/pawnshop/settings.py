@@ -317,7 +317,6 @@ def is_localhost_request():
 #     SESSION_COOKIE_SECURE = True
 #     CSRF_COOKIE_DOMAIN = '.bits-pilani.store'
 #     SESSION_COOKIE_DOMAIN = '.bits-pilani.store'
-CSRF_COOKIE_SECURE = False  # Allow HTTP for localhost
 SESSION_COOKIE_SECURE = False
 CSRF_COOKIE_DOMAIN = None  # Let Django auto-detect
 SESSION_COOKIE_DOMAIN = None
@@ -351,3 +350,5 @@ CORS_ALLOWED_ORIGINS = [
     "https://bits-pilani.store",
     "https://www.bits-pilani.store",
 ]
+
+CSRF_COOKIE_NAME = '***REMOVED***'
