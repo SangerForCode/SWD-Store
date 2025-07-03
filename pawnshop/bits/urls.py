@@ -32,6 +32,7 @@ urlpatterns = [
     path('api/feedback', views.api_feedback, name = "api feedback"),
     path('api/categories', views.api_cats, name = "api categories"),
     path('api/hostels', views.api_hstls, name = "api hostels"),
+    path('api/csrf/', views.get_csrf_token),
     # path('api/additem', views.api_item, name = "add item"),
     path("bp-bot/", views.bp_bot_webhook, name="bp_bot_webhook"),
 ]

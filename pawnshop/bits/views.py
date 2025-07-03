@@ -5,6 +5,7 @@ import os
 import json
 import logging
 import threading
+from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
@@ -1037,12 +1038,6 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
-def add_cors_headers(response):
-    response["Access-Control-Allow-Origin"] = "*"
-    response["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
-    response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
-    return response
-
 @csrf_exempt
 def api_items(request, id=None):
     if request.method == "GET":
@@ -1067,9 +1062,9 @@ def api_items(request, id=None):
                     "description": item.description,
                     "issold": item.is_sold,
                 }
-                return add_cors_headers(JsonResponse(data))
+                return JsonResponse(data)
             except Item.DoesNotExist:
-                return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
+                return JsonResponse({"error": "Item not found"}, status=404)
         else:
             items = Item.objects.filter(is_sold=False).select_related('seller', 'hostel', 'category').prefetch_related('images').order_by('-added_at')
             
@@ -1094,9 +1089,9 @@ def api_items(request, id=None):
                     "issold": item.is_sold,
                 })
 
-            return add_cors_headers(JsonResponse(data, safe=False))
+            return JsonResponse(data, safe=False)
     
-    return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 @csrf_exempt
 def api_items_post(request, id = None):
@@ -1114,7 +1109,7 @@ def api_items_post(request, id = None):
                 seller_name = request.POST.get('sellerName')
                 campus = request.POST.get('campus')
                 if not all([name, price, category_id, seller_email]):
-                    return add_cors_headers(JsonResponse({"error": "Missing required fields"}, status=400))
+                    return JsonResponse({"error": "Missing required fields"}, status=400)
                 
                 try:
                     seller = Person.objects.get(email=seller_email)
@@ -1122,15 +1117,15 @@ def api_items_post(request, id = None):
                         seller.name = seller_name
                         seller.save()
                 except Person.DoesNotExist:
-                    return add_cors_headers(JsonResponse({"error": "Seller not found"}, status=404))
+                    return JsonResponse({"error": "Seller not found"}, status=404)
                 
                 try:
                     category = Category.objects.get(id=int(category_id))
                     hostel = Hostel.objects.get(name=hostel_name) if hostel_name else seller.hostel
                 except Category.DoesNotExist:
-                    return add_cors_headers(JsonResponse({"error": "Invalid category"}, status=400))
+                    return JsonResponse({"error": "Invalid category"}, status=400)
                 except Hostel.DoesNotExist:
-                    return add_cors_headers(JsonResponse({"error": "Invalid hostel"}, status=400))
+                    return JsonResponse({"error": "Invalid hostel"}, status=400)
                 
                 item = Item.objects.create(
                     name=name,
@@ -1168,16 +1163,16 @@ def api_items_post(request, id = None):
                     "issold": item.is_sold,
                 }
                 print("Response is ready")
-                return add_cors_headers(JsonResponse(response_data, status=201))
+                return JsonResponse(response_data, status=201)
                 
             except Exception as e:
-                return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
+                return JsonResponse({"error": str(e)}, status=400)
         
         else:
             try:
                 item = Item.objects.get(id=int(id))
             except Item.DoesNotExist:
-                return add_cors_headers(JsonResponse({"error": "Item not found"}, status=404))
+                return JsonResponse({"error": "Item not found"}, status=404)
 
             try:
                 name = request.POST.get('itemName')
@@ -1245,11 +1240,11 @@ def api_items_post(request, id = None):
                     "issold": item.is_sold,
                 }
                 
-                return add_cors_headers(JsonResponse(response_data))
+                return JsonResponse(response_data)
                 
             except Exception as e:
-                return add_cors_headers(JsonResponse({"error": str(e)}, status=400))
-    return add_cors_headers(JsonResponse({"error": "Invalid method"}, status=405))
+                return JsonResponse({"error": str(e)}, status=400)
+    return JsonResponse({"error": "Invalid method"}, status=405)
 
 @csrf_exempt
 def api_item_images(request, id):
@@ -1325,3 +1320,7 @@ def api_hstls(request):
         return JsonResponse(list(hostels), safe=False)
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
+    
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    return JsonResponse({'message': 'CSRF cookie set'})
