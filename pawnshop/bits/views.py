@@ -1330,6 +1330,7 @@ def get_csrf_token(request):
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
     
+@csrf_exempt
 def api_repost(request):
     if request.method == "POST":
         data = json.loads(request.body)
