@@ -1303,7 +1303,7 @@ def api_feedback(request):
             return JsonResponse({"error": str(e)}, status=400)
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
-    
+
 def api_cats(request):
     if request.method == "GET":
         categories = Category.objects.all().values('id', 'name')
@@ -1320,7 +1320,7 @@ def api_hstls(request):
         return JsonResponse(list(hostels), safe=False)
     else:
         return JsonResponse({"error": "Invalid method"}, status=405)
-    
+
 @ensure_csrf_cookie
 def get_csrf_token(request):
     if request.method == "GET":
@@ -1329,7 +1329,7 @@ def get_csrf_token(request):
         return JsonResponse({'message': 'CSRF token valid'})
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
-    
+
 def api_repost(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -1338,4 +1338,21 @@ def api_repost(request):
             item = Item.objects.get(id = int(id))
             item.repost()
         return JsonResponse({"status": "ok"})
+    return JsonResponse({"error":"invalid request"})
+
+def api_authreceiver(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get('email')
+        name = data.get('name')
+        person = Person.objects.filter(email = email).first()
+        if not person:
+            person = Person.objects.create(name = name, email = email)
+
+        request.session["email"] = email
+        request.session["name"] = name
+        request.session["campus"] = person.campus
+
+        return JsonResponse({"status": "ok"})
+
     return JsonResponse({"error":"invalid request"})

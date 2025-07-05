@@ -14,7 +14,7 @@ class Person(models.Model):
     id = models.AutoField(primary_key=True)
     last_notification = models.DateTimeField(default=timezone.now)
     name = models.CharField(max_length=100, null=False)
-    email = models.EmailField(null=False)
+    email = models.EmailField(null=False, unique=True)
     is_subscribed = models.BooleanField(default=True)
     phone = models.CharField(max_length=20, null=True)
     campus = models.CharField(max_length=5, choices=Campus.choices, null=False)

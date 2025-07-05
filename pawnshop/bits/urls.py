@@ -34,6 +34,7 @@ urlpatterns = [
     path('api/hostels/', views.api_hstls, name = "api hostels"),
     path('api/repost/', views.api_repost, name = "api reposts"),
     path('api/csrf/', views.get_csrf_token),
+    path('api/auth-reciever', views.api_authreceiver, name = "Google Authentication"),
     # path('api/additem', views.api_item, name = "add item"),
     path("bp-bot/", views.bp_bot_webhook, name="bp_bot_webhook"),
 ]
