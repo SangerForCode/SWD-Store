@@ -279,6 +279,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
+    "https://amazoff.shop"
     # Add your production frontend URLs here
 ]
 
@@ -303,32 +304,32 @@ CSRF_TRUSTED_ORIGINS = [
     "https://bits-pilani.store",
     "https://www.bits-pilani.store",
     "http://127.0.0.1:8000",
-    "https://apiamazoff.shop",
+    "https://amazoff.shop",
     "http://localhost:5173",
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
 ]
 
+CSRF_COOKIE_DOMAIN = ".amazoff.shop"
+SESSION_COOKIE_DOMAIN = ".amazoff.shop"
 CSRF_COOKIE_NAME = '***REMOVED***'
-CSRF_COOKIE_AGE = 60 * 60 * 24 * 7 * 52  # 1 year
-CSRF_COOKIE_HTTPONLY = False  # Must be False for JavaScript access
+CSRF_COOKIE_AGE = 60 * 60 * 24 * 7 * 52
+CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_PATH = '/'
-CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
-CSRF_COOKIE_SAMESITE = 'Lax'  # Use 'None' for production with HTTPS
+CSRF_COOKIE_SECURE = True               # ✅ HTTPS only
+CSRF_COOKIE_SAMESITE = 'None'           # ✅ Must be 'None' for cross-subdomain
 CSRF_USE_SESSIONS = False
 CSRF_HEADER_NAME = '***REMOVED***'
-# CSRF_COOKIE_DOMAIN = 'localhost'
-# Session Configuration
-SESSION_COOKIE_AGE = 1209600  # 2 weeks
+
+# Proxy awareness (Cloudflare)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Session Settings
+SESSION_COOKIE_AGE = 1209600
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_PATH = '/'
-SESSION_COOKIE_SECURE = False  # Set to True in production with HTTPS
-SESSION_COOKIE_SAMESITE = 'Lax'  # Use 'None' for production if needed
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-SESSION_SAVE_EVERY_REQUEST = False
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'None'
 
-# For production with HTTPS, update these:
-# CSRF_COOKIE_SECURE = True
-# CSRF_COOKIE_SAMESITE = 'None'
-# SESSION_COOKIE_SECURE = True
-# SESSION_COOKIE_SAMESITE = 'None'
+# CORS
+CORS_ALLOW_CREDENTIALS = True
