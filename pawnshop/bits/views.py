@@ -1340,7 +1340,7 @@ def api_repost(request):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"error":"invalid request"})
 
-@csrf_exempt
+@ensure_csrf_cookie
 def api_authreceiver(request):
     if request.method == "POST":
         data = json.loads(request.body)
@@ -1351,9 +1351,7 @@ def api_authreceiver(request):
             person = Person.objects.create(name = name, email = email)
 
         request.session["email"] = email
-        request.session["name"] = name
-        request.session["campus"] = person.campus
 
-        return JsonResponse({"status": "ok"})
-
-    return JsonResponse({"error":"invalid request"})
+        return JsonResponse({"status": "ok", "campus": person.campus})
+    else:
+        return JsonResponse({"info": "No POST data processed."})
