@@ -309,9 +309,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
 ]
 
-CSRF_COOKIE_DOMAIN = ".amazoff.shop"
-SESSION_COOKIE_DOMAIN = ".amazoff.shop"
-CSRF_COOKIE_NAME = '***REMOVED***'
+# CSRF_COOKIE_DOMAIN = ".amazoff.shop"
+# SESSION_COOKIE_DOMAIN = ".amazoff.shop"
+# CSRF_COOKIE_NAME = '***REMOVED***'
 CSRF_COOKIE_AGE = 60 * 60 * 24 * 7 * 52
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_PATH = '/'
