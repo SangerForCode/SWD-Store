@@ -971,7 +971,7 @@ def repost(request, id):
     if request.session.get('user_data') and Person.objects.filter(email=request.session.get('user_data')['email']).exists():
         person = Person.objects.get(email=request.session.get('user_data')['email'])
         item = get_object_or_404(Item, id=id)
-        
+
         if item.seller != person:
             messages.error(request, "You can only repost your own items.")
             return redirect('home')
@@ -1329,3 +1329,10 @@ def get_csrf_token(request):
         return JsonResponse({'message': 'CSRF token valid'})
     else:
         return JsonResponse({'error': 'Invalid method'}, status=405)
+    
+def api_repost(request):
+    if request.method == "POST":
+        ids = request.POST.get("ids")
+        print(ids)
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"error":"invalid request"})
