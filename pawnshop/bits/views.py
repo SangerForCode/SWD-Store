@@ -1354,4 +1354,8 @@ def api_authreceiver(request):
 
         return JsonResponse({"status": "ok", "campus": person.campus})
     else:
+        email = request.session.get("email")
+        person = Person.objects.filter(email=email).first()
+        if person:
+            return JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
         return JsonResponse({"info": "No POST data processed."})
