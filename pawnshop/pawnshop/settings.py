@@ -32,8 +32,8 @@ ALLOWED_HOSTS = [
     'www.bits-pilani.store',
     "127.0.0.1",
     "localhost",
-    "amazoff.shop",
-    "www.amazoff.shop",
+    "api.amazoff.shop",
+    "www.api.amazoff.shop",
     "13.234.29.123",
     "localhost",
     "pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
@@ -303,8 +303,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://bits-pilani.store",
     "https://www.bits-pilani.store",
     "http://127.0.0.1:8000",
-    "https://amazoff.shop",
-    "https://www.amazoff.shop",
+    "https://apiamazoff.shop",
     "http://localhost:5173",
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
 ]
