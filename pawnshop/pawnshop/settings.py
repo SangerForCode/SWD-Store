@@ -317,7 +317,7 @@ CSRF_COOKIE_SECURE = False  # Set to True in production with HTTPS
 CSRF_COOKIE_SAMESITE = 'Lax'  # Use 'None' for production with HTTPS
 CSRF_USE_SESSIONS = False
 CSRF_HEADER_NAME = '***REMOVED***'
-
+CSRF_COOKIE_DOMAIN = 'localhost'
 # Session Configuration
 SESSION_COOKIE_AGE = 1209600  # 2 weeks
 SESSION_COOKIE_HTTPONLY = True
