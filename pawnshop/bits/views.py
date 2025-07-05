@@ -1340,7 +1340,7 @@ def api_repost(request):
         return JsonResponse({"status": "ok"})
     return JsonResponse({"error":"invalid request"})
 
-@ensure_csrf_cookie
+@csrf_exempt
 def api_authreceiver(request):
     if request.method == "POST":
         data = json.loads(request.body)
