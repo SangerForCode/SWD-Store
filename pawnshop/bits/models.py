@@ -67,7 +67,7 @@ class Item(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items', null=False)
     added_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(default=timezone.now)
-    hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=False)
+    hostel = models.ForeignKey(Hostel, on_delete=models.CASCADE, related_name='items', null=True)
     phone = models.CharField(max_length=20, null=True, blank=True)
 
     def save(self, *args, change_time = False, **kwargs):
@@ -88,7 +88,7 @@ class Item(models.Model):
     
     def repost(self):
         self.is_sold = False
-        self.hostel = self.seller.hostel
+        self.hostel = self.seller.hostel or self.hostel
         self.save(change_time=True)
 
     def __str__(self):
