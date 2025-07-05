@@ -85,6 +85,11 @@ class Item(models.Model):
         if change_time:
             self.updated_at = timezone.now()
         super().save(*args, **kwargs)
+    
+    def repost(self):
+        self.is_sold = False
+        self.hostel = self.seller.hostel
+        self.save(change_time=True)
 
     def __str__(self):
         return f"{self.name}-{self.seller}"

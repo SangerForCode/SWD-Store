@@ -1333,7 +1333,13 @@ def get_csrf_token(request):
 @csrf_exempt
 def api_repost(request):
     if request.method == "POST":
-        ids = request.POST.get("ids")
-        print(ids)
-        return JsonResponse({"status": "ok"})
+        try:
+            data = json.loads(request.body)
+            ids = data.get('ids')
+            for id in ids:
+                item = Item.objects.get(id = int(id))
+                item.repost()
+            return JsonResponse({"status": "ok"})
+        except Exception as e:
+            return JsonResponse({"error": f"BRO ERROR {e}"}, status=400)
     return JsonResponse({"error":"invalid request"})
