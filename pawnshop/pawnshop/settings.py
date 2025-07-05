@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     "www.amazoff.shop",
     "13.234.29.123",
     "localhost",
+    "pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
 ]
 
 # Application definition
@@ -277,6 +278,7 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
+    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
     # Add your production frontend URLs here
 ]
 
@@ -304,6 +306,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://amazoff.shop",
     "https://www.amazoff.shop",
     "http://localhost:5173",
+    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
 ]
 
 CSRF_COOKIE_NAME = '***REMOVED***'
