@@ -1307,7 +1307,7 @@ def api_specificitem(request, id):
             item.description = description
 
         if price:
-            item.price = price
+            item.price = float(price)
 
         if category_id:
             category = Category.objects.filter(id = category_id).first()
@@ -1398,9 +1398,19 @@ def api_mylisting(request):
             })
         return JsonResponse({"status":"ok", "items":data})
     
-    # elif request.method == "POST":
-    #     method = request.POST.get('method')
-    #     ids = request.POST.get('ids')
-
-    #     if method == "DELETE":
-    #         Item.objects.filter(id__in)
+    elif request.method == "POST":
+        method = request.POST.get('method')
+        ids = request.POST.get('ids')
+        items = Item.objects.filter(id__in = ids)
+        if method == "DELETE":
+            items.delete()
+        elif method == "REPOST":
+            for item in items:
+                item.repost()
+        elif method == "MARK SOLD":
+            items.update(is_sold = True)
+        elif method == "MARK UNSOLD":
+            items.update(is_sold = False)
+        else:
+            return JsonResponse({"status":"error", "error":"Illegal Method"})
+        
