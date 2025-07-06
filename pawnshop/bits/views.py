@@ -1403,6 +1403,7 @@ def api_mylisting(request):
 
     elif request.method == "POST":
         data = json.loads(request.body)
+        print(data)
         method = data.get('method')
         ids = list(map(int, data.get('ids', [])))
         print(method, ids)
