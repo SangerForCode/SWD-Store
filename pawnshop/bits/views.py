@@ -1188,13 +1188,16 @@ def api_authreceiver(request):
         data = json.loads(request.body)
         email = data.get('email')
         name = data.get('name')
+        print(email, name)
         person = Person.objects.filter(email = email).first()
         if not person:
             person = Person.objects.create(name = name, email = email)
-
+        print("stage 1")
         request.session["email"] = email
         resp = JsonResponse({"status": "ok", "campus": person.campus})
+        print("stage 2")
         resp.set_cookie(get_token(request))
+        print("ending stage")
         return resp
     else:
         email = request.session.get("email")
