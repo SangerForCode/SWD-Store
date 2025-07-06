@@ -1215,3 +1215,23 @@ def api_hostels(request):
         return JsonResponse(list(hostels), safe=False)
     
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
+
+@ensure_csrf_cookie
+def api_misc(request):
+    email = request.session.get('email')
+    person = Person.objects.filter(email = email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+
+    campus = person.campus
+    if request.method == "GET":
+        method = request.GET.get("id")
+        if int(method) == 1:
+            phone = person.phone
+            hostel = person.hostel
+            return JsonResponse({
+                "phone": phone,
+                "hostel": hostel.name
+            })
+        return JsonResponse({"status": "error", "error": "Invalid id"}, status=400)
+    return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)

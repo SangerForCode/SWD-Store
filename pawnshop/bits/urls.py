@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/authreceiver/', views.api_authreceiver, name = "API Auth Receiver"),
     path('api/categories/', views.api_categories, name = "GET only API categories"),
     path('api/hostels', views.api_hostels, name = "API hostels"),
+    path('api/misc', views.api_misc, name = "all small shit"),
     # path('api/items/', views.api_items, name='api_items'),
     # path('api/items/<int:id>/', views.api_items, name='api_items_detail'),
     # path('api/feedback', views.api_feedback, name = "api feedback"),
