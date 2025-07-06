@@ -35,8 +35,7 @@ ALLOWED_HOSTS = [
     "api.amazoff.shop",
     "www.api.amazoff.shop",
     "13.234.29.123",
-    "localhost",
-    "pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
+    "52.66.77.218",
 ]
 
 # Application definition
@@ -299,7 +298,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://127.0.0.1:8000",
     "https://amazoff.shop",
     "http://localhost:5173",
-    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com"
+    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
+    "52.66.77.218"
 ]
 
 CSRF_COOKIE_DOMAIN = ".amazoff.shop"
