@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
 from queue import Queue
+from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
@@ -1192,8 +1193,9 @@ def api_authreceiver(request):
             person = Person.objects.create(name = name, email = email)
 
         request.session["email"] = email
-
-        return JsonResponse({"status": "ok", "campus": person.campus})
+        resp = JsonResponse({"status": "ok", "campus": person.campus})
+        resp.set_cookie(get_token(request))
+        return resp
     else:
         email = request.session.get("email")
         person = Person.objects.filter(email=email).first()
