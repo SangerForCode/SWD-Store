@@ -1375,11 +1375,32 @@ def api_feedback(request):
     else:
         return JsonResponse({"status":"error", "error": "Invalid method"}, status=405)
 
-# def api_mylisting(request):
-#     email = request.session.get('email')
-#     person = Person.objects.filter(email = email).first()
-#     if not person:
-#         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+def api_mylisting(request):
+    email = request.session.get('email')
+    person = Person.objects.filter(email = email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
-#     if request.method == "GET":
-#         items = person.items
+    if request.method == "GET":
+        items = helper.items_sort(person.items.all())
+        data = []
+        for item in items:
+            first_image = item.images.first()
+            image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
+            data.append({
+                "id": item.id,
+                "firstimage": image_url,
+                "title": item.name,
+                "price": item.price,
+                "date": item.updated_at.isoformat(),
+                "hostel": item.hostel.name,
+                "contact": item.whatsapp,
+            })
+        return JsonResponse({"status":"ok", "items":data})
+    
+    # elif request.method == "POST":
+    #     method = request.POST.get('method')
+    #     ids = request.POST.get('ids')
+
+    #     if method == "DELETE":
+    #         Item.objects.filter(id__in)
