@@ -36,6 +36,7 @@ ALLOWED_HOSTS = [
     "www.api.amazoff.shop",
     "13.234.29.123",
     "52.66.77.218",
+    "admin.amazoff.shop",
 ]
 
 # Application definition
