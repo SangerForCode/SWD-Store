@@ -1038,324 +1038,67 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
+SESSIONS = False
+
 @csrf_exempt
-def api_items(request, id=None):
-    if request.method == "GET":
-        if id:
-            try:
-                item = Item.objects.get(id=id)
-                first_image = item.images.first()
-                image_url = first_image.image.url if first_image else ""
-                
-                data = {
-                    "id": item.id,
-                    "itemName": item.name,
-                    "itemImage": request.build_absolute_uri(image_url),
-                    "itemPrice": int(item.price),
-                    "sellerName": item.seller.name,
-                    "sellerHostel": item.hostel.name,
-                    "dateAdded": item.added_at.isoformat(),
-                    "contactNumber": item.phone or item.seller.phone,
-                    "category": item.category.id,
-                    "campus": item.seller.campus,
-                    "sellerEmail": item.seller.email,
-                    "description": item.description,
-                    "issold": item.is_sold,
-                }
-                return JsonResponse(data)
-            except Item.DoesNotExist:
-                return JsonResponse({"error": "Item not found"}, status=404)
-        else:
-            items = Item.objects.filter(is_sold=False).select_related('seller', 'hostel', 'category').prefetch_related('images').order_by('-added_at')
-            
-            data = []
-            for item in items:
-                first_image = item.images.first()
-                image_url = first_image.image.url if first_image else ""
-
-                data.append({
-                    "id": item.id,
-                    "itemName": item.name,
-                    "itemImage": request.build_absolute_uri(image_url),
-                    "itemPrice": int(item.price),
-                    "sellerName": item.seller.name,
-                    "sellerHostel": item.hostel.name,
-                    "dateAdded": item.added_at.isoformat(),
-                    "contactNumber": item.phone or item.seller.phone,
-                    "category": item.category.id,
-                    "campus": item.seller.campus,
-                    "sellerEmail": item.seller.email,
-                    "description": item.description,
-                    "issold": item.is_sold,
-                })
-
-            return JsonResponse(data, safe=False)
+def api_items(request):
+    session = request.session
+    email = session.get('email')
+    if SESSIONS and not email:
+        return JsonResponse({"status": "error", "error": "Not allowed. Please log in."}, status=403)
     
-    return JsonResponse({"error": "Invalid method"}, status=405)
+    campus = Person.objects.filter(email = email) or "ALL"
 
-@csrf_exempt
-def api_items_post(request, id = None):
-    if request.method == 'POST':
-        if not id:
-            try:
-                print("Entered")
-                name = request.POST.get('itemName')
-                description = request.POST.get('description', '')
-                price = float(request.POST.get('itemPrice'))
-                category_id = request.POST.get('category')
-                phone = request.POST.get('contactNumber')
-                hostel_name = request.POST.get('sellerHostel')
-                seller_email = request.POST.get('sellerEmail')
-                seller_name = request.POST.get('sellerName')
-                campus = request.POST.get('campus')
-                if not all([name, price, category_id, seller_email]):
-                    return JsonResponse({"error": "Missing required fields"}, status=400)
-                
-                try:
-                    seller = Person.objects.get(email=seller_email)
-                    if seller_name:
-                        seller.name = seller_name
-                        seller.save()
-                except Person.DoesNotExist:
-                    return JsonResponse({"error": "Seller not found"}, status=404)
-                
-                try:
-                    category = Category.objects.get(id=int(category_id))
-                    hostel = Hostel.objects.get(name=hostel_name) if hostel_name else seller.hostel
-                except Category.DoesNotExist:
-                    return JsonResponse({"error": "Invalid category"}, status=400)
-                except Hostel.DoesNotExist:
-                    return JsonResponse({"error": "Invalid hostel"}, status=400)
-                
-                item = Item.objects.create(
-                    name=name,
-                    description=description,
-                    price=price,
-                    seller=seller,
-                    category=category,
-                    hostel=hostel,
-                    phone=phone
-                )
-                
-                images = request.FILES.getlist('images')
-                for idx, image_file in enumerate(images):
-                    Image.objects.create(
-                        item=item,
-                        image=image_file,
-                        display_order=idx
-                    )
-                
-                first_image = item.images.first()
-                image_url = first_image.image.url if first_image else ""
-                response_data = {
-                    "id": item.id,
-                    "itemName": item.name,
-                    "itemImage": request.build_absolute_uri(image_url),
-                    "itemPrice": int(item.price),
-                    "sellerName": item.seller.name,
-                    "sellerHostel": item.hostel.name,
-                    "dateAdded": item.added_at.isoformat(),
-                    "contactNumber": item.phone or item.seller.phone,
-                    "category": item.category.name,
-                    "campus": item.seller.campus,
-                    "sellerEmail": item.seller.email,
-                    "description": item.description,
-                    "issold": item.is_sold,
-                }
-                print("Response is ready")
-                return JsonResponse(response_data, status=201)
-                
-            except Exception as e:
-                return JsonResponse({"error": str(e)}, status=400)
-        
-        else:
-            try:
-                item = Item.objects.get(id=int(id))
-            except Item.DoesNotExist:
-                return JsonResponse({"error": "Item not found"}, status=404)
-
-            try:
-                name = request.POST.get('itemName')
-                description = request.POST.get('description', '')
-                price = request.POST.get('itemPrice')
-                category_id = request.POST.get('category')
-                phone = request.POST.get('contactNumber')
-                hostel_name = request.POST.get('sellerHostel')
-                seller_email = request.POST.get('sellerEmail')
-                seller_name = request.POST.get('sellerName')
-                
-                if name:
-                    item.name = name
-                if description is not None:
-                    item.description = description
-                if price:
-                    item.price = float(price)
-                if phone:
-                    item.phone = phone
-                
-                if category_id:
-                    try:
-                        category = Category.objects.get(id=int(category_id))
-                        item.category = category
-                    except Category.DoesNotExist:
-                        pass
-                print(hostel_name)
-                if hostel_name:
-                    try:
-                        hostel = Hostel.objects.get(name=hostel_name)
-                        item.hostel = hostel
-                    except Hostel.DoesNotExist:
-                        print(f"hostel not there bro {hostel_name}")
-                        pass
-                
-                item.save()
-                
-                new_images = request.FILES.getlist('images')
-                if new_images:
-                    max_order = item.images.aggregate(models.Max('display_order'))['display_order__max'] or -1
-                    
-                    for idx, image_file in enumerate(new_images):
-                        Image.objects.create(
-                            item=item,
-                            image=image_file,
-                            display_order=max_order + idx + 1
-                        )
-                
-                first_image = item.images.first()
-                image_url = first_image.image.url if first_image else ""
-                
-                response_data = {
-                    "id": item.id,
-                    "itemName": item.name,
-                    "itemImage": request.build_absolute_uri(image_url),
-                    "itemPrice": float(item.price),
-                    "sellerName": item.seller.name,
-                    "sellerHostel": item.hostel.name,
-                    "dateAdded": item.added_at.isoformat(),
-                    "contactNumber": item.phone or item.seller.phone,
-                    "category": item.category.name,
-                    "campus": item.seller.campus,
-                    "sellerEmail": item.seller.email,
-                    "description": item.description,
-                    "issold": item.is_sold,
-                }
-                
-                return JsonResponse(response_data)
-                
-            except Exception as e:
-                return JsonResponse({"error": str(e)}, status=400)
-    return JsonResponse({"error": "Invalid method"}, status=405)
-
-@csrf_exempt
-def api_item_images(request, id):
-    try:
-        item = Item.objects.get(id=id)
-        images = item.images.all()
-        image_urls = [request.build_absolute_uri(img.image.url) for img in images]
-        return JsonResponse({"item_id": id, "images": image_urls})
-    except Item.DoesNotExist:
-        return JsonResponse({"error": "Item not found"}, status=404)
-
-@csrf_exempt
-def api_update_item(request, id):
-    if request.method == "PUT":
-        try:
-            item = Item.objects.get(id=id)
-        except Item.DoesNotExist:
-            return JsonResponse({"error": "Item not found"}, status=404)
-        try:
-            data = json.loads(request.body)
-            new_status = data.get("issold")
-            if new_status is None:
-                return JsonResponse({"error": "Missing 'issold' in body"}, status=400)
-            item.is_sold = bool(new_status)
-            item.save()
-            return JsonResponse({"id": item.id, "issold": item.is_sold})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    elif request.method == "DELETE":
-        try:
-            item = Item.objects.get(id=id)
-        except Item.DoesNotExist:
-            return JsonResponse({"error": "Item not found"}, status=404)
-        images = item.images.all()
-        for image in images:
-            image.image.delete(save=False)
-            image.delete()
-        item.delete()
-        return JsonResponse({"status": "deleted", "id": id})
-    else:
-        return JsonResponse({"error": "Invalid method"}, status=405)
-
-@csrf_exempt
-def api_feedback(request):
-    if request.method == "POST":
-        try:
-            description = request.POST.get('description', '')
-            images = request.FILES.getlist('images')
-            feedback = Feedback.objects.create()
-            feedback.description = description
-            feedback.save()
-            for image in images:
-                FeedbackImage.objects.create(feedback=feedback, image=image)
-            return JsonResponse({"status": "success"})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
-    else:
-        return JsonResponse({"error": "Invalid method"}, status=405)
-
-def api_cats(request):
     if request.method == "GET":
-        categories = Category.objects.all().values('id', 'name')
-        return JsonResponse(list(categories), safe=False)
-    else:
-        return JsonResponse({"error": "Invalid method"}, status=405)
+        campus_param = request.GET.get('c', campus)
+        page = request.GET.get('p', 1)
+        category = request.GET.get('cat')
+        sort_method = request.GET.get('s')
+        query = request.GET.get('q')
 
-def api_hstls(request):
-    if request.method == "GET":
-        campus = request.GET.get('campus')
-        if not campus:
-            return JsonResponse({"error": "Campus not specified"}, status=400)
-        hostels = Hostel.objects.filter(campus=campus).values('name')
-        return JsonResponse(list(hostels), safe=False)
-    else:
-        return JsonResponse({"error": "Invalid method"}, status=405)
+        items_query = Item.objects.all()
 
-@ensure_csrf_cookie
-def get_csrf_token(request):
-    if request.method == "GET":
-        return JsonResponse({'message': 'CSRF cookie set'})
-    elif request.method == "POST":
-        return JsonResponse({'message': 'CSRF token valid'})
-    else:
-        return JsonResponse({'error': 'Invalid method'}, status=405)
+        if campus_param and campus_param != 'ALL':
+            items_query = items_query.filter(seller__campus=campus_param)
 
-def api_repost(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        ids = data.get('ids')
-        for id in ids:
-            item = Item.objects.get(id = int(id))
-            item.repost()
-        return JsonResponse({"status": "ok"})
-    return JsonResponse({"error":"invalid request"})
+        if category:
+            items_query = items_query.filter(category__id=category)
 
-@ensure_csrf_cookie
-def api_authreceiver(request):
-    if request.method == "POST":
-        data = json.loads(request.body)
-        email = data.get('email')
-        name = data.get('name')
-        person = Person.objects.filter(email = email).first()
-        if not person:
-            person = Person.objects.create(name = name, email = email)
+        category_counts = {cat.id: items_query.filter(category=cat).count() for cat in Category.objects.all()}
 
-        request.session["email"] = email
+        if query:
+            items_query = items_query.filter(
+            Q(name__icontains=query) |
+            Q(hostel__name__icontains=query) |
+            Q(description__icontains=query) |
+            Q(category__name__icontains=query)
+            )
 
-        return JsonResponse({"status": "ok", "campus": person.campus})
-    else:
-        email = request.session.get("email")
-        person = Person.objects.filter(email=email).first()
-        if person:
-            return JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
-        return JsonResponse({"info": "No POST data processed."})
+        items = helper.items_sort(items_query, sort_method)
+        items_per_page = 20
+        paginator = Paginator(list(items), items_per_page)
+        try:
+            paginated_items = paginator.page(page)
+        except PageNotAnInteger:
+            paginated_items = paginator.page(1)
+        except EmptyPage:
+            paginated_items = paginator.page(paginator.num_pages)
+
+        data = []
+        for item in paginated_items:
+            first_image = item.images.first()
+            data.append({
+                "firstimage": first_image.image.url if first_image else "",
+                "title": item.name,
+                "price": item.price,
+                "date": item.updated_at.isoformat(),
+                "hostel": item.hostel,
+                "contact": item.whatsapp
+            })
+
+        return JsonResponse({
+            "status": "ok",
+            "items": data,
+            "total_items": paginator.count,
+            "total_items_cat": category_counts,
+        })
