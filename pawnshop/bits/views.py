@@ -1400,10 +1400,11 @@ def api_mylisting(request):
                 "contact": item.whatsapp,
             })
         return JsonResponse({"status":"ok", "items":data})
-    
+
     elif request.method == "POST":
-        method = request.POST.get('method')
-        ids = list(map(int, request.POST.getlist('ids')))
+        data = json.loads(request.body)
+        method = data.get('method')
+        ids = list(map(int, data.getlist('ids')))
         items = Item.objects.filter(id__in = ids)
         if method == "DELETE":
             items.delete()
@@ -1415,7 +1416,7 @@ def api_mylisting(request):
         elif method == "MARK UNSOLD":
             items.update(is_sold = False)
         else:
-            return JsonResponse({"status":"error", "error":"Illegal Method"})
+            return JsonResponse({"status":"error", "error":"Illegal Method"}, status=405)
 
         return JsonResponse({"status":"ok", "ids":ids})
-    return JsonResponse({"status":"error", "error":"Invalid Method"})
+    return JsonResponse({"status":"error", "error":"Invalid Method"}, status=405)
