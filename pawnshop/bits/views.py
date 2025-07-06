@@ -1089,8 +1089,9 @@ def api_items(request):
         data = []
         for item in paginated_items:
             first_image = item.images.first()
+            image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
             data.append({
-                "firstimage": first_image.image.url if first_image else "",
+                "firstimage": image_url,
                 "title": item.name,
                 "price": item.price,
                 "date": item.updated_at.isoformat(),
@@ -1177,7 +1178,7 @@ def api_categories(request):
                 "id": cat.id,
                 "name": cat.name
             })
-        
+
         return JsonResponse({"status":"ok", "data":data})
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
