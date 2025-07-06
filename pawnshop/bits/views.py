@@ -1375,3 +1375,5 @@ def api_feedback(request):
             return JsonResponse({"status":"ok", "error": str(e)}, status=400)
     else:
         return JsonResponse({"status":"error", "error": "Invalid method"}, status=405)
+
+# def api_mylisting(request):
