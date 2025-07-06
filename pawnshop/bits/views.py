@@ -1227,8 +1227,8 @@ def api_misc(request):
     if request.method == "GET":
         method = request.GET.get("id")
         if int(method) == 1:
-            phone = person.phone
-            hostel = person.hostel
+            phone = person.phone or None
+            hostel = person.hostel or None
             return JsonResponse({
                 "phone": phone,
                 "hostel": hostel.name
