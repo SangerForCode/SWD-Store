@@ -1088,6 +1088,7 @@ def api_items(request):
             first_image = item.images.first()
             image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
             data.append({
+                "id": item.id,
                 "firstimage": image_url,
                 "title": item.name,
                 "price": item.price,
