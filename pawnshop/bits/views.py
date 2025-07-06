@@ -1194,6 +1194,7 @@ def api_authreceiver(request):
         request.session["email"] = email
         resp = JsonResponse({"status": "ok", "campus": person.campus})
         resp.set_cookie(get_token(request))
+        request.session["email"] = email
         return resp
     else:
         email = request.session.get("email")
