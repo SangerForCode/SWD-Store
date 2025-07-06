@@ -1413,4 +1413,6 @@ def api_mylisting(request):
             items.update(is_sold = False)
         else:
             return JsonResponse({"status":"error", "error":"Illegal Method"})
-        
+
+        return JsonResponse({"status":"ok", "ids":ids})
+    return JsonResponse({"status":"error", "error":"Invalid Method"})
