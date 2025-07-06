@@ -24,6 +24,7 @@ urlpatterns = [
     path('save-subscription/', views.save_subscription, name='save_subscription'),
     path('unsubscribe/<str:token>/', views.unsubscribe_view, name='unsubscribe'),
     path('api/items', views.api_items, name = "API Items"),
+    path('api/categories/', views.api_categories, name = "GET only API categories"),
     # path('api/items/', views.api_items, name='api_items'),
     # path('api/items/<int:id>/', views.api_items, name='api_items_detail'),
     # path('api/feedback', views.api_feedback, name = "api feedback"),

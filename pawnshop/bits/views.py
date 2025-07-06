@@ -1104,3 +1104,17 @@ def api_items(request):
         })
 
     return JsonResponse({"status":"error", "error":"invalid method"})
+
+@csrf_exempt
+def api_categories(request):
+    if request.method == "GET":
+        cats = Category.objects.all()
+        data = []
+        for cat in cats:
+            data.append({
+                "id": cat.id,
+                "name": cat.name
+            })
+        
+        return JsonResponse({"status":"ok", "data":data})
+    return JsonResponse({"status": "error", "error": "invalid method"})
