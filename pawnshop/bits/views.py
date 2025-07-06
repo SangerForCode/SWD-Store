@@ -1235,3 +1235,117 @@ def api_misc(request):
             })
         return JsonResponse({"status": "error", "error": "Invalid id"}, status=400)
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
+
+def api_specificitem(request, id):
+    email = request.session.get('email')
+    person = Person.objects.filter(email = email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+
+    item = Item.objects.filter(id = int(id)).first()
+    if not item:
+        return JsonResponse({"status": "error", "error": "Item not found"}, status=404)
+
+    if request.method == "GET":
+        images = item.images.all()
+        image_urls = [request.build_absolute_uri(img.image.url) for img in images]
+        similar_items = item.category.items
+        similar_items = helper.items_sort(similar_items)
+        data = []
+        for item in similar_items:
+            first_image = item.images.first()
+            image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
+            data.append({
+                "id": item.id,
+                "firstimage": image_url,
+                "title": item.name,
+                "price": item.price,
+                "date": item.updated_at.isoformat(),
+                "hostel": item.hostel.name,
+                "contact": item.whatsapp,
+            })
+
+        return JsonResponse({
+            "status": "ok",
+            "details": {
+                "id": item.id,
+                "name": item.name,
+                "description": item.description,
+                "price": float(item.price),
+                "seller": {
+                    "name": item.seller.name,
+                    "email": item.seller.email,
+                },
+                "category": item.category.name if item.category else None,
+                "hostel": item.hostel.name if item.hostel else None,
+                "phone": item.phone,
+                "updated_at": item.updated_at.isoformat() if item.updated_at else None,
+                "images": image_urls,
+            },
+            "similar_items": data
+        }, status=200)
+
+    elif request.method == "POST":
+        name = request.POST.get('itemName')
+        description = request.POST.get('description', '')
+        price = request.POST.get('itemPrice')
+        category_id = request.POST.get('category')
+        phone = request.POST.get('contactNumber')
+        hostel_name = request.POST.get('sellerHostel')
+        new_images = request.FILES.getlist('images')
+
+        if name:
+            item.name = name
+
+        if description:
+            item.description = description
+
+        if price:
+            item.price = price
+
+        if category_id:
+            category = Category.objects.filter(id = category_id).first()
+            if not category:
+                return JsonResponse({"status":"error", "error":"Invalid Category ID"}, status = 405)
+            item.category = category
+
+        if phone:
+            item.phone = phone
+            person.phone = phone
+
+        if hostel_name:
+            hostel = Hostel.objects.filter(name = hostel_name).first()
+            if not hostel:
+                return JsonResponse({"status":"error", "error":"Invalid Hostel name"}, status = 405)
+            item.hostel = hostel
+            person.hostel = hostel
+
+        if new_images:
+            current_images = item.images
+            for image in images:
+                image.delete()
+
+            for idx, image_file in enumerate(new_images):
+                Image.objects.create(
+                    item=item,
+                    image=image_file,
+                    display_order=idx
+                )
+
+        person.save()
+        item.save()
+
+        first_image = item.images.first()
+        image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
+
+        return JsonResponse({
+            "status":"ok", 
+            "id": item.id,
+            "firstimage": image_url,
+            "title": item.name,
+            "price": item.price,
+            "date": item.updated_at.isoformat(),
+            "hostel": item.hostel.name,
+            "contact": item.whatsapp,
+        })
+    return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
