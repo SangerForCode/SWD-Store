@@ -273,15 +273,7 @@ AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 
 
 # CORS Configuration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
-    "https://amazoff.shop"
-    # Add your production frontend URLs here
-]
+
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -331,3 +323,12 @@ SESSION_COOKIE_SAMESITE = 'None'
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:3000",
+#     "http://localhost:5173",
+#     "http://127.0.0.1:3000",
+#     "http://127.0.0.1:5173",
+#     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
+#     "https://amazoff.shop"
+#     # Add your production frontend URLs here
+# ]
