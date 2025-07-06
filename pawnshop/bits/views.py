@@ -1326,10 +1326,8 @@ def api_specificitem(request, id):
             item.hostel = hostel
             person.hostel = hostel
 
-        if new_images:
-            current_images = item.images.all()
-            for image in current_images:
-                image.delete()
+        if new_images or existing_images:
+            item.images.exclude(image__in=[helper.get_image_name(imageurl) for imageurl in existing_images]).delete()
 
             for idx, image_file in enumerate(new_images):
                 Image.objects.create(
