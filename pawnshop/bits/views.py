@@ -1249,7 +1249,7 @@ def api_specificitem(request, id):
     if request.method == "GET":
         images = item.images.all()
         image_urls = [request.build_absolute_uri(img.image.url) for img in images]
-        similar_items = item.category.items
+        similar_items = item.category.items.all()
         similar_items = helper.items_sort(similar_items)
         data = []
         for item in similar_items:
@@ -1321,7 +1321,7 @@ def api_specificitem(request, id):
             person.hostel = hostel
 
         if new_images:
-            current_images = item.images
+            current_images = item.images.all()
             for image in images:
                 image.delete()
 
