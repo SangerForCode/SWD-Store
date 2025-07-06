@@ -93,7 +93,7 @@ class Item(models.Model):
 
     def __str__(self):
         return f"{self.name}-{self.seller}"
-    
+
 class Image(models.Model):
     id = models.AutoField(primary_key=True)
     image = models.ImageField(upload_to='images/', null=False)

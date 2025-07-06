@@ -1298,6 +1298,7 @@ def api_specificitem(request, id):
         phone = request.POST.get('contactNumber')
         hostel_name = request.POST.get('sellerHostel')
         new_images = request.FILES.getlist('images')
+        existing_images = request.POST.get('existingImages')
 
         if name:
             item.name = name
@@ -1377,3 +1378,10 @@ def api_feedback(request):
         return JsonResponse({"status":"error", "error": "Invalid method"}, status=405)
 
 # def api_mylisting(request):
+#     email = request.session.get('email')
+#     person = Person.objects.filter(email = email).first()
+#     if not person:
+#         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+
+#     if request.method == "GET":
+#         items = person.items
