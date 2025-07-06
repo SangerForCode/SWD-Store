@@ -284,6 +284,7 @@ CORS_ALLOW_HEADERS = [
     'content-type',
     'dnt',
     'origin',
+    'method',
     'user-agent',
     'x-***REMOVED***',
     'x-requested-with',
