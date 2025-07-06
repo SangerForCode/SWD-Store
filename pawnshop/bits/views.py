@@ -1092,8 +1092,8 @@ def api_items(request):
                 "title": item.name,
                 "price": item.price,
                 "date": item.updated_at.isoformat(),
-                "hostel": item.hostel,
-                "contact": item.whatsapp
+                "hostel": item.hostel.name,
+                "contact": item.whatsapp,
             })
 
         return JsonResponse({
@@ -1102,3 +1102,5 @@ def api_items(request):
             "total_items": paginator.count,
             "total_items_cat": category_counts,
         })
+
+    return JsonResponse({"status":"error", "error":"invalid method"})
