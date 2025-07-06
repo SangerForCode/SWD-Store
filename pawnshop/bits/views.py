@@ -1236,6 +1236,7 @@ def api_misc(request):
         return JsonResponse({"status": "error", "error": "Invalid id"}, status=400)
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
+@ensure_csrf_cookie
 def api_specificitem(request, id):
     email = request.session.get('email')
     person = Person.objects.filter(email = email).first()
@@ -1354,6 +1355,7 @@ def api_specificitem(request, id):
         })
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
+@ensure_csrf_cookie
 def api_feedback(request):
     email = request.session.get('email')
     person = Person.objects.filter(email = email).first()
@@ -1375,6 +1377,7 @@ def api_feedback(request):
     else:
         return JsonResponse({"status":"error", "error": "Invalid method"}, status=405)
 
+@ensure_csrf_cookie
 def api_mylisting(request):
     email = request.session.get('email')
     person = Person.objects.filter(email = email).first()
