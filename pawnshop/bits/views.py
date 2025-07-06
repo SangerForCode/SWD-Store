@@ -1404,7 +1404,7 @@ def api_mylisting(request):
     elif request.method == "POST":
         data = json.loads(request.body)
         method = data.get('method')
-        ids = list(map(int, data.getlist('ids')))
+        ids = list(map(int, data.get('ids', [])))
         print(method, ids)
         items = Item.objects.filter(id__in = ids)
         if method == "DELETE":
