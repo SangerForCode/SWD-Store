@@ -1041,14 +1041,13 @@ def terms(request):
 
 @ensure_csrf_cookie
 def api_items(request):
-    session = request.session
-    email = session.get('email')
+    email = request.session.get('email')
     if not email:
-        return JsonResponse({"status": "error", "error": "Not allowed. Please log in."}, status=403)
+        return JsonResponse({"status": "error", "error": "Email dosent EXIST"}, status=403)
 
     person = Person.objects.filter(email = email).first()
     if not person:
-        return JsonResponse({"status": "error", "error": "Not allowed. Please log in."}, status=403)
+        return JsonResponse({"status": "error", "error": "No person exists"}, status=403)
 
     campus = person.campus
 
