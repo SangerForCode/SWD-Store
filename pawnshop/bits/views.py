@@ -1098,9 +1098,9 @@ def api_items(request):
 
         return JsonResponse({
             "status": "ok",
-            "items": data,
             "total_items": paginator.count,
             "total_items_cat": category_counts,
+            "items": data,
         })
 
     return JsonResponse({"status":"error", "error":"invalid method"})
