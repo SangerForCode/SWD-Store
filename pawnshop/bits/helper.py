@@ -7,7 +7,6 @@ from django.db.models import Case, When, IntegerField, BooleanField, Value
 from django.utils import timezone
 from urllib.parse import urlparse
 from django.conf import settings
-from bits.models import Image
 
 load_dotenv()
 
@@ -67,7 +66,7 @@ def items_sort(items_list, method='0'):
 
     return unsold_sorted + sold_sorted
 
-def get_image_id_from_url(full_url):
+def get_image_name(full_url):
     parsed_path = urlparse(full_url).path
 
     if parsed_path.startswith(settings.MEDIA_URL):
@@ -75,8 +74,4 @@ def get_image_id_from_url(full_url):
     else:
         return None
 
-    try:
-        image = Image.objects.get(image=relative_path)
-        return image.id
-    except Image.DoesNotExist:
-        return None
+    return relative_path
