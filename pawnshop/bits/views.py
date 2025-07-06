@@ -1038,7 +1038,7 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
-@csrf_exempt
+@ensure_csrf_cookie
 def api_items(request):
     session = request.session
     email = session.get('email')
@@ -1167,7 +1167,7 @@ def api_items(request):
 
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
-@csrf_exempt
+@ensure_csrf_cookie
 def api_categories(request):
     if request.method == "GET":
         cats = Category.objects.all()
@@ -1180,3 +1180,23 @@ def api_categories(request):
         
         return JsonResponse({"status":"ok", "data":data})
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
+
+@ensure_csrf_cookie
+def api_authreceiver(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        email = data.get('email')
+        name = data.get('name')
+        person = Person.objects.filter(email = email).first()
+        if not person:
+            person = Person.objects.create(name = name, email = email)
+
+        request.session["email"] = email
+
+        return JsonResponse({"status": "ok", "campus": person.campus})
+    else:
+        email = request.session.get("email")
+        person = Person.objects.filter(email=email).first()
+        if person:
+            return JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
+        return JsonResponse({"info": "No POST data processed."})
