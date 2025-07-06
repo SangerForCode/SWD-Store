@@ -1249,20 +1249,25 @@ def api_specificitem(request, id):
     if request.method == "GET":
         images = item.images.all()
         image_urls = [request.build_absolute_uri(img.image.url) for img in images]
-        similar_items = item.category.items.all()
+        similar_items = (
+            item.category.items
+            .filter(seller__campus=item.seller.campus)
+            .exclude(id=item.id)
+            .order_by('?')
+        )[0:8]
         similar_items = helper.items_sort(similar_items)
         data = []
-        for item in similar_items:
-            first_image = item.images.first()
+        for i in similar_items:
+            first_image = i.images.first()
             image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
             data.append({
-                "id": item.id,
+                "id": i.id,
                 "firstimage": image_url,
-                "title": item.name,
-                "price": item.price,
-                "date": item.updated_at.isoformat(),
-                "hostel": item.hostel.name,
-                "contact": item.whatsapp,
+                "title": i.name,
+                "price": i.price,
+                "date": i.updated_at.isoformat(),
+                "hostel": i.hostel.name,
+                "contact": i.whatsapp,
             })
 
         return JsonResponse({
