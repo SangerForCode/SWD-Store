@@ -1042,12 +1042,9 @@ def terms(request):
 @ensure_csrf_cookie
 def api_items(request):
     email = request.session.get('email')
-    if not email:
-        return JsonResponse({"status": "error", "error": "Email dosent EXIST"}, status=403)
-
     person = Person.objects.filter(email = email).first()
     if not person:
-        return JsonResponse({"status": "error", "error": "No person exists"}, status=403)
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
     campus = person.campus
 
@@ -1202,3 +1199,18 @@ def api_authreceiver(request):
         if person:
             return JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
         return JsonResponse({"info": "No POST data processed."})
+
+@ensure_csrf_cookie
+def api_hostels(request):
+    email = request.session.get('email')
+    person = Person.objects.filter(email = email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+
+    campus = person.campus
+
+    if request.method == "GET":
+        hostels = Hostel.objects.filter(campus=campus).values('name')
+        return JsonResponse(list(hostels), safe=False)
+    
+    return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
