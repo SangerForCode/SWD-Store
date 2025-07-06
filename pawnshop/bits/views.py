@@ -1038,22 +1038,24 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
-SESSIONS = False
-
 @csrf_exempt
 def api_items(request):
     session = request.session
     email = session.get('email')
-    if SESSIONS and not email:
+    if not email:
         return JsonResponse({"status": "error", "error": "Not allowed. Please log in."}, status=403)
-    
-    campus = Person.objects.filter(email = email) or "ALL"
+
+    person = Person.objects.filter(email = email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Not allowed. Please log in."}, status=403)
+
+    campus = person.campus
 
     if request.method == "GET":
         campus_param = request.GET.get('c', campus)
         page = request.GET.get('p', 1)
         category = request.GET.get('cat')
-        sort_method = request.GET.get('s')
+        sort_method = request.GET.get('s', 0)
         query = request.GET.get('q')
 
         items_query = Item.objects.all()
@@ -1103,7 +1105,67 @@ def api_items(request):
             "items": data,
         })
 
-    return JsonResponse({"status":"error", "error":"invalid method"})
+    elif request.method == "POST":
+        name = request.POST.get("itemName")
+        description = request.POST.get('description', '')
+        price = request.POST.get('itemPrice')
+        category_id = request.POST.get('category')
+        phone = request.POST.get('contactNumber')
+        hostel_name = request.POST.get('sellerHostel')
+        images = request.FILES.getlist('images')
+
+        if not all([person, name, price, category_id, phone, hostel_name, images]):
+            return JsonResponse({"error": "Missing required fields"}, status=400)
+
+
+        try:
+            category = Category.objects.get(id=int(category_id))
+            hostel = Hostel.objects.get(name=hostel_name) if hostel_name else person.hostel
+        except Category.DoesNotExist:
+            return JsonResponse({"error": "Invalid category"}, status=400)
+        except Hostel.DoesNotExist:
+            return JsonResponse({"error": "Invalid hostel"}, status=400)
+
+        person.phone = phone
+        person.hostel = hostel
+        person.save()
+
+        item = Item.objects.create(
+            name=name,
+            description=description,
+            price=float(price),
+            seller=person,
+            category=category,
+            hostel=hostel,
+            phone=phone
+        )
+
+        for idx, image_file in enumerate(images):
+            Image.objects.create(
+                item=item,
+                image=image_file,
+                display_order=idx
+            )
+
+        first_image = item.images.first()
+        image_url = first_image.image.url if first_image else ""
+        return JsonResponse({
+            "id": item.id,
+            "itemName": item.name,
+            "itemImage": request.build_absolute_uri(image_url),
+            "itemPrice": int(item.price),
+            "sellerName": item.seller.name,
+            "sellerHostel": item.hostel.name,
+            "dateAdded": item.added_at.isoformat(),
+            "contactNumber": item.phone or item.seller.phone,
+            "category": item.category.name,
+            "campus": item.seller.campus,
+            "sellerEmail": item.seller.email,
+            "description": item.description,
+            "issold": item.is_sold,
+        }, status = 201)
+
+    return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
 @csrf_exempt
 def api_categories(request):
@@ -1117,4 +1179,4 @@ def api_categories(request):
             })
         
         return JsonResponse({"status":"ok", "data":data})
-    return JsonResponse({"status": "error", "error": "invalid method"})
+    return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
