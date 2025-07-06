@@ -1095,6 +1095,7 @@ def api_items(request):
                 "date": item.updated_at.isoformat(),
                 "hostel": item.hostel.name,
                 "contact": item.whatsapp,
+                "is_sold": item.is_sold
             })
 
         return JsonResponse({
