@@ -1327,7 +1327,7 @@ def api_specificitem(request, id):
 
         if new_images:
             current_images = item.images.all()
-            for image in images:
+            for image in current_images:
                 image.delete()
 
             for idx, image_file in enumerate(new_images):
