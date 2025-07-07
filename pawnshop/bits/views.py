@@ -1060,11 +1060,6 @@ def api_items(request):
         if campus_param and campus_param != 'ALL':
             items_query = items_query.filter(seller__campus=campus_param)
 
-        if category:
-            items_query = items_query.filter(category__id=category)
-
-        category_counts = {cat.id: items_query.filter(category=cat).count() for cat in Category.objects.all()}
-
         if query:
             items_query = items_query.filter(
             Q(name__icontains=query) |
@@ -1072,6 +1067,11 @@ def api_items(request):
             Q(description__icontains=query) |
             Q(category__name__icontains=query)
             )
+
+        category_counts = {cat.id: items_query.filter(category=cat).count() for cat in Category.objects.all()}
+
+        if category:
+            items_query = items_query.filter(category__id=category)
 
         items = helper.items_sort(items_query, sort_method)
         items_per_page = 20
