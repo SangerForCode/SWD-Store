@@ -30,12 +30,4 @@ urlpatterns = [
     path('api/categories/', views.api_categories, name = "GET only API categories"),
     path('api/hostels', views.api_hostels, name = "API hostels"),
     path('api/misc', views.api_misc, name = "all small shit"),
-    # path('api/items/', views.api_items, name='api_items'),
-    # path('api/items/<int:id>/', views.api_items, name='api_items_detail'),
-    # path('api/feedback', views.api_feedback, name = "api feedback"),
-    # path('api/categories/', views.api_cats, name = "api categories"),
-    # path('api/hostels/', views.api_hstls, name = "api hostels"),
-    # path('api/authreceiver/', views.api_authreceiver, name = "Google Authentication"),
-    # # path('api/additem', views.api_item, name = "add item"),
-    # path("bp-bot/", views.bp_bot_webhook, name="bp_bot_webhook"),
 ]

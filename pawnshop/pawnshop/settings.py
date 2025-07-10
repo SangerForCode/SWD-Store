@@ -30,6 +30,7 @@ DEBUG = False
 ALLOWED_HOSTS = [
     'bits-pilani.store',
     'www.bits-pilani.store',
+    'admin.bits-pilani.store',
     "127.0.0.1",
     "localhost",
     "api.amazoff.shop",
