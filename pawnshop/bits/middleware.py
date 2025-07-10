@@ -6,7 +6,7 @@ from django.middleware.csrf import CsrfViewMiddleware
 
 class DomainBasedCSRFMiddleware(CsrfViewMiddleware):
     def process_view(self, request, callback, callback_args, callback_kwargs):
-        allowed_domains = ['https://admin.amazoff.shop']
+        allowed_domains = ['https://admin.bits-pilani.store']
 
         origin = request.META.get('HTTP_ORIGIN', '')
         referer = request.META.get('HTTP_REFERER', '')

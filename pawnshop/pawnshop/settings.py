@@ -34,6 +34,7 @@ ALLOWED_HOSTS = [
     "localhost",
     "api.amazoff.shop",
     "api.bits-pilani.store",
+    "amdin.bits-pilani.store",
     "www.api.amazoff.shop",
     "www.api.bits-pilani.store",
     "13.234.29.123",
