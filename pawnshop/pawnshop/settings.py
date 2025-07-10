@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = r'***REMOVED***'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     'bits-pilani.store',
@@ -33,7 +33,9 @@ ALLOWED_HOSTS = [
     "127.0.0.1",
     "localhost",
     "api.amazoff.shop",
+    "api.bits-pilani.store",
     "www.api.amazoff.shop",
+    "www.api.bits-pilani.store",
     "13.234.29.123",
     "52.66.77.218",
     "admin.amazoff.shop",
@@ -304,8 +306,8 @@ CSRF_TRUSTED_ORIGINS = [
     "52.66.77.218"
 ]
 
-CSRF_COOKIE_DOMAIN = ".amazoff.shop"
-SESSION_COOKIE_DOMAIN = ".amazoff.shop"
+CSRF_COOKIE_DOMAIN = ".bits-pilani.store"
+SESSION_COOKIE_DOMAIN = ".bits-pilani.store"
 CSRF_COOKIE_NAME = '***REMOVED***'
 CSRF_COOKIE_AGE = 60 * 60 * 24 * 7 * 52
 CSRF_COOKIE_HTTPONLY = False
@@ -331,5 +333,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:3000",
     "http://127.0.0.1:5173",
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
-    "https://amazoff.shop"
+    "https://amazoff.shop",
+    "https://bits-pilani.store",
 ]
