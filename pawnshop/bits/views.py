@@ -1174,11 +1174,36 @@ def api_authreceiver(request):
         request.session["email"] = email
         return resp
     else:
+        if not request.session.session_key:
+            request.session.create()
         email = request.session.get("email")
         person = Person.objects.filter(email=email).first()
         if person:
-            return JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
-        return JsonResponse({"info": "No POST data processed."})
+            response = JsonResponse({"status": "ok", "campus": person.campus, "name": person.name})
+        response = JsonResponse({"info": "No POST data processed."})
+
+        csrf_token = get_token(request)
+        response.set_cookie(
+            key='***REMOVED***',
+            value=csrf_token,
+            max_age=60 * 60 * 24 * 7,
+            httponly=False,
+            secure=True,
+            samesite='None',
+            path='/'
+        )
+
+        response.set_cookie(
+            key='sessionid',
+            value=request.session.session_key,
+            max_age=60 * 60 * 24 * 7,
+            httponly=True,
+            secure=True,
+            samesite='None',
+            path='/'
+        )
+
+        return response
 
 @ensure_csrf_cookie
 def api_hostels(request):
