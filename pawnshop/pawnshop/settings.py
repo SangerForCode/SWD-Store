@@ -333,7 +333,7 @@ CACHES = {
             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         },
         'KEY_PREFIX': 'marketplace',
-        'TIMEOUT': 300,
+        'TIMEOUT': 3000,
     }
 }
 

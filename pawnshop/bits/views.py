@@ -9,7 +9,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
+import hashlib
 from queue import Queue
+from django.core.cache import cache
 from django.middleware.csrf import get_token
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -1025,43 +1027,61 @@ def api_items(request):
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
     if request.method == "GET":
-        campus_param = request.GET.get('c')
+        campus_param = request.GET.get('c', '')
         page = request.GET.get('p', 1)
-        category = request.GET.get('cat')
+        category = request.GET.get('cat', '')
         sort_method = request.GET.get('s', 0)
-        query = request.GET.get('q')
+        query = request.GET.get('q', '')
 
-        items_query = Item.objects.select_related(
-            'seller', 'category', 'hostel'
-        ).prefetch_related(
-            Prefetch('images', queryset=Image.objects.order_by('display_order'))
-        )
-
-        if campus_param and campus_param != 'ALL':
-            items_query = items_query.filter(seller__campus=campus_param)
-
-        if query:
-            items_query = items_query.filter(
-                Q(name__icontains=query) |
-                Q(hostel__name__icontains=query) |
-                Q(description__icontains=query) |
-                Q(category__name__icontains=query)
+        cache_params = f"{campus_param}_{category}_{sort_method}_{query}"
+        cache_hash = hashlib.md5(cache_params.encode()).hexdigest()
+        cache_key_items = f"items_cache_{cache_hash}"
+        cache_key_counts = f"category_counts_{cache_hash}"
+        
+        cached_items = cache.get(cache_key_items)
+        cached_counts = cache.get(cache_key_counts)
+        
+        if cached_items is not None and cached_counts is not None:
+            sorted_items = cached_items
+            category_counts = cached_counts
+            print(f"Cache HIT for: {cache_params}")
+        else:
+            print(f"Cache MISS for: {cache_params}")
+            
+            items_query = Item.objects.select_related(
+                'seller', 'category', 'hostel'
+            ).prefetch_related(
+                Prefetch('images', queryset=Image.objects.order_by('display_order'))
             )
 
-        base_query = items_query
-        if category:
-            items_query = items_query.filter(category__id=category)
+            if campus_param and campus_param != 'ALL':
+                items_query = items_query.filter(seller__campus=campus_param)
 
-        category_counts = dict(
-            base_query.values('category').annotate(
-                count=Count('id')
-            ).values_list('category', 'count')
-        )
+            if query:
+                items_query = items_query.filter(
+                    Q(name__icontains=query) |
+                    Q(hostel__name__icontains=query) |
+                    Q(description__icontains=query) |
+                    Q(category__name__icontains=query)
+                )
 
-        items = helper.items_sort(items_query, sort_method)
+            base_query = items_query
+            if category:
+                items_query = items_query.filter(category__id=category)
+
+            category_counts = dict(
+                base_query.values('category').annotate(
+                    count=Count('id')
+                ).values_list('category', 'count')
+            )
+
+            sorted_items = helper.items_sort(items_query, sort_method)
+            
+            cache.set(cache_key_items, sorted_items, 300)
+            cache.set(cache_key_counts, category_counts, 300)
 
         items_per_page = 20
-        paginator = Paginator(items, items_per_page)
+        paginator = Paginator(sorted_items, items_per_page)
 
         try:
             paginated_items = paginator.page(page)
@@ -1135,6 +1155,12 @@ def api_items(request):
                 display_order=idx
             )
 
+        try:
+            cache.clear()
+            print("Cache cleared due to new item creation")
+        except Exception as e:
+            print(f"Error clearing cache: {e}")
+
         first_image = item.images.first()
         image_url = first_image.image.url if first_image else ""
         return JsonResponse({
@@ -1154,7 +1180,6 @@ def api_items(request):
         }, status=201)
 
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
-
 @ensure_csrf_cookie
 def api_categories(request):
     if request.method == "GET":
