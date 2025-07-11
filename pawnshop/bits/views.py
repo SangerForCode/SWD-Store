@@ -29,7 +29,7 @@ import requests as req
 from . import helper
 from datetime import datetime, timedelta
 from user_agents import parse
-from django.db.models import Q
+from django.db.models import Q, Count, Prefetch
 import random
 from django.http import HttpResponse
 from django.core.signing import Signer, BadSignature
@@ -1020,7 +1020,7 @@ def terms(request):
 @ensure_csrf_cookie
 def api_items(request):
     email = request.session.get('email')
-    person = Person.objects.filter(email = email).first()
+    person = Person.objects.filter(email=email).first()
     if not person:
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
@@ -1031,27 +1031,38 @@ def api_items(request):
         sort_method = request.GET.get('s', 0)
         query = request.GET.get('q')
 
-        items_query = Item.objects.all()
+        items_query = Item.objects.select_related(
+            'seller', 'category', 'hostel'
+        ).prefetch_related(
+            Prefetch('images', queryset=Image.objects.order_by('display_order'))
+        )
 
         if campus_param and campus_param != 'ALL':
             items_query = items_query.filter(seller__campus=campus_param)
 
         if query:
             items_query = items_query.filter(
-            Q(name__icontains=query) |
-            Q(hostel__name__icontains=query) |
-            Q(description__icontains=query) |
-            Q(category__name__icontains=query)
+                Q(name__icontains=query) |
+                Q(hostel__name__icontains=query) |
+                Q(description__icontains=query) |
+                Q(category__name__icontains=query)
             )
 
-        category_counts = {cat.id: items_query.filter(category=cat).count() for cat in Category.objects.all()}
-
+        base_query = items_query
         if category:
             items_query = items_query.filter(category__id=category)
 
+        category_counts = dict(
+            base_query.values('category').annotate(
+                count=Count('id')
+            ).values_list('category', 'count')
+        )
+
         items = helper.items_sort(items_query, sort_method)
+
         items_per_page = 20
-        paginator = Paginator(list(items), items_per_page)
+        paginator = Paginator(items, items_per_page)
+
         try:
             paginated_items = paginator.page(page)
         except PageNotAnInteger:
@@ -1061,8 +1072,10 @@ def api_items(request):
 
         data = []
         for item in paginated_items:
-            first_image = item.images.first()
+            images = list(item.images.all())
+            first_image = images[0] if images else None
             image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
+
             data.append({
                 "id": item.id,
                 "firstimage": image_url,
@@ -1092,7 +1105,6 @@ def api_items(request):
 
         if not all([person, name, price, category_id, phone, hostel_name, images]):
             return JsonResponse({"error": "Missing required fields"}, status=400)
-
 
         try:
             category = Category.objects.get(id=int(category_id))
@@ -1139,7 +1151,7 @@ def api_items(request):
             "sellerEmail": item.seller.email,
             "description": item.description,
             "issold": item.is_sold,
-        }, status = 201)
+        }, status=201)
 
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
