@@ -10,6 +10,7 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.core.mail import EmailMessage
 import hashlib
+import time
 from queue import Queue
 from django.core.cache import cache
 from django.middleware.csrf import get_token
@@ -1021,6 +1022,7 @@ def terms(request):
 
 @ensure_csrf_cookie
 def api_items(request):
+    start = time.time()
     email = request.session.get('email')
     person = Person.objects.filter(email=email).first()
     if not person:
@@ -1106,7 +1108,7 @@ def api_items(request):
                 "contact": item.whatsapp,
                 "is_sold": item.is_sold
             })
-
+        print(time.time()-start)
         return JsonResponse({
             "status": "ok",
             "total_items": paginator.count,
