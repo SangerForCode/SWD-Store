@@ -71,6 +71,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 MIDDLEWARE = [
+    'django.middleware.gzip.GZipMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -235,31 +236,18 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
-        'request_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_DIR, 'request_logs.log'),
-        },
-        'install_file': {
-            'level': 'INFO',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(LOG_DIR, 'install_logs.log'),  # new install log file
+        'console': {
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
-        'request_logger': {
-            'handlers': ['request_file'],
+        'bits': {
+            'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
-        },
-        'install_logger': {
-            'handlers': ['install_file'],
-            'level': 'INFO',
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
-
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_PORT = 587
@@ -338,3 +326,16 @@ CORS_ALLOWED_ORIGINS = [
     "https://amazoff.shop",
     "https://bits-pilani.store",
 ]
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        },
+        'KEY_PREFIX': 'marketplace',
+        'TIMEOUT': 300,
+    }
+}
+
+# Install: pip install django-redis

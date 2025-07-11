@@ -93,6 +93,16 @@ class Item(models.Model):
 
     def __str__(self):
         return f"{self.name}-{self.seller}"
+    class Meta:
+        indexes = [
+            models.Index(fields=['is_sold', '-updated_at'], name='item_sold_updated_idx'),
+            models.Index(fields=['is_sold', 'price'], name='item_sold_price_asc_idx'),
+            models.Index(fields=['is_sold', '-price'], name='item_sold_price_desc_idx'),
+            models.Index(fields=['seller', 'is_sold', '-updated_at'], name='item_seller_sold_updated_idx'),
+            models.Index(fields=['category', 'is_sold', '-updated_at'], name='item_cat_sold_updated_idx'),
+            models.Index(fields=['name'], name='item_name_idx'),
+        ]
+
 
 class Image(models.Model):
     id = models.AutoField(primary_key=True)
@@ -102,7 +112,9 @@ class Image(models.Model):
     display_order = models.IntegerField(default=0)
 
     class Meta:
-        ordering = ['display_order']
+        indexes = [
+            models.Index(fields=['item', 'display_order']),
+        ]
 
     def delete(self, *args, **kwargs):
         self.image.delete(save=False)
