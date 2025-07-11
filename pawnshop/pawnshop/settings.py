@@ -325,15 +325,15 @@ CORS_ALLOWED_ORIGINS = [
     "https://amazoff.shop",
     "https://bits-pilani.store",
 ]
+
 CACHES = {
     'default': {
-        'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': 'redis://127.0.0.1:6379/1',
-        'OPTIONS': {
-            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-        },
-        'KEY_PREFIX': 'marketplace',
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'cache_table',
         'TIMEOUT': 3000,
+        'OPTIONS': {
+            'MAX_ENTRIES': 5000,
+        }
     }
 }
 
