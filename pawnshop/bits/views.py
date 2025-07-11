@@ -1024,10 +1024,8 @@ def api_items(request):
     if not person:
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
-    campus = person.campus
-
     if request.method == "GET":
-        campus_param = request.GET.get('c', campus)
+        campus_param = request.GET.get('c')
         page = request.GET.get('p', 1)
         category = request.GET.get('cat')
         sort_method = request.GET.get('s', 0)
