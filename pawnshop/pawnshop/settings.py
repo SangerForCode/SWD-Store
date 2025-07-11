@@ -293,7 +293,6 @@ CSRF_TRUSTED_ORIGINS = [
     "https://amazoff.shop",
     "http://localhost:5173",
     "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
-    "52.66.77.218"
 ]
 
 CSRF_COOKIE_DOMAIN = ".bits-pilani.store"
