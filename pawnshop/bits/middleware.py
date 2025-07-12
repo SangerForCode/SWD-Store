@@ -19,7 +19,10 @@ class DomainBasedCSRFMiddleware(CsrfViewMiddleware):
 
         return super().process_view(request, callback, callback_args, callback_kwargs)
 
-ALLOWED_ORIGINS = 'https://bits-pilani.store'
+ALLOWED_ORIGINS = [
+    'https://bits-pilani.store',
+    'https://www.bits-pilani.store',
+]
 
 class BlockUnauthorizedOriginsMiddleware:
     def __init__(self, get_response):
@@ -27,12 +30,18 @@ class BlockUnauthorizedOriginsMiddleware:
 
     def __call__(self, request):
         origin = request.META.get('HTTP_ORIGIN') or request.META.get('HTTP_REFERER')
+        ua = request.META.get("HTTP_USER_AGENT", "").lower()
+        if "postman" in ua or "curl" in ua:
+            return JsonResponse({'error': 'sneaky sneaky, denied'}, status=403)
+
         if origin:
-            if origin.startswith(ALLOWED_ORIGINS):
+            if any(origin.startswith(allowed) for allowed in ALLOWED_ORIGINS):
                 return self.get_response(request)
             return JsonResponse({'error': 'Bro dont try to play the fool with me'}, status=403)
-        email = request.session.get('email')
-        person = Person.objects.filter(email = email).first()
-        if person:
-            return JsonResponse({'error': "my brother, no public API for you, ask VISHRUT bhaiya for all this."})
-        return JsonResponse({'error': f"{person.name}, Bro really? if u need public API access ask PAPA SANGER! dont try to be sneeky peeky and all haa?"}, status=403)
+        try:
+            email = request.session.get('email')
+            person = Person.objects.filter(email = email).first()
+            if person:
+                return JsonResponse({'error': f"{person.name}, Bro really? if u need public API access ask PAPA SANGER! dont try to be sneeky peeky and all haa?"}, status=403)
+        finally: 
+           return JsonResponse({'error': "my brother, no public API for you, ask VISHRUT bhaiya for all this."})
