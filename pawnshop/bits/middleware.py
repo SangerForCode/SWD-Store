@@ -41,5 +41,6 @@ class BlockUnauthorizedOriginsMiddleware:
         email = request.session.get('email')
         person = Person.objects.filter(email = email).first()
         if person:
-            return JsonResponse({'error': f"{person.name}, Bro really? if u need public API access ask PAPA SANGER! dont try to be sneeky peeky and all haa?"}, status=403)
-        return JsonResponse({'error': "my brother, no public API for you, ask VISHRUT bhaiya for all this."})
+            return JsonResponse({'error': "my brother, no public API for you, ask VISHRUT bhaiya for all this."})
+        return JsonResponse({'error': f"{person.name}, Bro really? if u need public API access ask PAPA SANGER! dont try to be sneeky peeky and all haa?"}, status=403)
+        
