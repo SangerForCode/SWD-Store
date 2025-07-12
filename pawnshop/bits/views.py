@@ -1308,6 +1308,7 @@ def api_specificitem(request, id):
                 "firstimage": image_url,
                 "title": i.name,
                 "price": i.price,
+                "campus": i.seller.campus,
                 "date": i.updated_at.isoformat(),
                 "hostel": i.hostel.name,
                 "contact": i.whatsapp,
@@ -1319,6 +1320,7 @@ def api_specificitem(request, id):
                 "id": item.id,
                 "name": item.name,
                 "description": item.description,
+                "campus": item.seller.campus,
                 "price": float(item.price),
                 "seller": {
                     "name": item.seller.name,
