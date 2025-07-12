@@ -1183,8 +1183,14 @@ def api_items(request):
         }, status=201)
 
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
+
 @ensure_csrf_cookie
 def api_categories(request):
+    email = request.session.get('email')
+    person = Person.objects.filter(email=email).first()
+    if not person:
+        return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
+
     if request.method == "GET":
         cats = Category.objects.all()
         data = []
