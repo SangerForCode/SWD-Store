@@ -71,7 +71,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 
 MIDDLEWARE = [
-    'bits.middleware.BlockUnauthorizedOriginsMiddleware'
+    'bits.middleware.BlockUnauthorizedOriginsMiddleware',
     'django.middleware.gzip.GZipMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'allauth.account.middleware.AccountMiddleware',
