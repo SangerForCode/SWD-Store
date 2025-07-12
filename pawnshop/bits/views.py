@@ -1106,7 +1106,8 @@ def api_items(request):
                 "date": item.updated_at.isoformat(),
                 "hostel": item.hostel.name,
                 "contact": item.whatsapp,
-                "is_sold": item.is_sold
+                "is_sold": item.is_sold,
+                "campus": item.seller.campus
             })
         print(time.time()-start)
         return JsonResponse({
@@ -1434,6 +1435,7 @@ def api_mylisting(request):
             data.append({
                 "id": item.id,
                 "firstimage": image_url,
+                "campus": item.seller.campus,
                 "title": item.name,
                 "price": item.price,
                 "issold": item.is_sold,
