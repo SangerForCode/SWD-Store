@@ -22,6 +22,7 @@ class DomainBasedCSRFMiddleware(CsrfViewMiddleware):
 ALLOWED_ORIGINS = [
     'https://bits-pilani.store',
     'https://www.bits-pilani.store',
+    'https://admin.bits-pilani.store',
 ]
 
 class BlockUnauthorizedOriginsMiddleware:
