@@ -30,4 +30,5 @@ urlpatterns = [
     path('api/categories/', views.api_categories, name = "GET only API categories"),
     path('api/hostels', views.api_hostels, name = "API hostels"),
     path('api/misc', views.api_misc, name = "all small shit"),
+    path('api/feedback', views.api_feedback, name = "API feedback"),
 ]
