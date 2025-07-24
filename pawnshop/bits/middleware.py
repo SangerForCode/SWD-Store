@@ -34,7 +34,7 @@ class BlockUnauthorizedOriginsMiddleware:
         ua = request.META.get("HTTP_USER_AGENT", "").lower()
         if "postman" in ua or "curl" in ua:
             return JsonResponse({'error': 'sneaky sneaky, denied'}, status=403)
-
+        print(origin)
         if origin:
             if any(origin.startswith(allowed) for allowed in ALLOWED_ORIGINS):
                 return self.get_response(request)
