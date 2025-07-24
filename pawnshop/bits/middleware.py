@@ -30,16 +30,25 @@ class BlockUnauthorizedOriginsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        ua = request.META.get('HTTP_USER_AGENT', '').lower()
+        if any(x in ua for x in ('postman', 'curl')):
+            return JsonResponse({'error': 'sneaky sneaky, denied'}, status=403)
+
         host = request.get_host()
-        print(host)
-        if host:
-            if host in ALLOWED_ORIGINS:
-                return self.get_response(request)
-            return JsonResponse({'error': 'Bro dont try to play the fool with me'}, status=403)
-        try:
-            email = request.session.get('email')
-            person = Person.objects.filter(email = email).first()
+        if host in ALLOWED_ORIGINS:
+            return self.get_response(request)
+
+        origin = request.META.get('HTTP_ORIGIN')
+        if origin and any(origin.startswith(a) for a in ALLOWED_ORIGINS):
+            return self.get_response(request)
+
+        email = request.session.get('email')
+        if email:
+            person = Person.objects.filter(email=email).first()
             if person:
-                return JsonResponse({'error': f"{person.name}, Bro really? dont try to be sneeky peeky?"}, status=403)
-        finally: 
-           return JsonResponse({'error': "my brother, no public API for you."})
+                return JsonResponse(
+                    {'error': f"{person.name}, Bro really? dont try to be sneeky peeky?"},
+                    status=403
+                )
+
+        return JsonResponse({'error': "my brother, no public API for you."}, status=403)
