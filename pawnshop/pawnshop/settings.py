@@ -339,3 +339,4 @@ CACHES = {
 }
 
 # Install: pip install django-redis
+CSRF_FAILURE_VIEW = 'bits.views.csrf_failure_debug'

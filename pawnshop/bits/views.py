@@ -1501,3 +1501,16 @@ def api_feedback(request):
             return JsonResponse({"status":"ok", "error": str(e)}, status=400)
     else:
         return JsonResponse({"status":"error", "error": "Invalid method"}, status=405)
+from django.http import JsonResponse
+
+def csrf_failure_debug(request, reason=""):
+    print("CSRF FAILURE DETECTED")
+    print("Reason:", reason)
+    print("Method:", request.method)
+    print("Path:", request.path)
+    print("Headers:", dict(request.headers))
+    print("POST Data:", dict(request.POST))
+    return JsonResponse({
+        "error": "CSRF verification failed",
+        "reason": reason
+    }, status=403)
