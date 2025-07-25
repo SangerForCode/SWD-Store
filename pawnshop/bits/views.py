@@ -1027,6 +1027,7 @@ def api_items(request):
     person = Person.objects.filter(email=email).first()
     print(email)
     if not person:
+        print("ACCESS DENIED")
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
     print(person.name)
