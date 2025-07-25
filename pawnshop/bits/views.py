@@ -1028,6 +1028,10 @@ def api_items(request):
     if not person:
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
+    print(person.name)
+    print(person.email)
+    print(person.campus)
+
     if request.method == "GET":
         campus_param = request.GET.get('c', 'GOA')
         page = request.GET.get('p', 1)
