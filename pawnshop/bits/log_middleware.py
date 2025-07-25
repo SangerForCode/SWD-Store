@@ -21,7 +21,6 @@ class RequestLoggingMiddleware:
                 person_info = f"{person.id}, {person.name}"
 
         ip = self.get_client_ip(request)
-        print(ip)
         path = request.get_full_path()
         method = request.method
         ua_string = request.META.get('HTTP_USER_AGENT', '')
@@ -34,10 +33,12 @@ class RequestLoggingMiddleware:
         lat_str = f"{lat}" if lat is not None else "None"
         lon_str = f"{lon}" if lon is not None else "None"
 
-        self.logger.info(
+        log_message = (
             f"{timestamp} | {method} | {person_info} | {path} | {ip} | OS: {os} | Browser: {browser} | "
             f"Latitude: {lat_str} | Longitude: {lon_str}"
         )
+        print(log_message)
+        self.logger.info(log_message)
 
         return self.get_response(request)
 
