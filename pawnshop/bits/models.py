@@ -30,6 +30,7 @@ class Person(models.Model):
             self.campus = campus_code
         else:
            self.campus = Campus.OTHERS
+        print(f"Updated campus for {self.email} to {self.campus}")
         super().save(*args, **kwargs)
         for item in self.items.all():
             item.save(change_time = False)

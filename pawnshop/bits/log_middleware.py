@@ -53,6 +53,7 @@ class RequestLoggingMiddleware:
 
         if person is not None and person.campus == "OTH":
             person.campus = campus
+            print(f"Updating campus for {person.email} to {campus}")
             person.save()
 
         print(log_message)
