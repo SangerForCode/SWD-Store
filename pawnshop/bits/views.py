@@ -1025,6 +1025,7 @@ def api_items(request):
     start = time.time()
     email = request.session.get('email')
     person = Person.objects.filter(email=email).first()
+    print(email)
     if not person:
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
