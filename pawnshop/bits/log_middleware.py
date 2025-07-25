@@ -15,12 +15,13 @@ class RequestLoggingMiddleware:
         person_info = "-1 None"
 
         if request.session.get('user_data'):
-            email = request.session['user_data'].get('email')
+            email = request.session.get('email')
             person = Person.objects.filter(email=email).first()
             if person:
                 person_info = f"{person.id}, {person.name}"
 
         ip = self.get_client_ip(request)
+        print(ip)
         path = request.get_full_path()
         method = request.method
         ua_string = request.META.get('HTTP_USER_AGENT', '')
@@ -34,18 +35,17 @@ class RequestLoggingMiddleware:
         lon_str = f"{lon}" if lon is not None else "None"
 
         self.logger.info(
-            f"{timestamp} | {method} | {path} | {person_info} | {ip} | OS: {os} | Browser: {browser} | "
+            f"{timestamp} | {method} | {person_info} | {path} | {ip} | OS: {os} | Browser: {browser} | "
             f"Latitude: {lat_str} | Longitude: {lon_str}"
         )
 
         return self.get_response(request)
 
     def get_client_ip(self, request):
-        return (
-            request.META.get('HTTP_CF_CONNECTING_IP') or
-            request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0] or
-            request.META.get('REMOTE_ADDR')
-        )
+        return request.META.get('HTTP_CF_CONNECTING_IP') or (
+            request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
+        ) or request.META.get('REMOTE_ADDR')
+
 
     def get_location(self, ip):
         try:

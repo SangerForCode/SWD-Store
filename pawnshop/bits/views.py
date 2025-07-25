@@ -1269,7 +1269,7 @@ def api_hostels(request):
     if request.method == "GET":
         hostels = Hostel.objects.filter(campus=campus).values('name')
         return JsonResponse(list(hostels), safe=False)
-    
+
     return JsonResponse({"status": "error", "error": "Invalid method"}, status=405)
 
 @ensure_csrf_cookie
