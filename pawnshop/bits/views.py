@@ -1020,6 +1020,9 @@ def bulk_action(request, action):
 def terms(request):
     return render(request, 'bits/terms.html')
 
+def isbits(email):
+    return email.endswith('bits-pilani.ac.in')
+
 @ensure_csrf_cookie
 def api_items(request):
     start = time.time()
@@ -1122,6 +1125,8 @@ def api_items(request):
         })
 
     elif request.method == "POST":
+        if not isbits(email):
+            return JsonResponse({"status": "error", "error": "Unauthorized"}, status=401)
         name = request.POST.get("itemName")
         description = request.POST.get('description', '')
         price = request.POST.get('itemPrice')
@@ -1458,6 +1463,8 @@ def api_mylisting(request):
         return JsonResponse({"status":"ok", "items":data})
 
     elif request.method == "POST":
+        if not isbits(email):
+            return JsonResponse({"status": "error", "error": "Unauthorized"}, status=401)
         data = json.loads(request.body)
         method = data.get('method')
         ids = list(map(int, data.get('ids', [])))
