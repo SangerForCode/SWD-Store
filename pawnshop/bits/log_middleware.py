@@ -25,6 +25,7 @@ class RequestLoggingMiddleware:
 
         if request.session.get('user_data'):
             email = request.session.get('email')
+            print(email)
             if email:
                 person_info = email
             person = Person.objects.filter(email=email).first()
