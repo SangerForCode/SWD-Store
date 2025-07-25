@@ -51,7 +51,7 @@ class RequestLoggingMiddleware:
             f"{lat_str} | {lon_str} | {campus} | {person.campus}"
         )
 
-        if person.campus == "OTH":
+        if person is not None and person.campus == "OTH":
             person.campus = campus
             person.save()
 
