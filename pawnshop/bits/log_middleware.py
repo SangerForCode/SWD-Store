@@ -23,6 +23,7 @@ class RequestLoggingMiddleware:
         person_info = "-1 None"
 
         email = request.session.get('email')
+        name = request.session.get('name')
         if email:
             person_info = email
         person = Person.objects.filter(email=email).first()
@@ -52,6 +53,9 @@ class RequestLoggingMiddleware:
         if person is not None and person.campus == "OTH":
             person.campus = campus
             person.save()
+        
+        if not person:
+            person.objects.create(email = email, campus = campus, name = "Unknown" if not name else name)
 
         self.logger.info(log_message)
 
