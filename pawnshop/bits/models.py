@@ -23,6 +23,7 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         campus_code = self.campus
+        print(campus_code)
         if self.email.endswith('bits-pilani.ac.in'):
             campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
         self.phone = helper.get_clean_number(self.phone) if self.phone else None
