@@ -23,7 +23,6 @@ class Person(models.Model):
 
     def save(self, *args, **kwargs):
         campus_code = self.campus
-        print(campus_code)
         if self.email.endswith('bits-pilani.ac.in'):
             campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
         self.phone = helper.get_clean_number(self.phone) if self.phone else None
@@ -31,7 +30,6 @@ class Person(models.Model):
             self.campus = campus_code
         else:
            self.campus = Campus.OTHERS
-        print(f"Updated campus for {self.email} to {self.campus}")
         super().save(*args, **kwargs)
         for item in self.items.all():
             item.save(change_time = False)

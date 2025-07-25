@@ -14,7 +14,6 @@ BITS_CAMPUSES = {
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
-        print("AWD")
         self.get_response = get_response
         self.logger = logging.getLogger("bits")
 
@@ -24,7 +23,6 @@ class RequestLoggingMiddleware:
         person_info = "-1 None"
 
         email = request.session.get('email')
-        print(f"Email received: {email}")
         if email:
             person_info = email
         person = Person.objects.filter(email=email).first()
@@ -53,10 +51,8 @@ class RequestLoggingMiddleware:
 
         if person is not None and person.campus == "OTH":
             person.campus = campus
-            print(f"Updating campus for {person.email} to {campus}")
             person.save()
 
-        print(log_message)
         self.logger.info(log_message)
 
         return self.get_response(request)
