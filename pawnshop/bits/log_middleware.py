@@ -25,6 +25,8 @@ class RequestLoggingMiddleware:
 
         if request.session.get('user_data'):
             email = request.session.get('email')
+            if email:
+                person_info = email
             person = Person.objects.filter(email=email).first()
             if person:
                 person_info = f"{person.id}, {person.name}"
@@ -45,9 +47,14 @@ class RequestLoggingMiddleware:
         campus = self.get_nearest_campus(lat, lon)
 
         log_message = (
-            f"{timestamp} | {method} | {person_info} | {path} | {ip} | OS: {os} | Browser: {browser} | "
-            f"Latitude: {lat_str} | Longitude: {lon_str} | Campus: {campus}"
+            f"{timestamp} | {method} | {person_info} | {path} | {ip} | {os} | {browser} | "
+            f"{lat_str} | {lon_str} | {campus} | {person.campus}"
         )
+
+        if person.campus == "OTH":
+            person.campus = campus
+            person.save()
+
         print(log_message)
         self.logger.info(log_message)
 
@@ -77,16 +84,16 @@ class RequestLoggingMiddleware:
 
     def get_nearest_campus(self, lat, lon):
         if lat is None or lon is None:
-            return "Unknown"
+            return "OTH"
 
         try:
             lat = float(lat)
             lon = float(lon)
         except (TypeError, ValueError):
-            return "Unknown"
+            return "OTH"
 
         min_dist = float('inf')
-        nearest = "Unknown"
+        nearest = "OTH"
         for campus, (clat, clon) in BITS_CAMPUSES.items():
             dist = self.haversine(lat, lon, clat, clon)
             if dist < min_dist:

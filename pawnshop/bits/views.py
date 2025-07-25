@@ -1022,22 +1022,15 @@ def terms(request):
 
 @ensure_csrf_cookie
 def api_items(request):
-    print("Cookie:", request.COOKIES.get("***REMOVED***"))
-    print("Header:", request.META.get("***REMOVED***"))
     start = time.time()
     email = request.session.get('email')
     person = Person.objects.filter(email=email).first()
-    print(email)
     if not person:
         print("ACCESS DENIED")
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
-    print(person.name)
-    print(person.email)
-    print(person.campus)
-
     if request.method == "GET":
-        campus_param = request.GET.get('c', 'GOA')
+        campus_param = request.GET.get('c', person.campus)
         page = request.GET.get('p', 1)
         category = request.GET.get('cat', '')
         sort_method = request.GET.get('s', 0)
