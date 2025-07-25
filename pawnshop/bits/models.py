@@ -22,7 +22,9 @@ class Person(models.Model):
     registered_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):
-        campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
+        campus_code = self.campus
+        if self.email.endswith('bits-pilani.ac.in') or self.email.endswith('.bits-pilani.ac.in'):
+            campus_code = self.email.split('@')[1].split('.')[0].upper()[:3]
         self.phone = helper.get_clean_number(self.phone) if self.phone else None
         if campus_code in Campus.values:
             self.campus = campus_code

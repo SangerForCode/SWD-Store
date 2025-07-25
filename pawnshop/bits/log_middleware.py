@@ -3,6 +3,14 @@ import requests
 from datetime import datetime
 from bits.models import Person
 from user_agents import parse
+from math import radians, sin, cos, sqrt, atan2
+
+BITS_CAMPUSES = {
+    'Goa': (15.3911442733276, 73.87815086678745),
+    'Hyderabad': (17.544822002003123, 78.57271655444397),
+    'Pilani': (28.359229729445914, 75.58816379595879),
+    'Dubai': (25.131566983306616, 55.4200293516723),
+}
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -34,9 +42,11 @@ class RequestLoggingMiddleware:
         lat_str = f"{lat}" if lat is not None else "None"
         lon_str = f"{lon}" if lon is not None else "None"
 
+        campus = self.get_nearest_campus(lat, lon)
+
         log_message = (
             f"{timestamp} | {method} | {person_info} | {path} | {ip} | OS: {os} | Browser: {browser} | "
-            f"Latitude: {lat_str} | Longitude: {lon_str}"
+            f"Latitude: {lat_str} | Longitude: {lon_str} | Campus: {campus}"
         )
         print(log_message)
         self.logger.info(log_message)
@@ -48,7 +58,6 @@ class RequestLoggingMiddleware:
             request.META.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip()
         ) or request.META.get('REMOTE_ADDR')
 
-
     def get_location(self, ip):
         try:
             res = requests.get(f"https://web-api.nordvpn.com/v1/ips/lookup/{ip}", timeout=10)
@@ -57,3 +66,30 @@ class RequestLoggingMiddleware:
         except Exception as e:
             logging.warning(f"Could not get location for IP {ip}: {e}")
             return None, None
+
+    def haversine(self, lat1, lon1, lat2, lon2):
+        R = 6371
+        dlat = radians(lat2 - lat1)
+        dlon = radians(lon2 - lon1)
+        a = sin(dlat / 2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return R * c
+
+    def get_nearest_campus(self, lat, lon):
+        if lat is None or lon is None:
+            return "Unknown"
+
+        try:
+            lat = float(lat)
+            lon = float(lon)
+        except (TypeError, ValueError):
+            return "Unknown"
+
+        min_dist = float('inf')
+        nearest = "Unknown"
+        for campus, (clat, clon) in BITS_CAMPUSES.items():
+            dist = self.haversine(lat, lon, clat, clon)
+            if dist < min_dist:
+                min_dist = dist
+                nearest = campus
+        return nearest
