@@ -23,14 +23,13 @@ class RequestLoggingMiddleware:
         person = None
         person_info = "-1 None"
 
-        if request.session.get('user_data'):
-            email = request.session.get('email')
-            print(f"Email received: {email}")
-            if email:
-                person_info = email
-            person = Person.objects.filter(email=email).first()
-            if person:
-                person_info = f"{person.id}, {person.name}"
+        email = request.session.get('email')
+        print(f"Email received: {email}")
+        if email:
+            person_info = email
+        person = Person.objects.filter(email=email).first()
+        if person:
+            person_info = f"{person.id}, {person.name}"
 
         ip = self.get_client_ip(request)
         path = request.get_full_path()
