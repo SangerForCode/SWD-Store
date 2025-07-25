@@ -1036,6 +1036,9 @@ def api_items(request):
         sort_method = request.GET.get('s', 0)
         query = request.GET.get('q', '')
 
+        if campus_param == "OTH":
+            campus_param = "GOA"
+
         cache_params = f"{campus_param}_{category}_{sort_method}_{query}"
         cache_hash = hashlib.md5(cache_params.encode()).hexdigest()
         cache_key_items = f"items_cache_{cache_hash}"
