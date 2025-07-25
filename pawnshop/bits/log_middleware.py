@@ -48,7 +48,7 @@ class RequestLoggingMiddleware:
 
         log_message = (
             f"{timestamp} | {method} | {person_info} | {path} | {ip} | {os} | {browser} | "
-            f"{lat_str} | {lon_str} | {campus} | {person.campus}"
+            f"{lat_str} | {lon_str} | {campus} | {person.campus if person else campus}"
         )
 
         if person is not None and person.campus == "OTH":
