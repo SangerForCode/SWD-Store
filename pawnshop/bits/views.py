@@ -1022,7 +1022,8 @@ def terms(request):
 
 @ensure_csrf_cookie
 def api_items(request):
-    print("Entered")
+    print("Cookie:", request.COOKIES.get("***REMOVED***"))
+    print("Header:", request.META.get("***REMOVED***"))
     start = time.time()
     email = request.session.get('email')
     person = Person.objects.filter(email=email).first()
