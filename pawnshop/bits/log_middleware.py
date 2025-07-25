@@ -54,7 +54,7 @@ class RequestLoggingMiddleware:
             person.campus = campus
             person.save()
         
-        if not person:
+        if not person and email:
             Person.objects.create(email = email, campus = campus, name = "Unknown" if not name else name)
 
         self.logger.info(log_message)
