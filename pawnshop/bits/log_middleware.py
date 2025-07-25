@@ -8,7 +8,7 @@ class RequestLoggingMiddleware:
     def __init__(self, get_response):
         print("AWD")
         self.get_response = get_response
-        self.logger = logging.getLogger("request_logger")
+        self.logger = logging.getLogger("bits")
 
     def __call__(self, request):
         email = None
