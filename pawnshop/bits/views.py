@@ -1390,7 +1390,7 @@ def api_specificitem(request, id):
                 return JsonResponse({"status":"error", "error":"Invalid Hostel name"}, status = 405)
             item.hostel = hostel
             person.hostel = hostel
-        print(f"Existing images: {(new_images or existing_images) == True}")
+        print(f"Existing images: {bool((new_images or existing_images))}")
         if new_images or existing_images:
             item.images.exclude(image__in=[helper.get_image_name(imageurl) for imageurl in existing_images]).delete()
 
