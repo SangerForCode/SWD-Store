@@ -78,7 +78,9 @@ class RequestLoggingMiddleware:
             url = f"https://api.ipregistry.co/{ip}?key=tryout"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             loc = res.get("location", {})
-            return loc.get("latitude"), loc.get("longitude")
+            ret = loc.get("latitude"), loc.get("longitude")
+            print("IPRegistry location:", ret)
+            return ret
         except Exception as e:
             logging.warning(f"ipregistry failed for IP {ip}: {e}")
             return self.get_location2(ip)
@@ -89,7 +91,12 @@ class RequestLoggingMiddleware:
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             if "loc" in res:
                 lat_str, lon_str = res["loc"].split(",")
-                return float(lat_str), float(lon_str)
+                ret = float(lat_str), float(lon_str)
+                print("ipinfo location:", ret)
+                return ret
+            else:
+                logging.warning(f"ipinfo response missing 'loc' for IP {ip}: {res}")
+                return self.get_location3(ip)
         except Exception as e:
             logging.warning(f"ipinfo failed for IP {ip}: {e}")
             return self.get_location3(ip)
@@ -98,7 +105,9 @@ class RequestLoggingMiddleware:
         try:
             url = f"https://api.ipdata.co/{ip}?api-key=test"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
-            return res.get("latitude"), res.get("longitude")
+            ret = res.get("latitude"), res.get("longitude")
+            print("ipdata location:", ret)
+            return ret
         except Exception as e:
             logging.warning(f"ipdata failed for IP {ip}: {e}")
             return self.get_location4(ip)
@@ -107,7 +116,9 @@ class RequestLoggingMiddleware:
         try:
             url = f"http://ip-api.com/json/{ip}"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
-            return res.get("lat"), res.get("lon")
+            ret = res.get("lat"), res.get("lon")
+            print("ip-api location:", ret)
+            return ret
         except Exception as e:
             logging.warning(f"ip-api failed for IP {ip}: {e}")
             return None, None
