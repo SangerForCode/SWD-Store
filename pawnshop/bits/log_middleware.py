@@ -78,7 +78,7 @@ class RequestLoggingMiddleware:
             url = f"https://api.ipregistry.co/{ip}?key=tryout"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             loc = res.get("location", {})
-            ret = loc.get("latitude"), loc.get("longitude")
+            ret = (float(loc.get("latitude")), float(loc.get("longitude")))
             print("IPRegistry location:", ret)
             return ret
         except Exception as e:
@@ -105,7 +105,7 @@ class RequestLoggingMiddleware:
         try:
             url = f"https://api.ipdata.co/{ip}?api-key=test"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
-            ret = res.get("latitude"), res.get("longitude")
+            ret = (float(res.get("latitude")), float(res.get("longitude")))
             print("ipdata location:", ret)
             return ret
         except Exception as e:
@@ -116,7 +116,7 @@ class RequestLoggingMiddleware:
         try:
             url = f"http://ip-api.com/json/{ip}"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
-            ret = res.get("lat"), res.get("lon")
+            ret = (float(res.get("lat")), float(res.get("lon")))
             print("ip-api location:", ret)
             return ret
         except Exception as e:
