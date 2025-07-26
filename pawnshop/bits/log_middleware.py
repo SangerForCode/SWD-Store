@@ -79,7 +79,6 @@ class RequestLoggingMiddleware:
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             loc = res.get("location", {})
             ret = (float(loc.get("latitude")), float(loc.get("longitude")))
-            print("IPRegistry location:", ret)
             return ret
         except Exception as e:
             logging.warning(f"ipregistry failed for IP {ip}: {e}")
@@ -92,7 +91,6 @@ class RequestLoggingMiddleware:
             if "loc" in res:
                 lat_str, lon_str = res["loc"].split(",")
                 ret = float(lat_str), float(lon_str)
-                print("ipinfo location:", ret)
                 return ret
             else:
                 logging.warning(f"ipinfo response missing 'loc' for IP {ip}: {res}")
@@ -106,7 +104,6 @@ class RequestLoggingMiddleware:
             url = f"https://api.ipdata.co/{ip}?api-key=test"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             ret = (float(res.get("latitude")), float(res.get("longitude")))
-            print("ipdata location:", ret)
             return ret
         except Exception as e:
             logging.warning(f"ipdata failed for IP {ip}: {e}")
@@ -117,7 +114,6 @@ class RequestLoggingMiddleware:
             url = f"http://ip-api.com/json/{ip}"
             res = requests.get(url, headers=HEADERS, timeout=2).json()
             ret = (float(res.get("lat")), float(res.get("lon")))
-            print("ip-api location:", ret)
             return ret
         except Exception as e:
             logging.warning(f"ip-api failed for IP {ip}: {e}")
