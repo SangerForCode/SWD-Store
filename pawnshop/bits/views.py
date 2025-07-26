@@ -1362,6 +1362,8 @@ def api_specificitem(request, id):
         hostel_name = request.POST.get('sellerHostel')
         new_images = request.FILES.getlist('images')
         existing_images = request.POST.get('existingImages')
+        print(f"$$${existing_images}$$$")
+        print(f"$$${new_images}$$$")
 
         if name:
             item.name = name
