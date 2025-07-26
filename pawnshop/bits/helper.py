@@ -73,5 +73,5 @@ def get_image_name(full_url):
         relative_path = parsed_path.replace(settings.MEDIA_URL, '', 1)
     else:
         return None
-
+    print(relative_path)
     return relative_path
