@@ -81,7 +81,6 @@ class RequestLoggingMiddleware:
             ret = (float(loc.get("latitude")), float(loc.get("longitude")))
             return ret
         except Exception as e:
-            logging.warning(f"ipregistry failed for IP {ip}: {e}")
             return self.get_location2(ip)
 
     def get_location2(self, ip):
@@ -93,10 +92,8 @@ class RequestLoggingMiddleware:
                 ret = float(lat_str), float(lon_str)
                 return ret
             else:
-                logging.warning(f"ipinfo response missing 'loc' for IP {ip}: {res}")
                 return self.get_location3(ip)
         except Exception as e:
-            logging.warning(f"ipinfo failed for IP {ip}: {e}")
             return self.get_location3(ip)
 
     def get_location3(self, ip):
@@ -106,7 +103,6 @@ class RequestLoggingMiddleware:
             ret = (float(res.get("latitude")), float(res.get("longitude")))
             return ret
         except Exception as e:
-            logging.warning(f"ipdata failed for IP {ip}: {e}")
             return self.get_location4(ip)
 
     def get_location4(self, ip):
@@ -116,7 +112,6 @@ class RequestLoggingMiddleware:
             ret = (float(res.get("lat")), float(res.get("lon")))
             return ret
         except Exception as e:
-            logging.warning(f"ip-api failed for IP {ip}: {e}")
             return None, None
 
     def haversine(self, lat1, lon1, lat2, lon2):
