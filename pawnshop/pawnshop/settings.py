@@ -38,9 +38,8 @@ ALLOWED_HOSTS = [
     "amdin.bits-pilani.store",
     "www.api.amazoff.shop",
     "www.api.bits-pilani.store",
-    "13.234.29.123",
-    "52.66.77.218",
     "admin.amazoff.shop",
+    "15.206.211.192",
 ]
 
 # Application definition
