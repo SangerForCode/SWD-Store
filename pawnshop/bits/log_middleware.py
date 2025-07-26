@@ -4,6 +4,7 @@ from datetime import datetime
 from bits.models import Person
 from user_agents import parse
 from math import radians, sin, cos, sqrt, atan2
+import threading
 
 BITS_CAMPUSES = {
     'GOA': (15.3911442733276, 73.87815086678745),
@@ -11,6 +12,8 @@ BITS_CAMPUSES = {
     'PIL': (28.359229729445914, 75.58816379595879),
     'DUB': (25.131566983306616, 55.4200293516723),
 }
+
+HEADERS = {"User-Agent": "Mozilla/5.0 (BITSGeolocator/1.0)"}
 
 class RequestLoggingMiddleware:
     def __init__(self, get_response):
@@ -38,26 +41,30 @@ class RequestLoggingMiddleware:
         browser = f"{user_agent.browser.family} {user_agent.browser.version_string}"
         os = f"{user_agent.os.family} {user_agent.os.version_string}"
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        lat_str = "None"
+        lon_str = "None"
 
-        lat, lon = self.get_location(ip)
-        lat_str = f"{lat}" if lat is not None else "None"
-        lon_str = f"{lon}" if lon is not None else "None"
-
-        campus = self.get_nearest_campus(lat, lon)
-
-        log_message = (
-            f"{timestamp} | {method} | {person_info} | {path} | {ip} | {os} | {browser} | "
-            f"{lat_str} | {lon_str} | {campus} | {person.campus if person else campus}"
-        )
+        def get_campus():
+            lat, lon = self.get_location(ip)
+            lat_str = f"{lat}" if lat is not None else "None"
+            lon_str = f"{lon}" if lon is not None else "None"
+            campus = self.get_nearest_campus(lat, lon)
+            log_message = (
+                f"{timestamp} | {method} | {person_info} | {path} | {ip} | {os} | {browser} | "
+                f"{lat_str} | {lon_str} | {campus} | {person.campus if person else campus}"
+            )
+            self.logger.info(log_message)
+            return campus
 
         if person is not None and person.campus == "OTH":
-            person.campus = campus
+            person.campus = get_campus()
             person.save()
-        
-        if not person and email:
-            Person.objects.create(email = email, campus = campus, name = "Unknown" if not name else name)
 
-        self.logger.info(log_message)
+        elif not person and email:
+            Person.objects.create(email = email, campus = get_campus(), name = "Unknown" if not name else name)
+        
+        else:
+            threading.Thread(target=get_campus).start()
 
         return self.get_response(request)
 
@@ -68,11 +75,41 @@ class RequestLoggingMiddleware:
 
     def get_location(self, ip):
         try:
-            res = requests.get(f"https://web-api.nordvpn.com/v1/ips/lookup/{ip}", timeout=10)
-            data = res.json()
-            return data.get('latitude'), data.get('longitude')
+            url = f"https://api.ipregistry.co/{ip}?key=tryout"
+            res = requests.get(url, headers=HEADERS, timeout=2).json()
+            loc = res.get("location", {})
+            return loc.get("latitude"), loc.get("longitude")
         except Exception as e:
-            logging.warning(f"Could not get location for IP {ip}: {e}")
+            logging.warning(f"ipregistry failed for IP {ip}: {e}")
+            return self.get_location2(ip)
+
+    def get_location2(self, ip):
+        try:
+            url = f"https://ipinfo.io/{ip}/json"
+            res = requests.get(url, headers=HEADERS, timeout=2).json()
+            if "loc" in res:
+                lat_str, lon_str = res["loc"].split(",")
+                return float(lat_str), float(lon_str)
+        except Exception as e:
+            logging.warning(f"ipinfo failed for IP {ip}: {e}")
+            return self.get_location3(ip)
+
+    def get_location3(self, ip):
+        try:
+            url = f"https://api.ipdata.co/{ip}?api-key=test"
+            res = requests.get(url, headers=HEADERS, timeout=2).json()
+            return res.get("latitude"), res.get("longitude")
+        except Exception as e:
+            logging.warning(f"ipdata failed for IP {ip}: {e}")
+            return self.get_location4(ip)
+
+    def get_location4(self, ip):
+        try:
+            url = f"http://ip-api.com/json/{ip}"
+            res = requests.get(url, headers=HEADERS, timeout=2).json()
+            return res.get("lat"), res.get("lon")
+        except Exception as e:
+            logging.warning(f"ip-api failed for IP {ip}: {e}")
             return None, None
 
     def haversine(self, lat1, lon1, lat2, lon2):
