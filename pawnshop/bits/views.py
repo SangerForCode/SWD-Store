@@ -1033,7 +1033,10 @@ def api_items(request):
         return JsonResponse({"status": "error", "error": "Access Denied!"}, status=403)
 
     if request.method == "GET":
-        campus_param = request.GET.get('c', "ALL")
+        if person.campus:
+            campus_param = request.GET.get('c', person.campus)
+        else:
+            campus_param = request.GET.get('c', 'ALL')
         page = request.GET.get('p', 1)
         category = request.GET.get('cat', '')
         sort_method = request.GET.get('s', 0)
