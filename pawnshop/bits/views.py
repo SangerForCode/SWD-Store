@@ -1193,11 +1193,10 @@ def api_items(request):
             hostel=hostel,
             phone=phone
         )
-
-        for idx, image_file in enumerate(images):
+        for idx, image_dict in enumerate(images):
             Image.objects.create(
                 item=item,
-                image=image_file,
+                image=image_dict['image'],
                 display_order=idx
             )
 
@@ -1418,18 +1417,20 @@ def api_specificitem(request, id):
                 return JsonResponse({"status":"error", "error":"Invalid Hostel name"}, status = 405)
             item.hostel = hostel
             person.hostel = hostel
-        print(f"Existing images: {bool((new_images or existing_images))}")
-        if bool(new_images or existing_images):
-            imgs = [helper.get_image_name(imageurl) for imageurl in existing_images]
-            print(f"Images to delete: {imgs}")
-            itms = item.images.exclude(image__in=imgs)
-            print(f"Items to delete: {itms}")
-            itms.delete()
+        if new_images or existing_images:
+            existing_image_urls = [img['image'] for img in existing_images]
 
-            for idx, image_file in enumerate(new_images):
+            imgs_to_keep = [helper.get_image_name(imageurl) for imageurl in existing_image_urls]
+            print(f"Images to keep: {imgs_to_keep}")
+
+            itms_to_delete = item.images.exclude(image__in=imgs_to_keep)
+            print(f"Items to delete: {itms_to_delete}")
+            itms_to_delete.delete()
+
+            for idx, image_dict in enumerate(new_images):
                 Image.objects.create(
                     item=item,
-                    image=image_file,
+                    image=image_dict['image'],
                     display_order=idx
                 )
 
