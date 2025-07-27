@@ -1085,6 +1085,8 @@ def api_items(request):
         cached_counts = cache.get(cache_key_counts)
 
         campus_param = campus_param.upper()
+
+        print(f"Campus param: {campus_param}")
         
         if cached_items is not None and cached_counts is not None:
             sorted_items = cached_items
