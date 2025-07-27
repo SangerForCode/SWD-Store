@@ -1075,6 +1075,8 @@ def api_items(request):
 
         if campus_param == "OTH":
             campus_param = "ALL"
+        
+        campus_param = campus_param.upper()
 
         cache_params = f"{campus_param}_{category}_{sort_method}_{query}"
         cache_hash = hashlib.md5(cache_params.encode()).hexdigest()
@@ -1084,7 +1086,6 @@ def api_items(request):
         cached_items = cache.get(cache_key_items)
         cached_counts = cache.get(cache_key_counts)
 
-        campus_param = campus_param.upper()
 
         print(f"Campus param: {campus_param}")
         
@@ -1102,6 +1103,7 @@ def api_items(request):
             )
 
             if campus_param and campus_param != 'ALL':
+                print("FILTERING!!")
                 items_query = items_query.filter(seller__campus=campus_param)
 
             if query:
