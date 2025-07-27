@@ -1392,7 +1392,11 @@ def api_specificitem(request, id):
             person.hostel = hostel
         print(f"Existing images: {bool((new_images or existing_images))}")
         if bool(new_images or existing_images):
-            item.images.exclude(image__in=[helper.get_image_name(imageurl) for imageurl in existing_images]).delete()
+            imgs = [helper.get_image_name(imageurl) for imageurl in existing_images]
+            print(f"Images to delete: {imgs}")
+            itms = item.images.exclude(image__in=imgs)
+            print(f"Items to delete: {itms}")
+            itms.delete()
 
             for idx, image_file in enumerate(new_images):
                 Image.objects.create(
