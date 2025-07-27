@@ -1418,21 +1418,37 @@ def api_specificitem(request, id):
             item.hostel = hostel
             person.hostel = hostel
         if new_images or existing_images:
-            existing_image_urls = [img['image'] for img in existing_images]
+            combined_images = []
 
-            imgs_to_keep = [helper.get_image_name(imageurl) for imageurl in existing_image_urls]
-            print(f"Images to keep: {imgs_to_keep}")
+            for img in existing_images:
+                rel_path = helper.get_image_name(img['image'])
+                if rel_path:
+                    combined_images.append({
+                        'type': 'existing',
+                        'path': rel_path
+                    })
 
-            itms_to_delete = item.images.exclude(image__in=imgs_to_keep)
-            print(f"Items to delete: {itms_to_delete}")
-            itms_to_delete.delete()
+            for img in new_images:
+                combined_images.append({
+                    'type': 'new',
+                    'file': img['image']
+                })
 
-            for idx, image_dict in enumerate(new_images):
-                Image.objects.create(
-                    item=item,
-                    image=image_dict['image'],
-                    display_order=idx
-                )
+            item.images.all().delete()
+
+            for idx, img in enumerate(combined_images):
+                if img['type'] == 'existing':
+                    Image.objects.create(
+                        item=item,
+                        image=img['path'],
+                        display_order=idx
+                    )
+                else:
+                    Image.objects.create(
+                        item=item,
+                        image=img['file'],
+                        display_order=idx
+                    )
 
         person.save()
         item.save()
