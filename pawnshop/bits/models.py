@@ -94,7 +94,7 @@ class Item(models.Model):
         self.save(change_time=True)
 
     def __str__(self):
-        return f"{self.name}-{self.seller}"
+        return self.id
     class Meta:
         indexes = [
             models.Index(fields=['is_sold', '-updated_at'], name='item_sold_updated_idx'),
