@@ -1361,7 +1361,7 @@ def api_specificitem(request, id):
         phone = request.POST.get('contactNumber')
         hostel_name = request.POST.get('sellerHostel')
         new_images = request.FILES.getlist('images')
-        existing_images = request.POST.getlist('existingImages')
+        existing_images = request.POST.getlist('existingImages[]')
         print(request.POST)
         print(f"$$${existing_images}$$$")
         print(f"$$${new_images}$$$")
