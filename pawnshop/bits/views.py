@@ -1360,11 +1360,39 @@ def api_specificitem(request, id):
         category_id = request.POST.get('category')
         phone = request.POST.get('contactNumber')
         hostel_name = request.POST.get('sellerHostel')
-        new_images = request.FILES.getlist('images')
-        existing_images = request.POST.getlist('existingImages[]')
-        print(request.POST)
-        print(f"$$${existing_images}$$$")
-        print(f"$$${new_images}$$$")
+
+        def extract_images_from_request(request):
+            existing_images = []
+            index = 0
+            while True:
+                key_img = f"existingImages[{index}][image]"
+                key_idx = f"existingImages[{index}][index]"
+                if key_img in request.POST:
+                    existing_images.append({
+                        'index': int(request.POST.get(key_idx, index)),
+                        'image': request.POST.get(key_img)
+                    })
+                    index += 1
+                else:
+                    break
+
+            uploaded_images = []
+            index = 0
+            while True:
+                key_img = f"images[{index}][image]"
+                key_idx = f"images[{index}][index]"
+                if key_img in request.FILES:
+                    uploaded_images.append({
+                        'index': int(request.POST.get(key_idx, index)),
+                        'image': request.FILES.get(key_img)
+                    })
+                    index += 1
+                else:
+                    break
+
+            return existing_images, uploaded_images
+
+        existing_images, new_images = extract_images_from_request(request)
 
         if name:
             item.name = name
