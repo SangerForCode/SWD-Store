@@ -69,9 +69,15 @@ def items_sort(items_list, method='0'):
 def get_image_name(full_url):
     parsed_path = urlparse(full_url).path
 
-    if parsed_path.startswith(settings.MEDIA_URL):
-        relative_path = parsed_path.replace(settings.MEDIA_URL, '', 1)
-    else:
-        return None
-    print(f"Relative path: {relative_path}")
-    return relative_path
+    media_url = settings.MEDIA_URL
+    if not media_url.startswith('/'):
+        media_url = '/' + media_url
+    if not media_url.endswith('/'):
+        media_url += '/'
+
+    if parsed_path.startswith(media_url):
+        relative_path = parsed_path[len(media_url):]
+        print(f"Relative path: {relative_path}")
+        return relative_path
+
+    return None
