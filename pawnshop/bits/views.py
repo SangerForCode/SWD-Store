@@ -1027,6 +1027,7 @@ def extract_images_from_request(request):
     existing_images = []
     index = 0
     print(request.POST)
+    print(request.FILES)
     while True:
         key_img = f"existingImages[{index}][image]"
         key_idx = f"existingImages[{index}][index]"
