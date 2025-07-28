@@ -1023,38 +1023,43 @@ def terms(request):
 def isbits(email):
     return email.endswith('bits-pilani.ac.in')
 
+import re
+
 def extract_images_from_request(request):
     existing_images = []
-    index = 0
-    print(request.POST)
-    print(request.FILES)
-    while True:
-        key_img = f"existingImages[{index}][image]"
-        key_idx = f"existingImages[{index}][index]"
-        if key_img in request.POST:
-            existing_images.append({
-                'index': int(request.POST.get(key_idx, index)),
-                'image': request.POST.get(key_img)
-            })
-            index += 1
-        else:
-            break
-
     uploaded_images = []
-    index = 0
-    while True:
-        key_img = f"images[{index}][image]"
-        key_idx = f"images[{index}][index]"
-        if key_img in request.FILES:
-            uploaded_images.append({
-                'index': int(request.POST.get(key_idx, index)),
-                'image': request.FILES.get(key_img)
+
+    existing_pattern = re.compile(r'^existingImages\[(\d+)\]\[image\]$')
+    for key in request.POST:
+        match = existing_pattern.match(key)
+        if match:
+            idx = int(match.group(1))
+            image_data = request.POST.get(key)
+            index_key = f"existingImages[{idx}][index]"
+            index_value = request.POST.get(index_key, idx)
+            existing_images.append({
+                'index': int(index_value),
+                'image': image_data
             })
-            index += 1
-        else:
-            break
+
+    upload_pattern = re.compile(r'^images\[(\d+)\]\[image\]$')
+    for key in request.FILES:
+        match = upload_pattern.match(key)
+        if match:
+            idx = int(match.group(1))
+            image_file = request.FILES.get(key)
+            index_key = f"images[{idx}][index]"
+            index_value = request.POST.get(index_key, idx)
+            uploaded_images.append({
+                'index': int(index_value),
+                'image': image_file
+            })
+
+    existing_images.sort(key=lambda x: x['index'])
+    uploaded_images.sort(key=lambda x: x['index'])
 
     return existing_images, uploaded_images
+
 
 @ensure_csrf_cookie
 def api_items(request):
