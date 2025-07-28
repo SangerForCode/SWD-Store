@@ -1039,7 +1039,6 @@ def extract_images_from_request(request):
     for key in request.FILES:
         print(f"FILES key: {key} -> {request.FILES.get(key).name}")
 
-    # --- Extract existing images ---
     existing_pattern = re.compile(r'^existingImages\[(\d+)\]\[image\]$')
     for key in request.POST:
         match = existing_pattern.match(key)
@@ -1054,7 +1053,6 @@ def extract_images_from_request(request):
                 'image': image_data
             })
 
-    # --- Extract uploaded images ---
     upload_pattern = re.compile(r'^images\[(\d+)\]\[image\]$')
     for key in request.FILES:
         print(f"Checking FILE key for pattern match: {key}")
@@ -1072,7 +1070,6 @@ def extract_images_from_request(request):
         else:
             print(f"WARNING: FILE key '{key}' did NOT match expected pattern")
 
-    # Final debug summary
     print(f"\n--- Extracted {len(existing_images)} existing images ---")
     for img in existing_images:
         print(f"Existing -> index: {img['index']}, image: {img['image']}")
@@ -1081,7 +1078,6 @@ def extract_images_from_request(request):
     for img in uploaded_images:
         print(f"Uploaded -> index: {img['index']}, filename: {img['image'].name}")
 
-    # Optional: sort
     existing_images.sort(key=lambda x: x['index'])
     uploaded_images.sort(key=lambda x: x['index'])
 
@@ -1234,9 +1230,13 @@ def api_items(request):
             phone=phone
         )
         for idx, image_dict in enumerate(images):
+            img = image_dict['image']
+            if not img:
+                print(f"Skipping empty image at index {idx}")
+                continue
             Image.objects.create(
                 item=item,
-                image=image_dict['image'],
+                image=img,
                 display_order=idx
             )
 
