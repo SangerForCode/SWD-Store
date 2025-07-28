@@ -1489,22 +1489,27 @@ def api_specificitem(request, id):
                     'file': img['image']
                 })
 
-            item.images.all().delete()
+            new_image_objs = []
 
             for idx, img in enumerate(combined_images):
                 if img['type'] == 'existing':
-                    Image.objects.create(
+                    new_image_objs.append(Image(
                         item=item,
                         image=img['path'],
                         display_order=idx
-                    )
+                    ))
                 else:
                     image_file = img['file']
                     new_img = Image(item=item, display_order=idx)
-                    new_img.image.save(image_file.name, image_file, save=True)
+                    new_img.image.save(image_file.name, image_file, save=False)
+                    new_image_objs.append(new_img)
 
-                    print(f"[SAVED] Final name: {new_img.image.name}")
-                    print(f"[URL] Accessible at: {request.build_absolute_uri(new_img.image.url)}")
+            item.images.all().delete()
+
+            for obj in new_image_objs:
+                obj.save()
+
+            print(f"[IMAGES] Updated {len(new_image_objs)} images for item {item.id}")
 
 
         person.save()
