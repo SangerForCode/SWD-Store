@@ -1230,15 +1230,23 @@ def api_items(request):
             phone=phone
         )
         for idx, image_dict in enumerate(images):
-            img = image_dict['image']
-            if not img:
-                print(f"Skipping empty image at index {idx}")
-                continue
-            Image.objects.create(
-                item=item,
-                image=img,
-                display_order=idx
-            )
+            try:
+                image_file = image_dict.get('image')
+                if not image_file:
+                    print(f"[SKIP] No image at index {idx}")
+                    continue
+
+                print(f"[TRY SAVE] image: {image_file.name}")
+                img = Image.objects.create(
+                    item=item,
+                    image=image_file,
+                    display_order=idx
+                )
+                print(f"[SAVED] DB OK | path: {img.image.name}")
+                print(f"[EXISTS ON DISK?] {os.path.exists(img.image.path)} | path: {img.image.path}")
+            except Exception as e:
+                print(f"[ERROR] Exception while saving image: {e}")
+
 
         try:
             cache.clear()
