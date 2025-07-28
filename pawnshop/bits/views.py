@@ -1504,7 +1504,13 @@ def api_specificitem(request, id):
                     new_img.image.save(image_file.name, image_file, save=False)
                     new_image_objs.append(new_img)
 
-            item.images.all().delete()
+                paths_to_keep = [
+                    ci['path']
+                    for ci in combined_images
+                    if ci['type'] == 'existing'
+                ]
+                item.images.exclude(image__in=paths_to_keep).delete()
+
 
             for obj in new_image_objs:
                 obj.save()
