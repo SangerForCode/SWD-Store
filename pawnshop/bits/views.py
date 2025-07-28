@@ -1082,7 +1082,7 @@ def extract_images_from_request(request):
     uploaded_images.sort(key=lambda x: x['index'])
 
     return existing_images, uploaded_images
-
+from django.core.files.uploadedfile import UploadedFile
 
 @ensure_csrf_cookie
 def api_items(request):
@@ -1236,8 +1236,14 @@ def api_items(request):
                     print(f"[SKIP] No image at index {idx}")
                     continue
 
-                print(f"[TRY SAVE] image: {image_file.name}")
+                print(f"[DEBUG] Index: {idx}")
+                print(f"[DEBUG] type(image_file): {type(image_file)}")
+                print(f"[DEBUG] image_file.name: {getattr(image_file, 'name', 'NO NAME')}")
+                print(f"[DEBUG] image_file.size: {getattr(image_file, 'size', 'NO SIZE')}")
 
+                assert isinstance(image_file, UploadedFile), f"[ERROR] image_file is not an UploadedFile, got: {type(image_file)}"
+
+                print(f"[TRY SAVE] Saving image: {image_file.name}")
                 img = Image(item=item, display_order=idx)
                 img.image.save(image_file.name, image_file, save=True)
 
@@ -1246,7 +1252,6 @@ def api_items(request):
 
             except Exception as e:
                 print(f"[ERROR] Exception while saving image at index {idx}: {e}")
-
 
 
         try:
