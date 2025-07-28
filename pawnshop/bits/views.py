@@ -1473,50 +1473,32 @@ def api_specificitem(request, id):
             person.hostel = hostel
 
         if new_images or existing_images:
-            combined_images = []
+            combined = []
 
             for img in existing_images:
-                rel_path = helper.get_image_name(img['image'])
-                if rel_path:
-                    combined_images.append({
-                        'type': 'existing',
-                        'path': rel_path
-                    })
+                rel = helper.get_image_name(img['image'])
+                if rel:
+                    combined.append({'type': 'existing', 'path': rel})
 
             for img in new_images:
-                combined_images.append({
-                    'type': 'new',
-                    'file': img['image']
-                })
+                combined.append({'type': 'new', 'file': img['image']})
 
-            new_image_objs = []
+            keep_ids = []
 
-            for idx, img in enumerate(combined_images):
-                if img['type'] == 'existing':
-                    new_image_objs.append(Image(
-                        item=item,
-                        image=img['path'],
-                        display_order=idx
-                    ))
+            for idx, info in enumerate(combined):
+                if info['type'] == 'existing':
+                    existing_obj = item.images.filter(image=info['path']).first()
+                    if existing_obj:
+                        existing_obj.display_order = idx
+                        existing_obj.save()
+                        keep_ids.append(existing_obj.id)
                 else:
-                    image_file = img['file']
-                    new_img = Image(item=item, display_order=idx)
-                    new_img.image.save(image_file.name, image_file, save=False)
-                    new_image_objs.append(new_img)
+                    f = info['file']
+                    new_obj = Image(item=item, display_order=idx)
+                    new_obj.image.save(f.name, f, save=True)
+                    keep_ids.append(new_obj.id)
 
-                paths_to_keep = [
-                    ci['path']
-                    for ci in combined_images
-                    if ci['type'] == 'existing'
-                ]
-                item.images.exclude(image__in=paths_to_keep).delete()
-
-
-            for obj in new_image_objs:
-                obj.save()
-
-            print(f"[IMAGES] Updated {len(new_image_objs)} images for item {item.id}")
-
+            item.images.exclude(id__in=keep_ids).delete()
 
         person.save()
         item.save()
