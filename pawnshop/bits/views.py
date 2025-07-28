@@ -1237,15 +1237,16 @@ def api_items(request):
                     continue
 
                 print(f"[TRY SAVE] image: {image_file.name}")
-                img = Image.objects.create(
-                    item=item,
-                    image=image_file,
-                    display_order=idx
-                )
+
+                img = Image(item=item, display_order=idx)
+                img.image.save(image_file.name, image_file, save=True)
+
                 print(f"[SAVED] DB OK | path: {img.image.name}")
                 print(f"[EXISTS ON DISK?] {os.path.exists(img.image.path)} | path: {img.image.path}")
+
             except Exception as e:
-                print(f"[ERROR] Exception while saving image: {e}")
+                print(f"[ERROR] Exception while saving image at index {idx}: {e}")
+
 
 
         try:
@@ -1465,6 +1466,7 @@ def api_specificitem(request, id):
                 return JsonResponse({"status":"error", "error":"Invalid Hostel name"}, status = 405)
             item.hostel = hostel
             person.hostel = hostel
+
         if new_images or existing_images:
             combined_images = []
 
@@ -1492,11 +1494,13 @@ def api_specificitem(request, id):
                         display_order=idx
                     )
                 else:
-                    Image.objects.create(
-                        item=item,
-                        image=img['file'],
-                        display_order=idx
-                    )
+                    image_file = img['file']
+                    new_img = Image(item=item, display_order=idx)
+                    new_img.image.save(image_file.name, image_file, save=True)
+
+                    print(f"[SAVED] Final name: {new_img.image.name}")
+                    print(f"[URL] Accessible at: {request.build_absolute_uri(new_img.image.url)}")
+
 
         person.save()
         item.save()
