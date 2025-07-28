@@ -1025,10 +1025,21 @@ def isbits(email):
 
 import re
 
+import re
+
 def extract_images_from_request(request):
     existing_images = []
     uploaded_images = []
 
+    print("\n--- DEBUG: POST KEYS ---")
+    for key in request.POST:
+        print(f"POST key: {key} -> {request.POST.get(key)}")
+
+    print("\n--- DEBUG: FILES KEYS ---")
+    for key in request.FILES:
+        print(f"FILES key: {key} -> {request.FILES.get(key).name}")
+
+    # --- Extract existing images ---
     existing_pattern = re.compile(r'^existingImages\[(\d+)\]\[image\]$')
     for key in request.POST:
         match = existing_pattern.match(key)
@@ -1037,24 +1048,40 @@ def extract_images_from_request(request):
             image_data = request.POST.get(key)
             index_key = f"existingImages[{idx}][index]"
             index_value = request.POST.get(index_key, idx)
+            print(f"Matched existing image: idx={idx}, image={image_data}, index_key={index_key}")
             existing_images.append({
                 'index': int(index_value),
                 'image': image_data
             })
 
+    # --- Extract uploaded images ---
     upload_pattern = re.compile(r'^images\[(\d+)\]\[image\]$')
     for key in request.FILES:
+        print(f"Checking FILE key for pattern match: {key}")
         match = upload_pattern.match(key)
         if match:
             idx = int(match.group(1))
             image_file = request.FILES.get(key)
             index_key = f"images[{idx}][index]"
             index_value = request.POST.get(index_key, idx)
+            print(f"Matched upload: idx={idx}, image={image_file.name}, index_key={index_key}")
             uploaded_images.append({
                 'index': int(index_value),
                 'image': image_file
             })
+        else:
+            print(f"WARNING: FILE key '{key}' did NOT match expected pattern")
 
+    # Final debug summary
+    print(f"\n--- Extracted {len(existing_images)} existing images ---")
+    for img in existing_images:
+        print(f"Existing -> index: {img['index']}, image: {img['image']}")
+
+    print(f"\n--- Extracted {len(uploaded_images)} uploaded images ---")
+    for img in uploaded_images:
+        print(f"Uploaded -> index: {img['index']}, filename: {img['image'].name}")
+
+    # Optional: sort
     existing_images.sort(key=lambda x: x['index'])
     uploaded_images.sort(key=lambda x: x['index'])
 
