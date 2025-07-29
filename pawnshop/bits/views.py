@@ -1501,7 +1501,7 @@ def api_specificitem(request, id):
             item.images.exclude(id__in=keep_ids).delete()
 
         person.save()
-        item.save()
+        item.repost()
 
         first_image = item.images.first()
         image_url = request.build_absolute_uri(first_image.image.url) if first_image else ""
