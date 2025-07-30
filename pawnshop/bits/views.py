@@ -1157,7 +1157,8 @@ def api_items(request):
                     Q(name__icontains=query) |
                     Q(hostel__name__icontains=query) |
                     Q(description__icontains=query) |
-                    Q(category__name__icontains=query)
+                    Q(category__name__icontains=query) |
+                    Q(seller__name__icontains=query)
                 )
 
             base_query = items_query
