@@ -74,14 +74,6 @@ VAPID_CLAIMS = {
 }
 
 # upgraded_analytics/views.py
-import os
-from django.shortcuts import render
-from django import forms
-from django.utils import timezone
-from django.conf import settings
-from datetime import datetime, timedelta
-from collections import Counter
-
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
 METRICS = {
@@ -200,8 +192,9 @@ def analytics(request):
             browser_dist[e['browser']] += 1
             hourly_hits[e['timestamp'].hour] += 1
             top_paths[e['path']] += 1
-            # Use detected campus from geolocation
-            campus_dist[e['campus']] += 1
+            # Use person_campus if available, otherwise fall back to detected campus
+            campus = e['person_campus'] if e['person_campus'] != "OTH" else e['campus']
+            campus_dist[campus] += 1
 
         if cd['metric_y'].startswith('unique'):
             counts = [len(s) for s in seen]
@@ -243,7 +236,7 @@ def analytics(request):
                     'lat': e['lat'],
                     'lon': e['lon'],
                     'timestamp': e['timestamp'].strftime('%H:%M:%S'),
-                    'campus': e['campus'],  # Use detected campus from geolocation
+                    'campus': e['person_campus'] if e['person_campus'] != "OTH" else e['campus'],
                 })
 
     return render(request, 'bits/analytics.html', {
