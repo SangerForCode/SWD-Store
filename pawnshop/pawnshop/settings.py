@@ -352,6 +352,6 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'mark-items-sold-daily': {
         'task': 'bits.tasks.mark_old_items_as_sold',
-        'schedule': crontab(hour=0, minute=0),
+        'schedule': crontab(hour=9, minute=11),
     },
 }
