@@ -74,6 +74,14 @@ VAPID_CLAIMS = {
 }
 
 # upgraded_analytics/views.py
+import os
+from django.shortcuts import render
+from django import forms
+from django.utils import timezone
+from django.conf import settings
+from datetime import datetime, timedelta
+from collections import Counter
+
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
 METRICS = {
@@ -113,20 +121,15 @@ class AnalyticsForm(forms.Form):
 
 def parse_log_line(line):
     parts = [p.strip() for p in line.split('|')]
-    # The middleware logs 11 fields:
-    # timestamp | method | person_info | path | ip | os | browser | lat | lon | campus | person_campus
     if len(parts) < 11:
         return None
     
-    ts_str, method, person, path, ip, os_, browser, lat_str, lon_str, campus, person_campus = parts[:11]
-
     try:
-        ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
+        ts = datetime.strptime(parts[0], '%Y-%m-%d %H:%M:%S')
         ts = timezone.make_aware(ts, timezone.get_default_timezone())
     except:
         return None
 
-    # Parse latitude and longitude - they're logged as plain numbers or "None"
     def parse_coord(coord_str):
         if coord_str == "None" or not coord_str:
             return None
@@ -137,16 +140,16 @@ def parse_log_line(line):
 
     return {
         'timestamp': ts,
-        'method': method,
-        'person': person,
-        'browser': browser,
-        'os': os_,
-        'ip': ip,
-        'path': path,
-        'lat': parse_coord(lat_str),
-        'lon': parse_coord(lon_str),
-        'campus': campus,
-        'person_campus': person_campus,
+        'method': parts[1],
+        'person': parts[2],
+        'path': parts[3],
+        'ip': parts[4],
+        'os': parts[5],
+        'browser': parts[6],
+        'lat': parse_coord(parts[7]),
+        'lon': parse_coord(parts[8]),
+        'campus': parts[9],
+        'person_campus': parts[10] if len(parts) > 10 else None,
     }
 
 def analytics(request):
@@ -192,9 +195,7 @@ def analytics(request):
             browser_dist[e['browser']] += 1
             hourly_hits[e['timestamp'].hour] += 1
             top_paths[e['path']] += 1
-            # Use person_campus if available, otherwise fall back to detected campus
-            campus = e['person_campus'] if e['person_campus'] != "OTH" else e['campus']
-            campus_dist[campus] += 1
+            campus_dist[e['campus']] += 1
 
         if cd['metric_y'].startswith('unique'):
             counts = [len(s) for s in seen]
@@ -236,7 +237,7 @@ def analytics(request):
                     'lat': e['lat'],
                     'lon': e['lon'],
                     'timestamp': e['timestamp'].strftime('%H:%M:%S'),
-                    'campus': e['person_campus'] if e['person_campus'] != "OTH" else e['campus'],
+                    'campus': e['campus'],
                 })
 
     return render(request, 'bits/analytics.html', {
@@ -246,7 +247,6 @@ def analytics(request):
         'summary': summary,
         'show_map': form.cleaned_data['show_map'] if form.is_valid() else False,
     })
-
 
 ####THIS PART IS FOR NOTIFICATIONS BRO!!!####
 

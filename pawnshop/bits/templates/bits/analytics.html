@@ -3,250 +3,620 @@
 {% block extra_css %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
 <style>
-/* Core Analytics Dashboard Styling */
-.analytics-dashboard {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 10px;
-  font-family: 'Montserrat', sans-serif;
+/* Modern Analytics Dashboard */
+:root {
+  --dashboard-bg: #f8fafc;
+  --card-bg: #ffffff;
+  --text-primary: #1e293b;
+  --text-secondary: #64748b;
+  --border-subtle: #e2e8f0;
+  --accent-blue: #3b82f6;
+  --accent-red: #ef4444;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-purple: #8b5cf6;
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
 }
+
+body {
+  background-color: var(--dashboard-bg);
+}
+
+.analytics-dashboard {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Header Section */
 .dashboard-header {
-  margin-bottom: 15px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-md);
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.dashboard-title {
+  color: white;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.75rem;
 }
-.dashboard-header h1 {
-  margin: 0;
-  color: var(--secondary);
+
+.dashboard-title::before {
+  content: "📊";
   font-size: 1.5rem;
-  border-left: 4px solid var(--primary);
-  padding-left: 10px;
 }
-.dashboard-filters {
-  background: var(--card-color);
-  border-radius: 6px;
-  padding: 12px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border-color);
-  flex-grow: 1;
-  margin-left: 20px;
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
 }
+
+.btn {
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-white {
+  background: rgba(255, 255, 255, 0.9);
+  color: #667eea;
+}
+
+.btn-white:hover {
+  background: white;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Filters Section */
+.filters-section {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+
 .filter-form {
   width: 100%;
 }
-.form-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  align-items: flex-end;
-}
-.filter-form p {
-  margin: 0;
-  flex: 1 1 200px;
-}
-.filter-form label {
-  display: block;
-  margin-bottom: 3px;
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: var(--secondary);
-}
-.filter-form input, .filter-form select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background-color: #f9fafb;
-}
-.filter-form input:focus, .filter-form select:focus {
-  outline: none;
-  border-color: var(--primary);
-}
-.btn-primary {
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-weight: 600;
-  cursor: pointer;
-}
-.btn-primary:hover {
-  background: var(--primary-dark);
-}
-.dashboard-content {
+
+.form-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  align-items: end;
 }
-.dashboard-card {
-  background: var(--card-color);
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-  border: 1px solid var(--border-color);
+
+.form-field {
   display: flex;
   flex-direction: column;
+  gap: 0.375rem;
 }
-.card-header {
-  padding: 10px 15px;
-  border-bottom: 1px solid var(--border-color);
-  background-color: #f9fafb;
+
+.form-field label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
-.card-header h2 {
-  margin: 0;
+
+.form-field input,
+.form-field select {
+  padding: 0.625rem 0.875rem;
+  border: 2px solid var(--border-subtle);
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+  background: white;
+}
+
+.form-field input:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.btn-primary {
+  background: var(--accent-blue);
+  color: white;
+  justify-self: start;
+  align-self: end;
+}
+
+.btn-primary:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+/* Dashboard Grid */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: white;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+  transition: all 0.3s;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.metric-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.metric-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.metric-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+}
+
+.icon-blue { background: rgba(59, 130, 246, 0.1); color: var(--accent-blue); }
+.icon-green { background: rgba(16, 185, 129, 0.1); color: var(--accent-green); }
+.icon-purple { background: rgba(139, 92, 246, 0.1); color: var(--accent-purple); }
+.icon-amber { background: rgba(245, 158, 11, 0.1); color: var(--accent-amber); }
+
+.metric-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Chart Cards */
+.chart-card {
+  background: white;
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+.chart-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  background: linear-gradient(to right, #f8fafc, #f1f5f9);
+}
+
+.chart-title {
   font-size: 1rem;
-  color: var(--secondary);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
 }
-.card-body {
-  padding: 15px;
-  flex-grow: 1;
+
+.chart-body {
+  padding: 1.5rem;
+  position: relative;
 }
-.dashboard-card ul {
+
+.chart-card canvas {
+  max-height: 300px !important;
+}
+
+/* Map Styling */
+#map {
+  height: 400px;
+  border-radius: 0.75rem;
+  position: relative;
+}
+
+.map-container {
+  position: relative;
+}
+
+.map-legend {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: var(--shadow-md);
+  z-index: 1000;
+  min-width: 150px;
+}
+
+.legend-title {
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.legend-color {
+  width: 1.25rem;
+  height: 1.25rem;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+  border: 2px solid white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* Lists */
+.styled-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
-.dashboard-card ul li {
-  padding: 8px 0;
-  border-bottom: 1px solid #f0f0f0;
+
+.list-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
+  transition: background 0.2s;
 }
-.dashboard-card ul li:last-child {
+
+.list-item:hover {
+  background: #f8fafc;
+}
+
+.list-item:last-child {
   border-bottom: none;
 }
-.stat-value {
+
+.list-label {
   font-weight: 600;
-  color: var(--primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
 }
-.dashboard-card canvas {
-  width: 100% !important;
-  max-height: 250px;
+
+.list-value {
+  font-weight: 700;
+  color: var(--accent-blue);
+  font-size: 0.875rem;
 }
-#map {
-  width: 100%;
-  height: 350px;
-  border-radius: 4px;
-  border: 1px solid #e0e0e0;
-}
-.dashboard-card.full-width {
+
+/* Responsive Grid Adjustments */
+.full-width {
   grid-column: 1 / -1;
 }
-.map-legend {
-  position: absolute;
-  bottom: 30px;
-  right: 10px;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-  z-index: 1000;
+
+.half-width {
+  grid-column: span 1;
 }
-.legend-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 5px;
+
+@media (min-width: 768px) {
+  .half-width {
+    grid-column: span 2;
+  }
 }
-.legend-color {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  margin-right: 8px;
-  border: 2px solid #fff;
-  box-shadow: 0 0 3px rgba(0,0,0,0.3);
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
 }
+
+/* Mobile Optimizations */
 @media (max-width: 768px) {
-  .dashboard-content { grid-template-columns: 1fr; }
-  .form-container { flex-direction: column; }
+  .analytics-dashboard {
+    padding: 1rem;
+  }
+  
+  .dashboard-header {
+    padding: 1.5rem;
+  }
+  
+  .dashboard-title {
+    font-size: 1.5rem;
+  }
+  
+  .header-content {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header-actions {
+    justify-content: stretch;
+  }
+  
+  .btn {
+    flex: 1;
+    justify-content: center;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .metric-value {
+    font-size: 1.75rem;
+  }
+  
+  #map {
+    height: 300px;
+  }
+  
+  .map-legend {
+    position: relative;
+    top: auto;
+    right: auto;
+    margin-top: 1rem;
+  }
 }
+
+/* Print Styles */
+@media print {
+  .dashboard-header {
+    background: none;
+    color: black;
+  }
+  
+  .dashboard-title {
+    color: black;
+  }
+  
+  .filters-section,
+  .header-actions {
+    display: none;
+  }
+  
+  .chart-card,
+  .metric-card {
+    break-inside: avoid;
+  }
+}
+
+/* Loading State */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.metric-card,
+.chart-card {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.metric-card:nth-child(1) { animation-delay: 0.1s; }
+.metric-card:nth-child(2) { animation-delay: 0.2s; }
+.metric-card:nth-child(3) { animation-delay: 0.3s; }
+.metric-card:nth-child(4) { animation-delay: 0.4s; }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="analytics-dashboard">
+  <!-- Header -->
   <div class="dashboard-header">
-    <h1>Analytics Dashboard</h1>
-    <button class="btn-primary" onclick="window.print()" style="margin-left:20px;">Print</button>
-    <div class="dashboard-filters">
-      <form method="get" class="filter-form">
-        <div class="form-container">
-          {{ form.as_p }}
-          <button type="submit" class="btn-primary">Apply Filters</button>
-        </div>
-      </form>
+    <div class="header-content">
+      <h1 class="dashboard-title">Analytics Dashboard</h1>
+      <div class="header-actions">
+        <button class="btn btn-white" onclick="window.print()">
+          <span>🖨️</span> Print Report
+        </button>
+        <button class="btn btn-white" onclick="location.reload()">
+          <span>🔄</span> Refresh
+        </button>
+      </div>
     </div>
   </div>
 
-  <div class="dashboard-content">
-    {% if summary %}
-    <div class="dashboard-card summary-card">
-      <div class="card-header"><h2>Summary</h2></div>
-      <div class="card-body">
-        <ul>
-          <li><strong>Total Requests</strong> <span class="stat-value">{{ summary.total_requests }}</span></li>
-          <li><strong>Returning Visitors</strong> <span class="stat-value">{{ summary.returning_visitors }}</span></li>
-        </ul>
+  <!-- Filters -->
+  <div class="filters-section">
+    <form method="get" class="filter-form">
+      <div class="form-grid">
+        {% for field in form %}
+        <div class="form-field">
+          {{ field.label_tag }}
+          {{ field }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">
+          <span>🔍</span> Apply Filters
+        </button>
+      </div>
+    </form>
+  </div>
+
+  {% if summary %}
+  <!-- Metrics Grid -->
+  <div class="dashboard-grid">
+    <div class="metric-card">
+      <div class="metric-header">
+        <div>
+          <div class="metric-value">{{ summary.total_requests|floatformat:0 }}</div>
+          <div class="metric-label">Total Requests</div>
+        </div>
+        <div class="metric-icon icon-blue">📊</div>
+      </div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-header">
+        <div>
+          <div class="metric-value">{{ summary.returning_visitors|floatformat:0 }}</div>
+          <div class="metric-label">Returning Visitors</div>
+        </div>
+        <div class="metric-icon icon-green">🔄</div>
       </div>
     </div>
 
     {% if summary.campus_distribution %}
-    <div class="dashboard-card">
-      <div class="card-header"><h2>Detected Campus Distribution (Geolocation)</h2></div>
-      <div class="card-body"><canvas id="campusChart"></canvas></div>
+    {% for campus, count in summary.campus_distribution.items|slice:":2" %}
+    <div class="metric-card">
+      <div class="metric-header">
+        <div>
+          <div class="metric-value">{{ count|floatformat:0 }}</div>
+          <div class="metric-label">{{ campus }} Campus</div>
+        </div>
+        <div class="metric-icon icon-purple">🏫</div>
+      </div>
     </div>
+    {% endfor %}
     {% endif %}
+  </div>
 
-    <div class="dashboard-card">
-      <div class="card-header"><h2>OS Distribution</h2></div>
-      <div class="card-body"><canvas id="osChart"></canvas></div>
-    </div>
-
-    <div class="dashboard-card">
-      <div class="card-header"><h2>Browser Distribution</h2></div>
-      <div class="card-body"><canvas id="browserChart"></canvas></div>
-    </div>
-
-    <div class="dashboard-card">
-      <div class="card-header"><h2>Hourly Traffic</h2></div>
-      <div class="card-body"><canvas id="hourlyChart"></canvas></div>
-    </div>
-
-    <div class="dashboard-card full-width">
-      <div class="card-header"><h2>Top Paths</h2></div>
-      <div class="card-body">
-        <ul>
-          {% for path, count in summary.top_paths.items %}
-            <li><strong>{{ path }}</strong> <span class="stat-value">{{ count }}</span></li>
-          {% endfor %}
-        </ul>
+  <!-- Charts Grid -->
+  <div class="chart-grid">
+    {% if summary.campus_distribution %}
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2 class="chart-title">Campus Distribution (Detected by IP)</h2>
+      </div>
+      <div class="chart-body">
+        <canvas id="campusChart"></canvas>
       </div>
     </div>
     {% endif %}
 
-    {% if chart_data %}
-    <div class="dashboard-card full-width">
-      <div class="card-header"><h2>Trend Analysis</h2></div>
-      <div class="card-body"><canvas id="analyticsChart"></canvas></div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2 class="chart-title">Hourly Traffic Pattern</h2>
+      </div>
+      <div class="chart-body">
+        <canvas id="hourlyChart"></canvas>
+      </div>
     </div>
-    {% endif %}
 
-    {% if map_points %}
-    <div class="dashboard-card full-width">
-      <div class="card-header"><h2>Geographic Distribution (Detected Campus by IP Geolocation)</h2></div>
-      <div class="card-body">
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2 class="chart-title">Operating Systems</h2>
+      </div>
+      <div class="chart-body">
+        <canvas id="osChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-header">
+        <h2 class="chart-title">Browsers</h2>
+      </div>
+      <div class="chart-body">
+        <canvas id="browserChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Paths -->
+  <div class="chart-card full-width" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+      <h2 class="chart-title">Top 10 Most Visited Pages</h2>
+    </div>
+    <div class="chart-body">
+      <ul class="styled-list">
+        {% for path, count in summary.top_paths.items %}
+        <li class="list-item">
+          <span class="list-label">{{ path }}</span>
+          <span class="list-value">{{ count }} visits</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if chart_data %}
+  <!-- Trend Analysis -->
+  <div class="chart-card full-width" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+      <h2 class="chart-title">{{ chart_data.dataset.label }} Over Time</h2>
+    </div>
+    <div class="chart-body">
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if map_points %}
+  <!-- Geographic Distribution -->
+  <div class="chart-card full-width" style="margin-top: 1.5rem;">
+    <div class="chart-header">
+      <h2 class="chart-title">Geographic Distribution by Detected Campus</h2>
+    </div>
+    <div class="chart-body">
+      <div class="map-container">
         <div id="map"></div>
-        <div class="map-legend" id="mapLegend" style="display: none;">
-          <strong>Detected Campus</strong>
+        <div class="map-legend" id="mapLegend">
+          <div class="legend-title">Campus Locations</div>
         </div>
       </div>
     </div>
-    {% endif %}
   </div>
+  {% endif %}
 </div>
-
 {% endblock %}
 
 {% block scripts %}
@@ -254,128 +624,266 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  {% if summary %}
-    // Campus colors mapping
-    const campusColors = {
-      'GOA': '#ef4444',  // Red
-      'HYD': '#3b82f6',  // Blue
-      'PIL': '#10b981',  // Green
-      'DUB': '#f59e0b',  // Amber
-      'OTH': '#6b7280'   // Gray
-    };
+  // Chart defaults
+  Chart.defaults.font.family = "'Inter', 'system-ui', sans-serif";
+  Chart.defaults.plugins.legend.labels.usePointStyle = true;
+  Chart.defaults.plugins.legend.labels.padding = 15;
 
-    // Campus Chart
+  {% if summary %}
+    // Dynamic campus colors based on actual data
+    const campusData = {{ summary.campus_distribution|safe|default:"{}" }};
+    const campusKeys = Object.keys(campusData);
+    
+    // Generate colors dynamically based on number of campuses
+    const colorPalette = [
+      '#3b82f6', // blue
+      '#ef4444', // red
+      '#10b981', // green
+      '#f59e0b', // amber
+      '#8b5cf6', // purple
+      '#ec4899', // pink
+      '#14b8a6', // teal
+      '#f97316', // orange
+      '#6366f1', // indigo
+      '#84cc16', // lime
+    ];
+    
+    const campusColors = {};
+    campusKeys.forEach((campus, index) => {
+      campusColors[campus] = colorPalette[index % colorPalette.length];
+    });
+
     {% if summary.campus_distribution %}
-    const campusData = {{ summary.campus_distribution|safe }};
+    // Campus Distribution Chart
     const campusLabels = Object.keys(campusData);
     const campusCounts = Object.values(campusData);
-    const campusChartColors = campusLabels.map(campus => campusColors[campus] || '#6b7280');
+    const campusChartColors = campusLabels.map((campus, index) => colorPalette[index % colorPalette.length]);
+    
     new Chart(document.getElementById('campusChart'), {
-      type:'doughnut', 
-      data:{
-        labels:campusLabels, 
-        datasets:[{
-          data:campusCounts, 
-          backgroundColor:campusChartColors,
-          borderWidth: 2,
+      type: 'doughnut',
+      data: {
+        labels: campusLabels,
+        datasets: [{
+          data: campusCounts,
+          backgroundColor: campusChartColors,
+          borderWidth: 3,
           borderColor: '#fff'
         }]
       },
       options: {
+        responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
-            position: 'bottom'
+            position: 'bottom',
+            labels: {
+              padding: 20,
+              font: { size: 12 }
+            }
           }
         }
       }
     });
     {% endif %}
 
+    // Hourly Traffic Chart
+    const hourlyData = {{ summary.hourly_hits|safe }};
+    const hourlyCtx = document.getElementById('hourlyChart').getContext('2d');
+    const hourlyGradient = hourlyCtx.createLinearGradient(0, 0, 0, 300);
+    hourlyGradient.addColorStop(0, 'rgba(59, 130, 246, 0.8)');
+    hourlyGradient.addColorStop(1, 'rgba(59, 130, 246, 0.1)');
+    
+    new Chart(hourlyCtx, {
+      type: 'bar',
+      data: {
+        labels: Array.from({length: 24}, (_, i) => `${i}:00`),
+        datasets: [{
+          data: hourlyData,
+          backgroundColor: hourlyGradient,
+          borderColor: '#3b82f6',
+          borderWidth: 2,
+          borderRadius: 8,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)'
+            }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
+
     // OS Chart
     const osData = {{ summary.os_distribution|safe }};
-    const osLabels = Object.keys(osData);
-    const osCounts = Object.values(osData);
-    new Chart(document.getElementById('osChart'), {type:'pie', data:{labels:osLabels, datasets:[{data:osCounts, backgroundColor:['#3b82f6','#f97316','#10b981','#eab308','#ef4444']}]} });
+    new Chart(document.getElementById('osChart'), {
+      type: 'pie',
+      data: {
+        labels: Object.keys(osData),
+        datasets: [{
+          data: Object.values(osData),
+          backgroundColor: [
+            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'
+          ].slice(0, Object.keys(osData).length)
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { padding: 15, font: { size: 11 } }
+          }
+        }
+      }
+    });
 
     // Browser Chart
     const browserData = {{ summary.browser_distribution|safe }};
-    const browserLabels = Object.keys(browserData);
-    const browserCounts = Object.values(browserData);
-    new Chart(document.getElementById('browserChart'), {type:'pie', data:{labels:browserLabels, datasets:[{data:browserCounts, backgroundColor:['#6366f1','#f59e0b','#22c55e','#3b82f6','#ef4444']}]} });
-
-    // Hourly Chart
-    const hourlyData = {{ summary.hourly_hits|safe }};
-    new Chart(document.getElementById('hourlyChart'), {type:'bar', data:{labels:Array.from({length:24},(_,i)=>i+':00'), datasets:[{data:hourlyData, backgroundColor:'#3b82f6'}]}, options:{scales:{y:{beginAtZero:true}}}});
+    new Chart(document.getElementById('browserChart'), {
+      type: 'pie',
+      data: {
+        labels: Object.keys(browserData),
+        datasets: [{
+          data: Object.values(browserData),
+          backgroundColor: [
+            '#8b5cf6', '#ec4899', '#14b8a6', '#f97316', '#6366f1'
+          ].slice(0, Object.keys(browserData).length)
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { padding: 15, font: { size: 11 } }
+          }
+        }
+      }
+    });
   {% endif %}
 
   {% if chart_data %}
     // Trend Chart
-    const ctx = document.getElementById('analyticsChart').getContext('2d');
-    const grad = ctx.createLinearGradient(0,0,0,300);
-    grad.addColorStop(0,'rgba(59,130,246,0.5)'); grad.addColorStop(1,'rgba(59,130,246,0)');
-    new Chart(ctx, {type:'line', data:{labels:{{ chart_data.labels|safe }}, datasets:[{label:"{{ chart_data.dataset.label }}", data:{{ chart_data.dataset.data|safe }}, borderColor:'#3b82f6', backgroundColor:grad, fill:true, tension:0.4}]}, options:{scales:{y:{beginAtZero:true}}}});
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    const trendGradient = trendCtx.createLinearGradient(0, 0, 0, 300);
+    trendGradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
+    trendGradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+    
+    new Chart(trendCtx, {
+      type: 'line',
+      data: {
+        labels: {{ chart_data.labels|safe }},
+        datasets: [{
+          label: "{{ chart_data.dataset.label }}",
+          data: {{ chart_data.dataset.data|safe }},
+          borderColor: '#6366f1',
+          backgroundColor: trendGradient,
+          fill: true,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#6366f1',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            grid: { color: 'rgba(0, 0, 0, 0.05)' }
+          },
+          x: {
+            grid: { display: false }
+          }
+        }
+      }
+    });
   {% endif %}
 
   {% if map_points %}
-    // Map with campus clustering
-    const map = L.map('map').setView([22,79],5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
+    // Initialize map
+    const map = L.map('map').setView([20, 77], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors © CARTO'
+    }).addTo(map);
     
-    const campusColors = {
-      'GOA': '#ef4444',  // Red
-      'HYD': '#3b82f6',  // Blue
-      'PIL': '#10b981',  // Green
-      'DUB': '#f59e0b',  // Amber
-      'OTH': '#6b7280'   // Gray
-    };
-    
-    const campusFullNames = {
-      'GOA': 'BITS Goa',
-      'HYD': 'BITS Hyderabad',
-      'PIL': 'BITS Pilani',
-      'DUB': 'BITS Dubai',
-      'OTH': 'Other'
-    };
-    
-    const pts = {{ map_points|safe }};
+    const points = {{ map_points|safe }};
     const bounds = [];
-    const campusesFound = new Set();
+    const campusesInData = new Set();
     
-    pts.forEach(p => {
-      const campus = p.campus || 'OTH';
-      const color = campusColors[campus] || campusColors['OTH'];
-      campusesFound.add(campus);
-      
-      L.circleMarker([p.lat, p.lon], {
-        radius: 8, 
-        fillColor: color, 
-        color: '#fff', 
-        weight: 2, 
-        fillOpacity: 0.8
-      }).addTo(map).bindPopup(`
-        <strong>Detected Campus:</strong> ${campusFullNames[campus] || campus}<br>
-        <strong>Time:</strong> ${p.timestamp}
-      `); 
-      bounds.push([p.lat, p.lon]);
+    // Get campus colors from the data
+    const campusData = {{ summary.campus_distribution|safe|default:"{}" }};
+    const campusKeys = Object.keys(campusData);
+    const colorPalette = [
+      '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6',
+      '#ec4899', '#14b8a6', '#f97316', '#6366f1', '#84cc16'
+    ];
+    const campusColors = {};
+    campusKeys.forEach((campus, index) => {
+      campusColors[campus] = colorPalette[index % colorPalette.length];
     });
     
-    // Add legend
-    if (campusesFound.size > 0) {
-      const legend = document.getElementById('mapLegend');
-      legend.style.display = 'block';
+    // Add markers
+    points.forEach(point => {
+      const campus = point.campus || 'Unknown';
+      campusesInData.add(campus);
+      const color = campusColors[campus] || '#6b7280';
       
-      Array.from(campusesFound).sort().forEach(campus => {
-        const item = document.createElement('div');
-        item.className = 'legend-item';
-        item.innerHTML = `
-          <div class="legend-color" style="background-color: ${campusColors[campus] || campusColors['OTH']};"></div>
-          <span>${campusFullNames[campus] || campus}</span>
-        `;
-        legend.appendChild(item);
-      });
-    }
+      L.circleMarker([point.lat, point.lon], {
+        radius: 10,
+        fillColor: color,
+        color: '#fff',
+        weight: 3,
+        opacity: 1,
+        fillOpacity: 0.8
+      }).addTo(map).bindPopup(`
+        <div style="font-family: system-ui; padding: 5px;">
+          <strong>Campus:</strong> ${campus}<br>
+          <strong>Time:</strong> ${point.timestamp}
+        </div>
+      `);
+      
+      bounds.push([point.lat, point.lon]);
+    });
     
-    if (bounds.length) map.fitBounds(bounds, {padding:[30,30]});
+    // Update legend
+    const legend = document.getElementById('mapLegend');
+    Array.from(campusesInData).sort().forEach(campus => {
+      const item = document.createElement('div');
+      item.className = 'legend-item';
+      item.innerHTML = `
+        <div class="legend-color" style="background-color: ${campusColors[campus] || '#6b7280'};"></div>
+        <span>${campus}</span>
+      `;
+      legend.appendChild(item);
+    });
+    
+    // Fit bounds
+    if (bounds.length > 0) {
+      map.fitBounds(bounds, { padding: [50, 50] });
+    }
   {% endif %}
 });
 </script>
