@@ -120,7 +120,9 @@ class AnalyticsForm(forms.Form):
     map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=10080)
 
 def parse_log_line(line):
+    """Parse a single log line and extract all fields."""
     parts = [p.strip() for p in line.split('|')]
+    # Expected format: timestamp | method | person_info | path | ip | os | browser | lat | lon | campus | person_campus
     if len(parts) < 11:
         return None
     
@@ -130,6 +132,7 @@ def parse_log_line(line):
     except:
         return None
 
+    # Parse coordinates
     def parse_coord(coord_str):
         if coord_str == "None" or not coord_str:
             return None
@@ -148,7 +151,7 @@ def parse_log_line(line):
         'browser': parts[6],
         'lat': parse_coord(parts[7]),
         'lon': parse_coord(parts[8]),
-        'campus': parts[9],
+        'campus': parts[9],  # Detected campus from IP geolocation
         'person_campus': parts[10] if len(parts) > 10 else None,
     }
 
@@ -195,6 +198,7 @@ def analytics(request):
             browser_dist[e['browser']] += 1
             hourly_hits[e['timestamp'].hour] += 1
             top_paths[e['path']] += 1
+            # Use detected campus from geolocation (from the log)
             campus_dist[e['campus']] += 1
 
         if cd['metric_y'].startswith('unique'):
@@ -237,7 +241,7 @@ def analytics(request):
                     'lat': e['lat'],
                     'lon': e['lon'],
                     'timestamp': e['timestamp'].strftime('%H:%M:%S'),
-                    'campus': e['campus'],
+                    'campus': e['campus'],  # Campus as detected by geolocation in the log
                 })
 
     return render(request, 'bits/analytics.html', {
@@ -246,9 +250,7 @@ def analytics(request):
         'map_points': map_points,
         'summary': summary,
         'show_map': form.cleaned_data['show_map'] if form.is_valid() else False,
-    })
-
-####THIS PART IS FOR NOTIFICATIONS BRO!!!####
+    })####THIS PART IS FOR NOTIFICATIONS BRO!!!####
 
 
 def generate_notification(item_name, price):
