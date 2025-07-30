@@ -74,6 +74,14 @@ VAPID_CLAIMS = {
 }
 
 # upgraded_analytics/views.py
+import os
+from django.shortcuts import render
+from django import forms
+from django.utils import timezone
+from django.conf import settings
+from datetime import datetime, timedelta
+from collections import Counter
+
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
 METRICS = {

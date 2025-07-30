@@ -254,16 +254,24 @@
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  {% if summary %}
-    // Campus colors mapping
-    const campusColors = {
-      'GOA': '#ef4444',  // Red
-      'HYD': '#3b82f6',  // Blue
-      'PIL': '#10b981',  // Green
-      'DUB': '#f59e0b',  // Amber
-      'OTH': '#6b7280'   // Gray
-    };
+  // Define campus colors and names globally
+  const campusColors = {
+    'GOA': '#ef4444',  // Red
+    'HYD': '#3b82f6',  // Blue
+    'PIL': '#10b981',  // Green
+    'DUB': '#f59e0b',  // Amber
+    'OTH': '#6b7280'   // Gray
+  };
+  
+  const campusFullNames = {
+    'GOA': 'BITS Goa',
+    'HYD': 'BITS Hyderabad',
+    'PIL': 'BITS Pilani',
+    'DUB': 'BITS Dubai',
+    'OTH': 'Other'
+  };
 
+  {% if summary %}
     // Campus Chart
     {% if summary.campus_distribution %}
     const campusData = {{ summary.campus_distribution|safe }};
@@ -295,47 +303,89 @@ document.addEventListener('DOMContentLoaded', () => {
     const osData = {{ summary.os_distribution|safe }};
     const osLabels = Object.keys(osData);
     const osCounts = Object.values(osData);
-    new Chart(document.getElementById('osChart'), {type:'pie', data:{labels:osLabels, datasets:[{data:osCounts, backgroundColor:['#3b82f6','#f97316','#10b981','#eab308','#ef4444']}]} });
+    new Chart(document.getElementById('osChart'), {
+      type:'pie', 
+      data:{
+        labels:osLabels, 
+        datasets:[{
+          data:osCounts, 
+          backgroundColor:['#3b82f6','#f97316','#10b981','#eab308','#ef4444']
+        }]
+      } 
+    });
 
     // Browser Chart
     const browserData = {{ summary.browser_distribution|safe }};
     const browserLabels = Object.keys(browserData);
     const browserCounts = Object.values(browserData);
-    new Chart(document.getElementById('browserChart'), {type:'pie', data:{labels:browserLabels, datasets:[{data:browserCounts, backgroundColor:['#6366f1','#f59e0b','#22c55e','#3b82f6','#ef4444']}]} });
+    new Chart(document.getElementById('browserChart'), {
+      type:'pie', 
+      data:{
+        labels:browserLabels, 
+        datasets:[{
+          data:browserCounts, 
+          backgroundColor:['#6366f1','#f59e0b','#22c55e','#3b82f6','#ef4444']
+        }]
+      } 
+    });
 
     // Hourly Chart
     const hourlyData = {{ summary.hourly_hits|safe }};
-    new Chart(document.getElementById('hourlyChart'), {type:'bar', data:{labels:Array.from({length:24},(_,i)=>i+':00'), datasets:[{data:hourlyData, backgroundColor:'#3b82f6'}]}, options:{scales:{y:{beginAtZero:true}}}});
+    new Chart(document.getElementById('hourlyChart'), {
+      type:'bar', 
+      data:{
+        labels:Array.from({length:24},(_,i)=>i+':00'), 
+        datasets:[{
+          data:hourlyData, 
+          backgroundColor:'#3b82f6'
+        }]
+      }, 
+      options:{
+        scales:{
+          y:{
+            beginAtZero:true
+          }
+        }
+      }
+    });
   {% endif %}
 
   {% if chart_data %}
     // Trend Chart
     const ctx = document.getElementById('analyticsChart').getContext('2d');
     const grad = ctx.createLinearGradient(0,0,0,300);
-    grad.addColorStop(0,'rgba(59,130,246,0.5)'); grad.addColorStop(1,'rgba(59,130,246,0)');
-    new Chart(ctx, {type:'line', data:{labels:{{ chart_data.labels|safe }}, datasets:[{label:"{{ chart_data.dataset.label }}", data:{{ chart_data.dataset.data|safe }}, borderColor:'#3b82f6', backgroundColor:grad, fill:true, tension:0.4}]}, options:{scales:{y:{beginAtZero:true}}}});
+    grad.addColorStop(0,'rgba(59,130,246,0.5)'); 
+    grad.addColorStop(1,'rgba(59,130,246,0)');
+    new Chart(ctx, {
+      type:'line', 
+      data:{
+        labels:{{ chart_data.labels|safe }}, 
+        datasets:[{
+          label:"{{ chart_data.dataset.label }}", 
+          data:{{ chart_data.dataset.data|safe }}, 
+          borderColor:'#3b82f6', 
+          backgroundColor:grad, 
+          fill:true, 
+          tension:0.4
+        }]
+      }, 
+      options:{
+        scales:{
+          y:{
+            beginAtZero:true
+          }
+        }
+      }
+    });
   {% endif %}
 
   {% if map_points %}
     // Map with campus clustering
     const map = L.map('map').setView([22,79],5);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
-    
-    const campusColors = {
-      'GOA': '#ef4444',  // Red
-      'HYD': '#3b82f6',  // Blue
-      'PIL': '#10b981',  // Green
-      'DUB': '#f59e0b',  // Amber
-      'OTH': '#6b7280'   // Gray
-    };
-    
-    const campusFullNames = {
-      'GOA': 'BITS Goa',
-      'HYD': 'BITS Hyderabad',
-      'PIL': 'BITS Pilani',
-      'DUB': 'BITS Dubai',
-      'OTH': 'Other'
-    };
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      maxZoom:19, 
+      attribution:'© OpenStreetMap'
+    }).addTo(map);
     
     const pts = {{ map_points|safe }};
     const bounds = [];
