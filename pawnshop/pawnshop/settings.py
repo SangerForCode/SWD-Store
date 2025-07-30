@@ -347,3 +347,11 @@ CSRF_FAILURE_VIEW = 'bits.views.csrf_failure_debug'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+from celery.schedules import crontab
+CELERY_BEAT_SCHEDULE = {
+    'mark-items-sold-daily': {
+        'task': 'bits.tasks.mark_old_items_as_sold',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
