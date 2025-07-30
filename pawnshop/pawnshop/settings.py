@@ -60,7 +60,8 @@ INSTALLED_APPS = [
     'social_django',
     'pwa',
     'django_ses',
-    'corsheaders'
+    'corsheaders',
+    'django_celery_beat'
 ]
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
@@ -341,5 +342,8 @@ CACHES = {
     }
 }
 
-# Install: pip install django-redis
 CSRF_FAILURE_VIEW = 'bits.views.csrf_failure_debug'
+
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
