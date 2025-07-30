@@ -113,9 +113,12 @@ class AnalyticsForm(forms.Form):
 
 def parse_log_line(line):
     parts = [p.strip() for p in line.split('|')]
-    if len(parts) < 9:
+    # The middleware logs 11 fields:
+    # timestamp | method | person_info | path | ip | os | browser | lat | lon | campus | person_campus
+    if len(parts) < 11:
         return None
-    ts_str, method, path, person, ip, os_, browser, lat_part, lon_part = parts[:9]
+    
+    ts_str, method, person, path, ip, os_, browser, lat_str, lon_str, campus, person_campus = parts[:11]
 
     try:
         ts = datetime.strptime(ts_str, '%Y-%m-%d %H:%M:%S')
@@ -123,9 +126,12 @@ def parse_log_line(line):
     except:
         return None
 
-    def extract_coord(s):
+    # Parse latitude and longitude - they're logged as plain numbers or "None"
+    def parse_coord(coord_str):
+        if coord_str == "None" or not coord_str:
+            return None
         try:
-            return float(s.split(':')[1].strip())
+            return float(coord_str)
         except:
             return None
 
@@ -137,8 +143,10 @@ def parse_log_line(line):
         'os': os_,
         'ip': ip,
         'path': path,
-        'lat': extract_coord(lat_part),
-        'lon': extract_coord(lon_part),
+        'lat': parse_coord(lat_str),
+        'lon': parse_coord(lon_str),
+        'campus': campus,
+        'person_campus': person_campus,
     }
 
 def analytics(request):
@@ -150,6 +158,7 @@ def analytics(request):
     browser_dist = Counter()
     hourly_hits = [0]*24
     top_paths = Counter()
+    campus_dist = Counter()
 
     if form.is_valid():
         cd = form.cleaned_data
@@ -183,6 +192,9 @@ def analytics(request):
             browser_dist[e['browser']] += 1
             hourly_hits[e['timestamp'].hour] += 1
             top_paths[e['path']] += 1
+            # Use person_campus if available, otherwise fall back to detected campus
+            campus = e['person_campus'] if e['person_campus'] != "OTH" else e['campus']
+            campus_dist[campus] += 1
 
         if cd['metric_y'].startswith('unique'):
             counts = [len(s) for s in seen]
@@ -205,7 +217,8 @@ def analytics(request):
             'os_distribution': dict(os_dist.most_common()),
             'browser_distribution': dict(browser_dist.most_common()),
             'hourly_hits': hourly_hits,
-            'top_paths': dict(top_paths.most_common(10))
+            'top_paths': dict(top_paths.most_common(10)),
+            'campus_distribution': dict(campus_dist.most_common()),
         }
 
         if cd['show_map']:
@@ -222,7 +235,8 @@ def analytics(request):
                 map_points.append({
                     'lat': e['lat'],
                     'lon': e['lon'],
-                    'timestamp': e['timestamp'].strftime('%H:%M:%S')
+                    'timestamp': e['timestamp'].strftime('%H:%M:%S'),
+                    'campus': e['person_campus'] if e['person_campus'] != "OTH" else e['campus'],
                 })
 
     return render(request, 'bits/analytics.html', {
