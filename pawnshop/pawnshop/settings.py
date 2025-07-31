@@ -39,7 +39,7 @@ ALLOWED_HOSTS = [
     "www.api.amazoff.shop",
     "www.api.bits-pilani.store",
     "admin.amazoff.shop",
-    "65.2.6.230",
+    "3.108.113.123",
 ]
 
 # Application definition
