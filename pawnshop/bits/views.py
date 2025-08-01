@@ -43,7 +43,6 @@ from twilio.twiml.messaging_response import MessagingResponse
 import re
 from bp_bot.bot import save_bp_reading
 
-#EMAIL SHIT STARTS HERE
 signer = Signer()
 
 def generate_unsubscribe_token(user):
@@ -66,21 +65,10 @@ def unsubscribe_view(request, token):
     user.save()
     return HttpResponse("You have been unsubscribed successfully.")
 
-##EMAIL SHIT ENDS HERE
-
 VAPID_PRIVATE_KEY = "***REMOVED***"
 VAPID_CLAIMS = {
     "sub": "mailto:contact@example.com"
 }
-
-# upgraded_analytics/views.py
-import os
-from django.shortcuts import render
-from django import forms
-from django.utils import timezone
-from django.conf import settings
-from datetime import datetime, timedelta
-from collections import Counter
 
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
@@ -120,9 +108,7 @@ class AnalyticsForm(forms.Form):
     map_window = forms.IntegerField(label="Map: last N minutes", min_value=1, initial=10080)
 
 def parse_log_line(line):
-    """Parse a single log line and extract all fields."""
     parts = [p.strip() for p in line.split('|')]
-    # Expected format: timestamp | method | person_info | path | ip | os | browser | lat | lon | campus | person_campus
     if len(parts) < 11:
         return None
     
@@ -132,7 +118,6 @@ def parse_log_line(line):
     except:
         return None
 
-    # Parse coordinates
     def parse_coord(coord_str):
         if coord_str == "None" or not coord_str:
             return None
@@ -151,7 +136,7 @@ def parse_log_line(line):
         'browser': parts[6],
         'lat': parse_coord(parts[7]),
         'lon': parse_coord(parts[8]),
-        'campus': parts[9],  # Detected campus from IP geolocation
+        'campus': parts[9],
         'person_campus': parts[10] if len(parts) > 10 else None,
     }
 
@@ -169,14 +154,20 @@ def analytics(request):
     if form.is_valid():
         cd = form.cleaned_data
         entries = []
-        with open(LOGFILE) as f:
-            for line in f:
-                e = parse_log_line(line)
-                if not e:
-                    continue
-                if not (cd['start_time'] <= e['timestamp'] <= cd['end_time']):
-                    continue
-                entries.append(e)
+        try:
+            with open(LOGFILE, 'r', encoding='utf-8', errors='ignore') as f:
+                for line in f:
+                    e = parse_log_line(line)
+                    if not e:
+                        continue
+                    if not (cd['start_time'] <= e['timestamp'] <= cd['end_time']):
+                        continue
+                    entries.append(e)
+        except FileNotFoundError:
+            entries = []
+        except Exception as e:
+            print(f"Error reading log file: {e}")
+            entries = []
 
         total_secs = (cd['end_time'] - cd['start_time']).total_seconds()
         step = total_secs / cd['buckets']
@@ -198,7 +189,6 @@ def analytics(request):
             browser_dist[e['browser']] += 1
             hourly_hits[e['timestamp'].hour] += 1
             top_paths[e['path']] += 1
-            # Use detected campus from geolocation (from the log)
             campus_dist[e['campus']] += 1
 
         if cd['metric_y'].startswith('unique'):
@@ -241,7 +231,7 @@ def analytics(request):
                     'lat': e['lat'],
                     'lon': e['lon'],
                     'timestamp': e['timestamp'].strftime('%H:%M:%S'),
-                    'campus': e['campus'],  # Campus as detected by geolocation in the log
+                    'campus': e['campus'],
                 })
 
     return render(request, 'bits/analytics.html', {
@@ -250,8 +240,7 @@ def analytics(request):
         'map_points': map_points,
         'summary': summary,
         'show_map': form.cleaned_data['show_map'] if form.is_valid() else False,
-    })####THIS PART IS FOR NOTIFICATIONS BRO!!!####
-
+    })
 
 def generate_notification(item_name, price):
     title_options = [
