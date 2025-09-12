@@ -5,7 +5,12 @@ from django.views.decorators.http import require_GET
 from django.db.models import Q
 from django.db.models import Count
 from .models import *
-
+from decimal import Decimal, InvalidOperation
+from typing import Dict, Any, List
+from django.http import JsonResponse, HttpRequest
+from django.views.decorators.http import require_GET
+from django.db.models import Prefetch
+from django.utils.timezone import localtime
 # --- helpers ---
 def _sanitize_fields_generic(v, allowed):
     if not v:
@@ -50,22 +55,12 @@ def _sanitize_fields(v: Optional[str]) -> Optional[Set[str]]:
     return (fields & allowed) or None
 
 # views_public.py (example filename)
-from __future__ import annotations
-from decimal import Decimal, InvalidOperation
-from typing import Dict, Any, List
-from django.http import JsonResponse, HttpRequest
-from django.views.decorators.http import require_GET
-from django.db.models import Q, Prefetch
-from django.utils.timezone import localtime
+
 
 from .models import Item, Image, Category, Hostel, Person
 
 # Optional (Postgres fuzzy fallback). Safe to ignore if not installed.
-try:
-    from django.contrib.postgres.search import TrigramSimilarity
-    HAS_TRIGRAM = True
-except Exception:
-    HAS_TRIGRAM = False
+HAS_TRIGRAM = False
 
 VALID_CAMPUSES = {"GOA", "HYD", "PIL", "DUB"}
 
