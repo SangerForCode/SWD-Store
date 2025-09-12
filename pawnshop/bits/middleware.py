@@ -30,6 +30,8 @@ class BlockUnauthorizedOriginsMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        if "public" in request.path:
+            return self.get_response(request)
         ua = request.META.get("HTTP_USER_AGENT", "").lower()
         if "postman" in ua or "curl" in ua:
             print("e1")
