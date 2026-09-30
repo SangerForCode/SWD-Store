@@ -7,7 +7,6 @@ class ItemForm(forms.ModelForm):
         fields = ['name', 'description', 'price', 'category', 'hostel', 'phone']
         widgets = {
             'description': forms.Textarea(attrs={'rows': 4}),
-            'category': forms.Select(choices=[(category.id, category.name) for category in Category.objects.all()]),
             'phone': forms.TextInput(attrs={'placeholder': '(WhatsApp) Required if not provided one before'})
         }
         labels = {

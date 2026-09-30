@@ -17,7 +17,7 @@ See [docs/architecture.md](docs/architecture.md) for the UML-style class, compon
 
 ## Stack
 
-- Python 3.12 recommended (the pinned TensorFlow dependency is not compatible with every Python release).
+- Python 3.12 recommended for compatibility with the pinned Django dependency set.
 - Django 5.1, SQLite by default, Django templates/static assets.
 - Celery + Redis for scheduled/background work.
 - WhiteNoise for static-file serving; Google OAuth, SES, Web Push, and Twilio are optional integrations.
@@ -65,6 +65,7 @@ python manage.py migrate
 python manage.py createcachetable cache_table
 python manage.py collectstatic --noinput
 python manage.py check
+python manage.py test
 python manage.py runserver
 ```
 
@@ -91,6 +92,7 @@ All credentials and deployment-specific values belong in the untracked `pawnshop
 | `DJANGO_SECRET_KEY` | Django signing/session secret; required |
 | `DJANGO_DEBUG`, `DJANGO_ALLOWED_HOSTS` | Development and host configuration |
 | `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | Google sign-in |
+| `SWD_ADMIN_EMAIL`, `DEFAULT_FROM_EMAIL` | Optional admin notification target and sender address |
 | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SES_REGION_NAME` | Optional SES email delivery |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN` | Optional phone-number verification |
 | `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT` | Optional browser push notifications; use a newly generated pair |

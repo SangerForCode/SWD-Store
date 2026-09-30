@@ -1327,7 +1327,7 @@ def api_authreceiver(request):
 
         csrf_token = get_token(request)
         response.set_cookie(
-            key='***REMOVED***',
+            key='csrftoken',
             value=csrf_token,
             max_age=60 * 60 * 24 * 7,
             httponly=False,
