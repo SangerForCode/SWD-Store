@@ -98,7 +98,6 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.0.1
 python3-openid==3.2.0
 pytz==2025.1
-pywin32==308
 pyzmq==26.2.1
 requests==2.32.3
 requests-oauthlib==2.0.0
@@ -141,3 +140,10 @@ yahoo-finance==1.4.0
 yarl==1.18.3
 yfinance==0.2.52
 pywin32==308; sys_platform == 'win32'
+celery==5.4.0
+django-celery-beat==2.7.0
+django-cors-headers==4.7.0
+django-ses==4.4.0
+pywebpush==2.0.3
+redis==5.2.1
+user-agents==2.2.0

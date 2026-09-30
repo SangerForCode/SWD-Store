@@ -1118,7 +1118,10 @@ function isRunningStandalone() {
   return (window.matchMedia('(display-mode: standalone)').matches) || (window.navigator.standalone);
 }
 
+const vapidPublicKey = "{{ VAPID_PUBLIC_KEY|default:''|escapejs }}";
+
 function subscribeUserToPush() {
+  if (!vapidPublicKey) return;
   navigator.serviceWorker.ready.then(function(registration) {
     registration.pushManager.getSubscription().then(function(existingSubscription) {
       if (existingSubscription) {
@@ -1136,7 +1139,7 @@ function subscribeUserToPush() {
 
         registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: '***REMOVED***'
+          applicationServerKey: vapidPublicKey
         }).then(function(newSubscription) {
           console.log('✅ New subscription created:', newSubscription);
 
@@ -1156,9 +1159,10 @@ function subscribeUserToPush() {
 }
 
 function createNewSubscription(registration) {
+  if (!vapidPublicKey) return;
   registration.pushManager.subscribe({
     userVisibleOnly: true,
-    applicationServerKey: '***REMOVED***'
+    applicationServerKey: vapidPublicKey
   }).then(function(newSubscription) {
     console.log('✅ New subscription created:', newSubscription);
 

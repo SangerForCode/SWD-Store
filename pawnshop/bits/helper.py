@@ -1,5 +1,4 @@
 import os
-from dotenv import load_dotenv
 from twilio.rest import Client
 import urllib.parse
 from operator import attrgetter
@@ -8,11 +7,10 @@ from django.utils import timezone
 from urllib.parse import urlparse
 from django.conf import settings
 
-load_dotenv()
 
-account_sid = os.environ['TWILIO_ACCOUNT_SID']
-auth_token = os.environ['TWILIO_AUTH_TOKEN']
-client = Client(account_sid, auth_token)
+account_sid = settings.TWILIO_ACCOUNT_SID
+auth_token = settings.TWILIO_AUTH_TOKEN
+client = Client(account_sid, auth_token) if account_sid and auth_token else None
 
 def generate_whatsapp_link(phone_number, message=None):
     phone_number = get_clean_number(phone_number)
@@ -40,7 +38,8 @@ def get_clean_number(phone_number):
 
 
 def verify_phone_number(phone_number):
-    service = client.verify.v2.services.create(friendly_name="Bits Pilani Pawnshop")
+    if client is None:
+        raise RuntimeError("Twilio phone verification is not configured.")
     return client.lookups.v2.phone_numbers(phone_number).fetch().valid
 
 def items_sort(items_list, method='0'):

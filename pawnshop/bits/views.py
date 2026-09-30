@@ -1,5 +1,5 @@
 banned_list = []
-NOTIFICATION_COOLDOWN = 10 #minutes nigga
+NOTIFICATION_COOLDOWN = 10  # minutes
 
 import os
 import json
@@ -41,7 +41,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from twilio.twiml.messaging_response import MessagingResponse
 import re
-from bp_bot.bot import save_bp_reading
 
 signer = Signer()
 
@@ -65,10 +64,8 @@ def unsubscribe_view(request, token):
     user.save()
     return HttpResponse("You have been unsubscribed successfully.")
 
-VAPID_PRIVATE_KEY = "***REMOVED***"
-VAPID_CLAIMS = {
-    "sub": "mailto:contact@example.com"
-}
+VAPID_PRIVATE_KEY = settings.VAPID_PRIVATE_KEY
+VAPID_CLAIMS = {"sub": settings.VAPID_SUBJECT}
 
 LOGFILE = os.path.join(settings.LOG_DIR, 'request_logs.log')
 
@@ -277,7 +274,7 @@ def send_notification(request, person, item):
             person.last_notification = timezone.now()
             person.save()
             campus = person.campus
-            if person.email == 'contact@example.com':
+            if settings.SWD_ADMIN_EMAIL and person.email == settings.SWD_ADMIN_EMAIL:
                 target_persons = Person.objects.filter(campus=campus)
             else:
                 target_persons = Person.objects.filter(campus=campus).exclude(email=person.email)
@@ -332,7 +329,7 @@ def send_email_notification(users, subject, context, template_name):
         email = EmailMessage(
             subject=subject,
             body=html_content,
-            from_email='contact@example.com',
+            from_email=settings.DEFAULT_FROM_EMAIL,
             to=[user.email],
         )
         email.content_subtype = "html"
@@ -449,7 +446,7 @@ def sign_in(request):
 @csrf_exempt
 def auth_receiver(request):
     token = request.POST['credential']
-    user_data = id_token.verify_oauth2_token(token, requests.Request(), os.environ['GOOGLE_OAUTH_CLIENT_ID'], clock_skew_in_seconds = 10)
+    user_data = id_token.verify_oauth2_token(token, requests.Request(), settings.GOOGLE_OAUTH_CLIENT_ID, clock_skew_in_seconds = 10)
     request.session['user_data'] = user_data
     if not Person.objects.filter(email=user_data['email']).exists():
         person = Person(email=user_data['email'], name=user_data['name'])

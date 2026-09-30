@@ -12,35 +12,30 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
+
+
+def env_bool(name, default=False):
+    return os.getenv(name, str(default)).strip().lower() in {'1', 'true', 'yes', 'on'}
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = r'***REMOVED***'
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', '')
+if not SECRET_KEY:
+    raise RuntimeError('Set DJANGO_SECRET_KEY in pawnshop/.env or the environment.')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = env_bool('DJANGO_DEBUG', False)
 
-ALLOWED_HOSTS = [
-    'bits-pilani.store',
-    'www.bits-pilani.store',
-    'admin.bits-pilani.store',
-    "127.0.0.1",
-    "localhost",
-    "api.amazoff.shop",
-    "api.bits-pilani.store",
-    "amdin.bits-pilani.store",
-    "www.api.amazoff.shop",
-    "www.api.bits-pilani.store",
-    "admin.amazoff.shop",
-    "3.108.113.123",
-]
+ALLOWED_HOSTS = [host.strip() for host in os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if host.strip()]
 
 # Application definition
 
@@ -101,6 +96,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bits.context_processors.vapid_public_key',
             ],
         },
     },
@@ -170,19 +166,16 @@ AUTHENTICATION_BACKENDS = [
 ]
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '***REMOVED***'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '***REMOVED***'
-from dotenv import load_dotenv
-from pathlib import Path
-
-load_dotenv()
-
-GOOGLE_OAUTH_CLIENT_ID = os.environ.get('GOOGLE_OAUTH_CLIENT_ID')
-if not GOOGLE_OAUTH_CLIENT_ID:
-    raise ValueError(
-        'GOOGLE_OAUTH_CLIENT_ID is missing.'
-        'Have you put it in a file at core/.env ?'
-    )
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = os.getenv('GOOGLE_OAUTH_CLIENT_ID', '')
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET', '')
+GOOGLE_OAUTH_CLIENT_ID = SOCIAL_AUTH_GOOGLE_OAUTH2_KEY
+VAPID_PUBLIC_KEY = os.getenv('VAPID_PUBLIC_KEY', '')
+VAPID_PRIVATE_KEY = os.getenv('VAPID_PRIVATE_KEY', '')
+VAPID_SUBJECT = os.getenv('VAPID_SUBJECT', 'mailto:admin@example.com')
+SWD_ADMIN_EMAIL = os.getenv('SWD_ADMIN_EMAIL', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+TWILIO_ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID', '')
+TWILIO_AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN', '')
 
 SECURE_REFERRER_POLICY = 'no-referrer-when-downgrade'
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin-allow-popups"
@@ -253,18 +246,16 @@ LOGGING = {
     },
 }
 
-# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'contact@example.com'
-# EMAIL_HOST_PASSWORD = '***REMOVED***'
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '')
+AWS_SES_REGION_NAME = os.getenv('AWS_SES_REGION_NAME', 'ap-south-1')
+AWS_SES_REGION_ENDPOINT = f'email.{AWS_SES_REGION_NAME}.amazonaws.com'
+EMAIL_BACKEND = (
+    'django_ses.SESBackend'
+    if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY
+    else 'django.core.mail.backends.console.EmailBackend'
+)
 
-EMAIL_BACKEND = 'django_ses.SESBackend'
-AWS_ACCESS_KEY_ID  = '***REMOVED***'
-AWS_SECRET_ACCESS_KEY = '***REMOVED***'
-AWS_SES_REGION_NAME = 'ap-south-1'
-AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
 # Add these CORS settings to your settings.py
 # Remove the duplicate CORS_ALLOWED_ORIGINS near the top
 # Keep only these CORS settings at the bottom:
@@ -284,53 +275,38 @@ CORS_ALLOW_HEADERS = [
     'origin',
     'method',
     'user-agent',
-    'x-***REMOVED***',
+    'x-csrftoken',
     'x-requested-with',
 ]
 
 CORS_EXPOSE_HEADERS = ['Content-Type', 'X-CSRFToken']
 
 # CSRF Configuration
-CSRF_TRUSTED_ORIGINS = [
-    "https://bits-pilani.store",
-    "https://www.bits-pilani.store",
-    "http://127.0.0.1:8000",
-    "https://amazoff.shop",
-    "http://localhost:5173",
-    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
-]
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv('CSRF_TRUSTED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',') if origin.strip()]
 
-CSRF_COOKIE_DOMAIN = ".bits-pilani.store"
-SESSION_COOKIE_DOMAIN = ".bits-pilani.store"
-CSRF_COOKIE_NAME = '***REMOVED***'
+CSRF_COOKIE_DOMAIN = os.getenv('CSRF_COOKIE_DOMAIN') or None
+SESSION_COOKIE_DOMAIN = os.getenv('SESSION_COOKIE_DOMAIN') or None
+CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_COOKIE_AGE = 60 * 60 * 24 * 7 * 52
 CSRF_COOKIE_HTTPONLY = False
 CSRF_COOKIE_PATH = '/'
-CSRF_COOKIE_SECURE = True
-CSRF_COOKIE_SAMESITE = 'None'
+CSRF_COOKIE_SECURE = env_bool('CSRF_COOKIE_SECURE', not DEBUG)
+CSRF_COOKIE_SAMESITE = os.getenv('CSRF_COOKIE_SAMESITE', 'Lax')
 CSRF_USE_SESSIONS = False
-CSRF_HEADER_NAME = '***REMOVED***'
+CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 
-SECURE_SSL_REDIRECT = True
+SECURE_SSL_REDIRECT = env_bool('SECURE_SSL_REDIRECT', not DEBUG)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 7
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_NAME = 'sessionid'
 SESSION_COOKIE_PATH = '/'
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SECURE = env_bool('SESSION_COOKIE_SECURE', not DEBUG)
+SESSION_COOKIE_SAMESITE = os.getenv('SESSION_COOKIE_SAMESITE', 'Lax')
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "http://127.0.0.1:3000",
-    "http://127.0.0.1:5173",
-    "https://pawnshop-react-frontend.s3.ap-south-1.amazonaws.com",
-    "https://amazoff.shop",
-    "https://bits-pilani.store",
-]
+CORS_ALLOWED_ORIGINS = [origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173').split(',') if origin.strip()]
 
 CACHES = {
     'default': {
@@ -345,7 +321,7 @@ CACHES = {
 
 CSRF_FAILURE_VIEW = 'bits.views.csrf_failure_debug'
 
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://127.0.0.1:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

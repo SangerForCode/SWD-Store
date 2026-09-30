@@ -1,1 +1,33 @@
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Django runtime data
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+/media/
+media/
+/staticfiles/
+staticfiles/
+/logs/
+logs/
+celerybeat-schedule
+
+# Local exports, logs, backups, and editor/OS files
 *.log
+*_logs.txt
+*.xlsx
+*.xls
+*.csv
+*.zip
+*.bak
+*.backup
+.DS_Store
+Thumbs.db
